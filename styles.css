@@ -618,3 +618,4 @@ button:disabled { opacity: .5; cursor: default; }
 .scan-actions .cta { padding: 12px 8px; font-size: 14px; }
 .scan-actions .btn-ghost { padding: 10px 8px; }
 @media (max-width: 380px) { .scan-actions { grid-template-columns: 1fr 1fr; } }
+.cm-all { justify-self: center; text-align: center; margin-top: -6px; }

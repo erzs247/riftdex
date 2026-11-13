@@ -1,7 +1,7 @@
 // Cache hors ligne : l'interface et les images sont servies depuis le cache, les données sont rafraîchies dès que possible.
 // Seules les réponses valides sont mises en cache : une erreur passagère (réseau coupé, mise à jour du site)
 // n'est jamais mémorisée, la ressource est simplement redemandée la fois suivante.
-const CACHE = 'riftdex-v1';
+const CACHE = 'riftdex-v2';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'manifest.webmanifest', 'icons/icon.svg', 'data/config.json'];
 const keep = (req, r) => { if (r && r.ok && r.type === 'basic') { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return r; };
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))); self.skipWaiting(); });

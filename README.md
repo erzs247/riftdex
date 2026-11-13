@@ -30,6 +30,12 @@ du scellé « (Chinese) » ou des images chinoises officielles.
 Riot ne publie pas encore les scans français : l'édition française affiche les images anglaises (c'est indiqué dans l'appli).
 Les prix Cardmarket ne distinguent pas les langues : une carte a le même prix dans les trois éditions.
 
+**Liens Cardmarket** : le bouton de la fiche ouvre la page exacte de la carte (`Products/Singles/<extension>/<Nom>`),
+filtrée sur la langue de l'édition. Pour une carte en plusieurs versions, Cardmarket numérote les versions dans l'ordre
+de ses identifiants (V1 normale, V2 illustration alternative, V3 hors-série…) et ajoute la rareté (`Nom-V2-Showcase`) ;
+comme cette rareté ne se déduit pas toujours, un second lien ouvre la page de toutes les versions de la carte.
+Le nom de chaque extension dans les adresses Cardmarket est `cmSlug` dans `data/config.json`.
+
 ## Mise en ligne et mises à jour automatiques (GitHub Pages)
 
 Le workflow `.github/workflows/prix.yml` fait tout seul :

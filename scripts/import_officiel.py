@@ -9,12 +9,14 @@ Chaque carte déjà présente garde son identifiant et son produit Cardmarket : 
 des utilisateurs. Les nouvelles cartes, séries et images sont ajoutées ; une nouvelle extension Cardmarket est
 rattachée automatiquement à sa série (comparaison des noms des cartes).
 
-Usage : python scripts/import_officiel.py [--riftcodex]   (--riftcodex : retélécharger Riftcodex, lent)
+Usage : python scripts/import_officiel.py [--riftcodex] [--rematch]
+  --riftcodex : retélécharger Riftcodex (lent) ; --rematch : refaire le rattachement de toutes les cartes à Cardmarket
 """
 import base64
 import io
 import re
 import sys
+import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
@@ -114,6 +116,49 @@ def download_images(cards, sources):
         c['imageZh'] = zh if (ROOT / zh).exists() else None
 
 
+# ---------- liens Cardmarket ----------
+def cm_slug(s):
+    """« Kai'Sa, Daughter of the Void » -> « KaiSa-Daughter-of-the-Void » (forme des adresses Cardmarket)."""
+    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode().replace("'", '').replace('’', '')
+    return re.sub(r'[^A-Za-z0-9]+', '-', s).strip('-')
+
+
+# suffixe des versions multiples : Cardmarket écrit « Nom-V2-Showcase », « Nom-V1-Rare », « Nom-V3-Overnumbered »…
+VERSION_SUFFIX = {'common': 'Common', 'uncommon': 'Uncommon', 'rare': 'Rare', 'epic': 'Epic', 'showcase': 'Showcase'}
+
+
+def add_cardmarket_paths(cards, singles, sets_cfg):
+    """Adresse de la page Cardmarket de chaque carte.
+    Carte unique dans son extension : Products/Singles/<extension>/<Nom> (exacte).
+    Plusieurs versions : Products/Singles/<extension>/<Nom>-V<n>-<rareté>, n = rang du produit Cardmarket
+    (identifiants croissants) ; la rareté écrite par Cardmarket ne se déduit pas toujours, l'appli propose donc
+    aussi la page de toutes les versions (Cards/<Nom>/Versions)."""
+    exp_slug = {v['idExpansion']: v.get('cmSlug') for v in sets_cfg.values() if isinstance(v, dict) and v.get('idExpansion')}
+    by_id = {p['idProduct']: p for p in singles}
+    groups = defaultdict(list)
+    for p in singles:
+        groups[(p['idExpansion'], p['name'])].append(p['idProduct'])
+    for ids in groups.values():
+        ids.sort()
+    for c in cards:
+        link = c.get('cardmarket')
+        p = by_id.get((link or {}).get('idProduct'))
+        if not p:
+            continue
+        name = cm_slug(p['name'])
+        out = {'idProduct': p['idProduct'], 'versions': f'Cards/{name}/Versions'}
+        exp = exp_slug.get(p['idExpansion'])
+        ids = groups[(p['idExpansion'], p['name'])]
+        if exp and len(ids) == 1:
+            out['path'] = f'Products/Singles/{exp}/{name}'
+        elif exp:
+            suffix = 'Signed-Showcase' if c.get('variant') == 'sig' else 'Overnumbered' if c.get('variant') == 'star' else VERSION_SUFFIX.get(c.get('rarity'))
+            if suffix and c.get('variant') != 'extra':
+                out['path'] = f'Products/Singles/{exp}/{name}-V{ids.index(p["idProduct"]) + 1}-{suffix}'
+                out['guess'] = True
+        c['cardmarket'] = out
+
+
 # ---------- import ----------
 def main():
     config = read_json(DATA / 'config.json')
@@ -131,14 +176,13 @@ def main():
     print('Cardmarket…')
     singles = get_json(f'{CM}/productList/products_singles_{CM_GAME}.json')['products']
     nonsingles = get_json(f'{CM}/productList/products_nonsingles_{CM_GAME}.json')['products']
-    guide = {p['idProduct']: p for p in get_json(f'{CM}/priceGuide/price_guide_{CM_GAME}.json')['priceGuides']}
     product_ids = {p['idProduct'] for p in singles}
 
     # nouvelles séries de la galerie officielle
     order_next = max([v.get('order', 0) for v in sets_cfg.values() if v.get('block') == 'main'] + [0]) + 1
     for code, name in en_sets.items():
         if code not in sets_cfg:
-            sets_cfg[code] = {'fr': name, 'en': name, 'order': order_next, 'releaseDate': None, 'idExpansion': None, 'block': 'main', 'new': True}
+            sets_cfg[code] = {'fr': name, 'en': name, 'order': order_next, 'releaseDate': None, 'idExpansion': None, 'block': 'main', 'new': True, 'cmSlug': cm_slug(name)}
             order_next += 1
             print(f'  Nouvelle série {code} « {name} »')
 
@@ -219,7 +263,8 @@ def main():
     # une carte déjà dans l'appli n'est jamais retirée (la galerie officielle varie parfois d'un jour à l'autre) :
     # elle garde son identifiant et son produit Cardmarket, donc sa place dans les collections
     for oc in old['cards']:
-        if oc['id'] not in known and oc['set'] in sets_cfg and sets_cfg[oc['set']].get('block') != 'promo':
+        # (les « variantes » sans numéro sont recréées à chaque passage, avec le même identifiant, à partir des produits restants)
+        if oc['id'] not in known and oc['set'] in sets_cfg and sets_cfg[oc['set']].get('block') != 'promo' and oc.get('variant') != 'extra':
             known.add(oc['id'])
             sources[oc['id']] = {}
             cards.append({**oc, '_tier': 9})
@@ -228,14 +273,10 @@ def main():
     used = set()
     for c in cards:
         link = old_cards.get(c['id'], {}).get('cardmarket')
-        if link and link.get('idProduct') in product_ids:
+        if link and link.get('idProduct') in product_ids and '--rematch' not in sys.argv:
             c['cardmarket'] = link
             used.add(link['idProduct'])
 
-    def pkey(p):
-        g = guide.get(p['idProduct'], {})
-        v = g.get('trend') or g.get('trend-foil') or g.get('avg') or g.get('low')
-        return (v if v else 1e9, p['idProduct'])
     by_name = defaultdict(list)
     for c in cards:
         by_name[(c['set'], norm(c['name']))].append(c)
@@ -245,9 +286,10 @@ def main():
             cm_main[(main_exp[p['idExpansion']], norm(p['name']))].append(p)
     leftovers = []
     for key, prods in cm_main.items():
-        # versions d'une même carte : rareté croissante ↔ prix croissant (normale, alternative, hors-série, signature)
+        # versions d'une même carte, dans l'ordre où Cardmarket les numérote (V1, V2, V3… = identifiants croissants) :
+        # normale, illustration alternative, hors-série, signature, puis les versions ajoutées plus tard
         group = sorted((c for c in by_name.get(key, []) if 'cardmarket' not in c), key=lambda c: (c['_tier'], num_key(c['number'])))
-        prods = sorted(prods, key=pkey)
+        prods = sorted(prods, key=lambda p: p['idProduct'])
         for c, p in zip(group, prods):
             c['cardmarket'] = {'idProduct': p['idProduct']}
         leftovers += [(key, p) for p in prods[len(group):]]
@@ -328,6 +370,7 @@ def main():
                      'block': 'new' if v.get('new') else v.get('block', 'main'), 'order': v.get('order', 99), 'releaseDate': v.get('releaseDate'),
                      'langs': langs, 'total': totals.get(code), 'cardmarket': {'idExpansion': v.get('idExpansion')}})
 
+    add_cardmarket_paths(cards, singles, sets_cfg)
     download_images(cards, sources)
     for c in cards:
         c.pop('_tier', None)

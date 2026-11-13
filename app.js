@@ -48,7 +48,7 @@ const TEXT = {
     trend: 'Tendance Cardmarket', noPrice: 'Prix à venir', over30: 'sur 30 jours', removeCopy: 'Retirer un exemplaire', addCopy: 'Ajouter un exemplaire', copies: 'Exemplaires possédés',
     wishBtn: 'Liste de souhaits', ownBtn: 'Je possède cette carte', from: 'À partir de', avg7: 'Moy. 7 j', avg30: 'Moy. 30 j', foil: 'Foil', foilPrice: (v) => `Version foil : ${v}`,
     curve: 'Courbe de prix', seeded: 'Les premiers points sont les moyennes 30 j, 7 j et 1 j de Cardmarket ; ensuite un relevé par jour.',
-    cmSearch: 'Rechercher sur Cardmarket', art: (a) => `Illustration : ${a}`, artApprox: 'Visuel de la version standard (pas d\'image officielle de cette version).', enArt: 'Visuel de la version anglaise.',
+    cmSearch: 'Rechercher sur Cardmarket', cmView: 'Voir sur Cardmarket', cmVersions: 'Voir les versions sur Cardmarket', cmAll: 'Pas la bonne version ? Toutes les versions sur Cardmarket', art: (a) => `Illustration : ${a}`, artApprox: 'Visuel de la version standard (pas d\'image officielle de cette version).', enArt: 'Visuel de la version anglaise.',
     worth: (q, v) => (q > 1 ? `Vos ${q} exemplaires valent ${v}` : `Votre exemplaire vaut ${v}`),
     energy: 'Énergie', might: 'Puissance', power: 'Rune', dayShort: 'j',
     chartWait: 'Pas encore assez d\'historique pour tracer une courbe. Le prix est relevé chaque jour.', chartNone: 'Pas de prix Cardmarket pour cette carte pour l\'instant.',
@@ -131,7 +131,7 @@ const TEXT = {
     trend: 'Cardmarket trend', noPrice: 'No price yet', over30: 'over 30 days', removeCopy: 'Remove a copy', addCopy: 'Add a copy', copies: 'Copies owned',
     wishBtn: 'Wishlist', ownBtn: 'I own this card', from: 'From', avg7: '7-day avg', avg30: '30-day avg', foil: 'Foil', foilPrice: (v) => `Foil version: ${v}`,
     curve: 'Price history', seeded: 'The first points are Cardmarket\'s 30-day, 7-day and 1-day averages; after that, one reading per day.',
-    cmSearch: 'Search on Cardmarket', art: (a) => `Art: ${a}`, artApprox: 'Standard version artwork (no official image of this version).', enArt: '',
+    cmSearch: 'Search on Cardmarket', cmView: 'View on Cardmarket', cmVersions: 'See the versions on Cardmarket', cmAll: 'Not the right version? All versions on Cardmarket', art: (a) => `Art: ${a}`, artApprox: 'Standard version artwork (no official image of this version).', enArt: '',
     worth: (q, v) => (q > 1 ? `Your ${q} copies are worth ${v}` : `Your copy is worth ${v}`),
     energy: 'Energy', might: 'Might', power: 'Power', dayShort: 'd',
     chartWait: 'Not enough history to draw a curve yet. Prices are recorded every day.', chartNone: 'No Cardmarket price for this card yet.',
@@ -214,7 +214,7 @@ const TEXT = {
     trend: 'Cardmarket 趋势价', noPrice: '暂无价格', over30: '（30 日）', removeCopy: '减少一张', addCopy: '增加一张', copies: '拥有数量',
     wishBtn: '心愿单', ownBtn: '我拥有这张卡', from: '最低价', avg7: '7 日均价', avg30: '30 日均价', foil: '闪卡', foilPrice: (v) => `闪卡版本：${v}`,
     curve: '价格走势', seeded: '最初几个点为 Cardmarket 的 30 日、7 日和 1 日均价，之后每天记录一次。',
-    cmSearch: '在 Cardmarket 上搜索', art: (a) => `画师：${a}`, artApprox: '显示的是标准版卡图（该版本暂无官方图片）。', enArt: '暂无中文卡图，显示英文版。',
+    cmSearch: '在 Cardmarket 上搜索', cmView: '在 Cardmarket 上查看', cmVersions: '在 Cardmarket 上查看所有版本', cmAll: '版本不对？查看 Cardmarket 上的所有版本', art: (a) => `画师：${a}`, artApprox: '显示的是标准版卡图（该版本暂无官方图片）。', enArt: '暂无中文卡图，显示英文版。',
     worth: (q, v) => (q > 1 ? `你的 ${q} 张价值 ${v}` : `你的这张价值 ${v}`),
     energy: '能量', might: '战力', power: '符能', dayShort: '天',
     chartWait: '历史数据不足，暂时无法绘制走势。价格每天记录一次。', chartNone: '这张卡暂无 Cardmarket 价格。',
@@ -410,11 +410,16 @@ function change(id, days) {
   const before = valueAt(h, from) ?? h[0][1];
   return before ? last[1] / before - 1 : null;
 }
-// Lien Cardmarket : les pages produit sont protégées contre les robots, on ouvre une recherche sur le nom anglais
-function cmUrl(card) {
-  const site = lang === 'fr' ? 'fr' : 'en';
+// Lien Cardmarket : page exacte de la carte, filtrée sur la langue de l'édition ; quand la version n'est pas certaine
+// (rareté écrite par Cardmarket), un second lien ouvre la page de toutes les versions de la carte ; produits scellés : recherche.
+function cmLinks(card) {
+  const site = `https://www.cardmarket.com/${lang === 'fr' ? 'fr' : 'en'}/${config.cardmarket?.gameSlug ?? 'Riftbound'}`;
+  const langId = config.cardmarket?.languageIds?.[lang];
+  const cm = card.cardmarket ?? {};
+  if (!isSealed(card) && cm.path) return { url: `${site}/${cm.path}${langId ? `?language=${langId}` : ''}`, label: L.cmView, all: cm.guess && cm.versions ? `${site}/${cm.versions}` : null };
+  if (!isSealed(card) && cm.versions) return { url: `${site}/${cm.versions}`, label: L.cmVersions, all: null };
   const q = isSealed(card) ? String(card.nameEn).replace(/\s*\((Slim|Jumbo)\)$/, '') : card.name;
-  return `https://www.cardmarket.com/${site}/${config.cardmarket?.gameSlug ?? 'Riftbound'}/Products/Search?searchString=${encodeURIComponent(q)}`;
+  return { url: `${site}/Products/Search?searchString=${encodeURIComponent(q)}`, label: L.cmSearch, all: null };
 }
 
 // ---------- Images ----------
@@ -867,6 +872,7 @@ function openCard(id, keepNav) {
   const p = P(id) ?? {};
   const ch = change(id, 30);
   const q = qty(id);
+  const cm = cmLinks(c);
   const stats = [c.energy != null ? `${L.energy} ${c.energy}` : '', c.might != null ? `${L.might} ${c.might}` : '', c.power != null ? `${L.power} ${c.power}` : ''].filter(Boolean).join(' · ');
   const sealedItem = isSealed(c);
   const artNote = sealedItem ? '' : c.artApprox ? L.artApprox : (lang === 'fr' || (lang === 'zh' && !c.imageZh)) && c.image ? L.enArt : '';
@@ -906,7 +912,8 @@ function openCard(id, keepNav) {
         <div class="chart" id="cardChart"></div>
         ${p.seeded && (p.history?.length ?? 0) > 1 ? `<p class="note">${L.seeded}</p>` : ''}
       </section>
-      <a class="cta" href="${esc(cmUrl(c))}" target="_blank" rel="noopener">${L.cmSearch} ${I.ext}</a>
+      <a class="cta" href="${esc(cm.url)}" target="_blank" rel="noopener">${cm.label} ${I.ext}</a>
+      ${cm.all ? `<a class="link-btn cm-all" href="${esc(cm.all)}" target="_blank" rel="noopener">${L.cmAll}</a>` : ''}
       ${q > 0 && p.trend ? `<p class="note num" style="text-align:center">${L.worth(q, eur(q * p.trend))}</p>` : ''}
       ${artNote ? `<p class="note" style="text-align:center">${esc(artNote)}</p>` : ''}
       ${c.artist ? `<p class="note" style="text-align:center">${esc(L.art(c.artist))}</p>` : ''}
