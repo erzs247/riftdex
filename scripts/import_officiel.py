@@ -76,16 +76,95 @@ def zh_name(x):
 # ---------- images ----------
 def fetch_image(url, landscape):
     from PIL import Image  # les champs de bataille (paysage) sont tournés en portrait pour la grille
-    b = get(f"{url}{'&' if '?' in url else '?'}w={420 if landscape else IMG_W}&fm=webp&q=72", binary=True)
-    if landscape:
-        im = Image.open(io.BytesIO(b)).convert('RGB').rotate(90, expand=True)
-        out = io.BytesIO()
-        im.save(out, 'WEBP', quality=72)
-        b = out.getvalue()
-    return b
+    if 'cmsassets.rgpub.io' in url:  # images officielles : redimensionnées par le serveur de Riot
+        b = get(f"{url}{'&' if '?' in url else '?'}w={420 if landscape else IMG_W}&fm=webp&q=72", binary=True)
+        if not landscape:
+            return b
+    else:
+        # TCGplayer refuse parfois les demandes trop rapprochées : nouvel essai, puis image plus petite
+        import time
+        b = None
+        for attempt, u in enumerate([url, url, url.replace('_in_1000x1000.jpg', '_400w.jpg')]):
+            try:
+                b = get(u, binary=True)
+                break
+            except Exception:
+                time.sleep(2 + 3 * attempt)
+        if b is None:
+            raise RuntimeError('image TCGplayer indisponible')
+    im = Image.open(io.BytesIO(b)).convert('RGB')
+    if im.width > im.height:
+        im = im.rotate(90, expand=True)
+    im.thumbnail((IMG_W, IMG_W * 2))
+    out = io.BytesIO()
+    im.save(out, 'WEBP', quality=72)
+    return out.getvalue()
+
+
+# ---------- images TCGplayer (promos, coffrets, cartes sans image officielle) ----------
+TCG = 'https://tcgcsv.com/tcgplayer/89'  # copie publique du catalogue TCGplayer (Riftbound = catégorie 89)
+TCG_GROUPS = {'KDA': ['RXK/DA'], 'SGD': ['SGN'], 'T1W': ['T12025'], 'LGC': ['LGC'], 'W26': ['RWB'],
+              'OGN': ['OGN'], 'OGS': ['OGS'], 'SFD': ['SFD'], 'UNL': ['UNL'], 'VEN': ['VEN'], 'RAD': ['RAD']}
+TCG_PROMO_GROUPS = ['PR', 'OPP', 'JDG', 'GRFT', 'RWB']
+
+
+def tcg_base(name):
+    return norm(re.sub(r'(\s*\([^)]*\))+\s*$', '', name))
+
+
+def tcg_images(cards, sources, sets_cfg):
+    """Image exacte des cartes que la galerie officielle n'a pas (promos, coffrets, jetons) : on prend celle du
+    produit TCGplayer de même nom, dans le groupe correspondant à la série ; à plusieurs versions, dans l'ordre
+    des identifiants. Les cartes des séries principales qui ont déjà une image officielle ne sont pas touchées."""
+    try:
+        groups = {g['abbreviation']: g['groupId'] for g in get_json(f'{TCG}/groups')['results']}
+    except Exception as e:
+        print('  TCGplayer indisponible :', e)
+        return
+    products = {}
+
+    def group_products(abbr):
+        if abbr not in products:
+            gid = groups.get(abbr)
+            try:
+                res = get_json(f'{TCG}/{gid}/products')['results'] if gid else []
+            except Exception:
+                res = []
+            products[abbr] = [p for p in res if any(e['name'] == 'Number' for e in p.get('extendedData', []))]
+        return products[abbr]
+    need = defaultdict(list)
+    for c in cards:
+        promo = sets_cfg.get(c['set'], {}).get('block') == 'promo'
+        # coffrets avec leur propre groupe TCGplayer (K/DA, T1, Secret Garden…) : TCGplayer d'abord, c'est leur visuel exact
+        if (promo and (c.get('artApprox') or c['set'] in TCG_GROUPS)) or not sources.get(c['id'], {}).get('en'):
+            need[(c['set'], norm(c['name']))].append(c)
+    found = 0
+    used = set()
+    for (s, k), group_cards in need.items():
+        abbrs = TCG_GROUPS.get(s) or TCG_PROMO_GROUPS
+        cands = sorted((p for a in abbrs for p in group_products(a) if tcg_base(p['name']) == k and p['productId'] not in used),
+                       key=lambda p: p['productId'])
+        if not cands:
+            continue
+        group_cards.sort(key=lambda c: (c.get('cardmarket') or {}).get('idProduct', 0))
+        for c, p in zip(group_cards, cands):
+            used.add(p['productId'])
+            if not p.get('imageCount'):  # produit TCGplayer sans image : la carte garde la sienne
+                continue
+            sources.setdefault(c['id'], {})['en'] = f"https://tcgplayer-cdn.tcgplayer.com/product/{p['productId']}_in_1000x1000.jpg"
+            # image exacte si autant de produits TCGplayer que de cartes ; sinon c'est peut-être une autre version
+            if len(cands) == len(group_cards):
+                c.pop('artApprox', None)
+            else:
+                c['artApprox'] = True
+            found += 1
+    print(f'  {found} images TCGplayer pour les promos et les cartes sans image officielle')
 
 
 def download_images(cards, sources):
+    # manifeste : adresse d'origine de chaque image, pour la remplacer quand la source change
+    manifest_file = CACHE / 'images.json'
+    manifest = read_json(manifest_file, {})
     todo = []
     for c in cards:
         for lang in ('en', 'zh'):
@@ -93,7 +172,10 @@ def download_images(cards, sources):
             if not url:
                 continue
             rel = image_file(c['set'], c['id'], lang)
-            if not (ROOT / rel).exists():
+            exists = (ROOT / rel).exists()
+            if exists and rel not in manifest and 'tcgplayer' not in url:
+                manifest[rel] = url  # image déjà là, téléchargée avant le manifeste
+            if not exists or manifest.get(rel) != url:
                 todo.append((c, lang, url, rel))
     print(f'Images à télécharger : {len(todo)}')
 
@@ -103,13 +185,15 @@ def download_images(cards, sources):
             b = fetch_image(url, c.get('landscape'))
             (ROOT / rel).parent.mkdir(parents=True, exist_ok=True)
             (ROOT / rel).write_bytes(b)
+            manifest[rel] = url
             return True
         except Exception as e:
             print('  image KO', c['id'], lang, e)
             return False
-    with ThreadPoolExecutor(12) as pool:
+    with ThreadPoolExecutor(4) as pool:
         ok = sum(pool.map(job, todo))
     print(f'  {ok} images ajoutées')
+    write_json(manifest_file, dict(sorted(manifest.items())))
     for c in cards:
         en, zh = image_file(c['set'], c['id'], 'en'), image_file(c['set'], c['id'], 'zh')
         c['image'] = en if (ROOT / en).exists() else None
@@ -369,8 +453,7 @@ def main():
     sets = []
     for code, v in sets_cfg.items():
         langs = ['en']
-        if v.get('block') == 'promo':  # promos et coffrets : imprimés en anglais, collectionnés dans toutes les éditions
-            langs = ['en', 'fr', 'zh']
+        # promos et coffrets : imprimés en anglais, donc seulement dans l'édition anglaise
         if v.get('block') == 'main' and v.get('idExpansion') in fr_exp:
             langs.append('fr')
         if v.get('block') == 'main' and (v.get('idExpansion') in zh_exp or code in zh_art):
@@ -383,6 +466,7 @@ def main():
                      'langs': langs, 'total': totals.get(code), 'cardmarket': {'idExpansion': v.get('idExpansion')}})
 
     add_cardmarket_paths(cards, singles, sets_cfg, config['cardmarket'].get('paths'))
+    tcg_images(cards, sources, sets_cfg)
     download_images(cards, sources)
     for c in cards:
         c.pop('_tier', None)

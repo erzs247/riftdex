@@ -3,9 +3,10 @@
 Appli web (installable sur téléphone) pour suivre sa collection de **Riftbound**, le jeu de cartes de League of Legends,
 sur le modèle de NightDex :
 
-- **Onglets de langue FR · EN · 中文** en haut de l'écran : chaque langue est une **édition à part**, avec ses séries
-  (seules les séries sorties dans cette langue), son scellé, sa collection, ses souhaits et ses favoris.
-  Les textes de l'appli, les noms et les images des cartes suivent la langue choisie.
+- **Onglets FR · EN · 中文** en haut de l'écran : chaque langue est une **édition à part**, avec ses cartes, son scellé,
+  sa collection, ses souhaits et ses favoris. FR : séries sorties en français. EN : tout, promos et coffrets compris
+  (imprimés en anglais). 中文 : seulement les cartes dont Riot publie la version chinoise.
+- **Langue du site** (Réglages) : français, anglais ou chinois, indépendante de l'édition affichée.
 - **Accueil** : les séries avec la progression (cartes possédées / total, %), en liste ou en grille, avec favoris et recherche.
 - **Série** : trois affichages (Cartes, Liste, Grille), tri (numéro, prix, nom), filtres (possédées, manquantes, rareté), valeur de la série.
 - **Fiche carte** : image, prix tendance Cardmarket en euros, prix minimum, moyennes 7 j et 30 j, **courbe de prix** (7 J, 1 M, 3 M, 1 A, Tout) et bouton **Cardmarket**.
@@ -24,6 +25,7 @@ Aucune dépendance côté appli : HTML, CSS et JavaScript. Les scripts de donné
 | Galerie officielle Riftbound (anglais et chinois simplifié) | noms, raretés, domaines, statistiques, images |
 | Riftcodex (api.riftcodex.com) | cartes signées et promos absentes de la galerie |
 | Cardmarket, fichiers publics du jeu n° 22 | rattachement des cartes, promos, scellé, **prix du jour** |
+| TCGplayer, via tcgcsv.com | images des promos et coffrets absents de la galerie (K/DA, T1, Secret Garden…) |
 
 Les séries sont visibles en français dès que Cardmarket vend du scellé « (French) » de la série, en chinois dès qu'il existe
 du scellé « (Chinese) » ou des images chinoises officielles.
