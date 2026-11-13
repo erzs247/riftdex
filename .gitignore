@@ -1,0 +1,7 @@
+__pycache__/
+.claude/
+# anciennes versions autonomes (artefact)
+dist/
+raw/
+build.py
+app.html

@@ -1,0 +1,153 @@
+{
+  "appName": "RiftDex",
+  "cardmarket": {
+    "gameSlug": "Riftbound",
+    "idGame": 22,
+    "languageIds": {
+      "en": 1,
+      "fr": 2,
+      "zh": 6
+    }
+  },
+  "sets": {
+    "_aide": "Séries de l'appli. idExpansion = extension Cardmarket. Les nouvelles séries sont ajoutées automatiquement chaque lundi ; seuls le nom français (fr) et le nom chinois (zh) des promos sont à préciser à la main.",
+    "OGN": {
+      "fr": "Origines",
+      "en": "Origins",
+      "order": 1,
+      "releaseDate": "2025-10-31",
+      "idExpansion": 6286,
+      "block": "main"
+    },
+    "OGS": {
+      "fr": "Proving Grounds",
+      "en": "Proving Grounds",
+      "order": 2,
+      "releaseDate": "2025-10-31",
+      "idExpansion": 6289,
+      "block": "main"
+    },
+    "SFD": {
+      "fr": "Armes spirituelles",
+      "en": "Spiritforged",
+      "order": 3,
+      "releaseDate": "2026-02-13",
+      "idExpansion": 6399,
+      "block": "main"
+    },
+    "UNL": {
+      "fr": "Déchaînement",
+      "en": "Unleashed",
+      "order": 4,
+      "releaseDate": "2026-05-08",
+      "idExpansion": 6491,
+      "block": "main"
+    },
+    "VEN": {
+      "fr": "Vendetta",
+      "en": "Vendetta",
+      "order": 5,
+      "releaseDate": "2026-07-31",
+      "idExpansion": 6587,
+      "block": "main"
+    },
+    "RAD": {
+      "fr": "Radiance",
+      "en": "Radiance",
+      "order": 6,
+      "releaseDate": null,
+      "idExpansion": 6659,
+      "block": "main"
+    },
+    "PR-OGN": {
+      "fr": "Promos Origines",
+      "en": "Origins Promos",
+      "zh": "起源 宣传卡",
+      "order": 20,
+      "idExpansion": 6322,
+      "block": "promo"
+    },
+    "PR-PJK": {
+      "fr": "Promos Project K",
+      "en": "Project K Promos",
+      "zh": "Project K 宣传卡",
+      "order": 21,
+      "idExpansion": 6480,
+      "block": "promo"
+    },
+    "PR-SFD": {
+      "fr": "Promos Armes spirituelles",
+      "en": "Spiritforged Promos",
+      "zh": "铸魂 宣传卡",
+      "order": 22,
+      "idExpansion": 6483,
+      "block": "promo"
+    },
+    "PR-UNL": {
+      "fr": "Promos Déchaînement",
+      "en": "Unleashed Promos",
+      "zh": "狂飙 宣传卡",
+      "order": 23,
+      "idExpansion": 6567,
+      "block": "promo"
+    },
+    "PR-VEN": {
+      "fr": "Promos Vendetta",
+      "en": "Vendetta Promos",
+      "zh": "Vendetta 宣传卡",
+      "order": 24,
+      "idExpansion": 6588,
+      "block": "promo"
+    },
+    "PR-RAD": {
+      "fr": "Promos Radiance",
+      "en": "Radiance Promos",
+      "zh": "Radiance 宣传卡",
+      "order": 25,
+      "idExpansion": 6921,
+      "block": "promo"
+    },
+    "SGD": {
+      "fr": "Secret Garden",
+      "en": "Secret Garden",
+      "order": 26,
+      "idExpansion": 6681,
+      "block": "promo"
+    },
+    "T1W": {
+      "fr": "T1 Champion du monde",
+      "en": "T1 Worlds Champion",
+      "zh": "T1 世界冠军",
+      "order": 27,
+      "idExpansion": 6705,
+      "block": "promo"
+    },
+    "KDA": {
+      "fr": "K/DA Couture",
+      "en": "K/DA Couture",
+      "order": 28,
+      "idExpansion": 6938,
+      "block": "promo"
+    },
+    "LGC": {
+      "fr": "Legacy",
+      "en": "Legacy",
+      "order": 29,
+      "idExpansion": 6947,
+      "block": "promo"
+    },
+    "W26": {
+      "fr": "Worlds 2026",
+      "en": "Worlds 2026",
+      "zh": "2026 全球总决赛",
+      "order": 30,
+      "idExpansion": 6959,
+      "block": "promo"
+    }
+  },
+  "support": {
+    "_aide": "Lien de ta page de dons (Ko-fi, Buy Me a Coffee, PayPal…). Vide = bouton masqué.",
+    "url": "https://ko-fi.com/erzs247"
+  },
+  "admins": []
+}

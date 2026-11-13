@@ -1,0 +1,87 @@
+name: Prix Cardmarket, nouveautés et publication
+
+on:
+  schedule:
+    - cron: "17 6 * * *"   # chaque jour vers 7 h (heure de Paris en hiver) : prix du jour
+    - cron: "47 5 * * 1"   # chaque lundi vers 6 h 45 : nouvelles séries, cartes et produits scellés
+  workflow_dispatch:
+    inputs:
+      nouveautes:
+        description: "Chercher aussi les nouvelles cartes et les nouveaux produits scellés"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  nouveautes:
+    # le lundi, ou à la demande : nouvelles cartes (galerie officielle, Riftcodex, Cardmarket) et nouveaux produits scellés
+    if: github.event.schedule == '47 5 * * 1' || inputs.nouveautes == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Nouvelles cartes et images
+        run: python scripts/import_officiel.py --riftcodex
+      - name: Nouveaux produits scellés
+        run: python scripts/import_scelle.py
+      - name: Empreintes du scanner (nouvelles cartes)
+        run: python scripts/make_scan_index.py
+      - name: Enregistrer les nouveautés
+        run: |
+          git config user.name "riftdex-bot"
+          git config user.email "riftdex-bot@users.noreply.github.com"
+          git add data/ images/ cache/
+          git diff --cached --quiet || git commit -m "Nouveautés du $(date +%F)"
+          git push
+
+  prix:
+    needs: [nouveautes]
+    if: always() && github.event_name != 'push' && needs.nouveautes.result != 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Relevé des prix Cardmarket du jour
+        run: python scripts/update_prices.py
+      - name: Enregistrer l'historique
+        run: |
+          git config user.name "riftdex-bot"
+          git config user.email "riftdex-bot@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "Prix Cardmarket du $(date +%F)"
+          git push
+
+  publier:
+    needs: [prix]
+    if: always() && (needs.prix.result == 'success' || needs.prix.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deploy
+        uses: actions/deploy-pages@v4

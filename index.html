@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RiftDex</title>
+  <meta name="description" content="Suivi de collection Riftbound : cartes, prix Cardmarket et courbes de prix, en français, anglais et chinois.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="head" id="head">
+      <div class="langtabs" role="tablist" aria-label="Langue / Language / 语言" id="langtabs">
+        <button role="tab" data-lang="fr" lang="fr">FR</button>
+        <button role="tab" data-lang="en" lang="en">EN</button>
+        <button role="tab" data-lang="zh" lang="zh">中文</button>
+      </div>
+      <div class="langline"></div>
+      <header class="topbar" id="topbar"></header>
+    </div>
+    <main id="view" tabindex="-1"></main>
+  </div>
+
+  <nav class="tabbar" aria-label="Navigation principale">
+    <div class="brand pc-only" aria-hidden="true"><img src="icons/icon.svg" alt="" width="34" height="34">RiftDex</div>
+    <a href="#home" data-tab="home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      <span>Accueil</span>
+    </a>
+    <a href="#sealed" data-tab="sealed" class="pc-only">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 7.5v9L12 21l9-4.5v-9z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>
+      <span>Scellé</span>
+    </a>
+    <a href="#collection" data-tab="collection">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="12" height="17" rx="2"/><path d="M19 6v14a1 1 0 0 1-1 1H8"/></svg>
+      <span>Collection</span>
+    </a>
+    <a href="#search" data-tab="search" class="tab-main" aria-label="Rechercher une carte">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+      <span>Recherche</span>
+    </a>
+    <a href="#values" data-tab="values">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19h18"/><path d="m4 15 5-5 4 3 7-7"/><path d="M15 6h5v5"/></svg>
+      <span>Cotes</span>
+    </a>
+    <a href="#wishlist" data-tab="wishlist">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+      <span>Souhaits</span>
+    </a>
+    <a href="#friends" data-tab="friends" class="pc-only">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.8"/><path d="M15.5 14.2A5.5 5.5 0 0 1 21.5 20"/></svg>
+      <span>Amis</span><b class="fbadge" data-friends-badge hidden></b>
+    </a>
+  </nav>
+
+  <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-backdrop" data-close></div>
+    <div class="sheet-panel" id="sheetPanel"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
