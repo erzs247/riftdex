@@ -154,10 +154,10 @@ def add_cardmarket_paths(cards, singles, sets_cfg, fixed=None):
         elif exp:
             n = ids.index(p['idProduct']) + 1
             if c.get('variant') == 'extra':
-                # version présente seulement chez Cardmarket : son numéro (V.4, V.5…) ; les versions de collection
-                # ajoutées après coup sont en général signées
+                # version présente seulement chez Cardmarket : on affiche son numéro (V.4, V.5…) ; son nom d'adresse
+                # ne se devine pas, le bouton ouvre la page de toutes les versions (sauf adresse vérifiée ci-dessous)
                 c['number'] = f'V.{n}'
-                suffix = 'Signed-Showcase' if c.get('rarity') in ('showcase', 'signature') else VERSION_SUFFIX.get(c.get('rarity'))
+                suffix = None
             else:
                 suffix = 'Signed-Showcase' if c.get('variant') == 'sig' else 'Overnumbered' if c.get('variant') == 'star' else VERSION_SUFFIX.get(c.get('rarity'))
             if suffix:
@@ -369,6 +369,8 @@ def main():
     sets = []
     for code, v in sets_cfg.items():
         langs = ['en']
+        if v.get('block') == 'promo':  # promos et coffrets : imprimés en anglais, collectionnés dans toutes les éditions
+            langs = ['en', 'fr', 'zh']
         if v.get('block') == 'main' and v.get('idExpansion') in fr_exp:
             langs.append('fr')
         if v.get('block') == 'main' and (v.get('idExpansion') in zh_exp or code in zh_art):
