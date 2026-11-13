@@ -216,6 +216,14 @@ def main():
             'artist': r['media'].get('artist'), 'variant': 'sig', 'landscape': r.get('orientation') == 'landscape', '_tier': 7,
         })
 
+    # une carte déjà dans l'appli n'est jamais retirée (la galerie officielle varie parfois d'un jour à l'autre) :
+    # elle garde son identifiant et son produit Cardmarket, donc sa place dans les collections
+    for oc in old['cards']:
+        if oc['id'] not in known and oc['set'] in sets_cfg and sets_cfg[oc['set']].get('block') != 'promo':
+            known.add(oc['id'])
+            sources[oc['id']] = {}
+            cards.append({**oc, '_tier': 9})
+
     # --- rattachement à Cardmarket : on garde les liens existants, on apparie le reste ---
     used = set()
     for c in cards:
