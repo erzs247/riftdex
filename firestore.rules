@@ -7,7 +7,7 @@ service cloud.firestore {
     // un ami accepté de <owner> figure dans friends/<owner>/list/<son uid>
     function isFriendOf(owner) { return signedIn() && exists(/databases/$(database)/documents/friends/$(owner)/list/$(request.auth.uid)); }
     // administrateurs de RiftDex (gèrent les soutiens depuis l'appli) : mettre ici ton ID RiftDex (Mon compte)
-    function isAdmin() { return signedIn() && request.auth.uid in []; }
+    function isAdmin() { return signedIn() && request.auth.uid in ['dRrWSLm9dtOcGxwZWghdAaXAF4T2']; }
 
     // collections de chaque compte (une par édition : fr, en, zh) : écrites par leur propriétaire, lues par lui et ses amis acceptés
     match /users/{uid} {
