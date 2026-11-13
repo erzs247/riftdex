@@ -127,7 +127,7 @@ def cm_slug(s):
 VERSION_SUFFIX = {'common': 'Common', 'uncommon': 'Uncommon', 'rare': 'Rare', 'epic': 'Epic', 'showcase': 'Showcase'}
 
 
-def add_cardmarket_paths(cards, singles, sets_cfg):
+def add_cardmarket_paths(cards, singles, sets_cfg, fixed=None):
     """Adresse de la page Cardmarket de chaque carte.
     Carte unique dans son extension : Products/Singles/<extension>/<Nom> (exacte).
     Plusieurs versions : Products/Singles/<extension>/<Nom>-V<n>-<rareté>, n = rang du produit Cardmarket
@@ -152,10 +152,20 @@ def add_cardmarket_paths(cards, singles, sets_cfg):
         if exp and len(ids) == 1:
             out['path'] = f'Products/Singles/{exp}/{name}'
         elif exp:
-            suffix = 'Signed-Showcase' if c.get('variant') == 'sig' else 'Overnumbered' if c.get('variant') == 'star' else VERSION_SUFFIX.get(c.get('rarity'))
-            if suffix and c.get('variant') != 'extra':
-                out['path'] = f'Products/Singles/{exp}/{name}-V{ids.index(p["idProduct"]) + 1}-{suffix}'
+            n = ids.index(p['idProduct']) + 1
+            if c.get('variant') == 'extra':
+                # version présente seulement chez Cardmarket : son numéro (V.4, V.5…) ; les versions de collection
+                # ajoutées après coup sont en général signées
+                c['number'] = f'V.{n}'
+                suffix = 'Signed-Showcase' if c.get('rarity') in ('showcase', 'signature') else VERSION_SUFFIX.get(c.get('rarity'))
+            else:
+                suffix = 'Signed-Showcase' if c.get('variant') == 'sig' else 'Overnumbered' if c.get('variant') == 'star' else VERSION_SUFFIX.get(c.get('rarity'))
+            if suffix:
+                out['path'] = f'Products/Singles/{exp}/{name}-V{n}-{suffix}'
                 out['guess'] = True
+        if str(p['idProduct']) in (fixed or {}):  # adresse vérifiée à la main
+            out['path'] = fixed[str(p['idProduct'])]
+            out.pop('guess', None)
         c['cardmarket'] = out
 
 
@@ -370,7 +380,7 @@ def main():
                      'block': 'new' if v.get('new') else v.get('block', 'main'), 'order': v.get('order', 99), 'releaseDate': v.get('releaseDate'),
                      'langs': langs, 'total': totals.get(code), 'cardmarket': {'idExpansion': v.get('idExpansion')}})
 
-    add_cardmarket_paths(cards, singles, sets_cfg)
+    add_cardmarket_paths(cards, singles, sets_cfg, config['cardmarket'].get('paths'))
     download_images(cards, sources)
     for c in cards:
         c.pop('_tier', None)

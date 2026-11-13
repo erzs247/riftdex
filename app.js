@@ -394,7 +394,7 @@ const setTotal = (s) => cardsBySet.get(s.code)?.length ?? 0;
 const ownedIn = (code) => (cardsBySet.get(code) ?? []).filter((c) => qty(c.id) > 0).length;
 const isSealed = (c) => c.kind === 'sealed';
 const itemCode = (c) => c.set ?? '';
-const numLabel = (c) => (c.variant === 'extra' ? L.variant.extra : c.number ?? '');
+const numLabel = (c) => (c.variant === 'extra' ? `${L.variant.extra}${/^V\./.test(c.number ?? '') ? ` ${c.number}` : ''}` : c.number ?? '');
 const allItems = () => [...editionCards(), ...sealed()];
 
 function valueAt(hist, day) {

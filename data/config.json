@@ -7,6 +7,13 @@
       "en": 1,
       "fr": 2,
       "zh": 6
+    },
+    "paths": {
+      "_aide": "Adresses Cardmarket vérifiées à la main, par identifiant de produit (prioritaires sur les adresses calculées).",
+      "907588": "Products/Singles/Origins/Ahri-Nine-Tailed-Fox-V4-Signed-Showcase",
+      "847508": "Products/Singles/Origins/Ahri-Nine-Tailed-Fox-V3-Overnumbered",
+      "847146": "Products/Singles/Origins/Jinx-Demolitionist-V1-Rare",
+      "845887": "Products/Singles/Origins/Fury-Rune-V2-Overnumbered"
     }
   },
   "sets": {
