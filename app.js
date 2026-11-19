@@ -19,7 +19,9 @@ applyDevice();
 const plural = (n, one, many) => (n > 1 ? many : one);
 const TEXT = {
   fr: {
-    sealed: 'Scellé', setsTab: 'Séries', toggleView: 'Changer l\'affichage',
+    sealed: 'Scellé', setsTab: 'Séries', toggleView: 'Changer l\'affichage', extraTab: 'Extra',
+    extraIntro: 'Versions vendues sur Cardmarket mais absentes de la galerie officielle de Riot : versions signées, runes et jetons à part, hors-séries pas encore publiés… Leur visuel est souvent celui d\'une autre version, et leur prix repose parfois sur très peu d\'offres.',
+    extraOne: 'Version vendue sur Cardmarket, absente de la galerie officielle de Riot (rangée dans l\'onglet Extra de l\'accueil).',
     cats: { booster: 'Boosters', box: 'Booster Box', case: 'Cases de 6 Booster Box', deck: 'Decks', kit: 'Coffrets & kits', set: 'Sets complets' },
     catOne: { booster: 'Booster', box: 'Booster Box', case: 'Case de 6 Booster Box', deck: 'Deck', kit: 'Coffret', set: 'Set complet' },
     sealedNote: (d, e) => `Prix tendance Cardmarket des produits scellés de l'édition ${TEXT.fr.ed[e]}${d ? ` · mis à jour le ${d}` : ''}. Les produits sans prix n'ont pas encore de ventes.`,
@@ -48,7 +50,7 @@ const TEXT = {
     trend: 'Tendance Cardmarket', noPrice: 'Prix à venir', over30: 'sur 30 jours', removeCopy: 'Retirer un exemplaire', addCopy: 'Ajouter un exemplaire', copies: 'Exemplaires possédés',
     wishBtn: 'Liste de souhaits', ownBtn: 'Je possède cette carte', from: 'À partir de', avg7: 'Moy. 7 j', avg30: 'Moy. 30 j', foil: 'Foil', foilPrice: (v) => `Version foil : ${v}`,
     curve: 'Courbe de prix', seeded: 'Les premiers points sont les moyennes 30 j, 7 j et 1 j de Cardmarket ; ensuite un relevé par jour.',
-    cmSearch: 'Rechercher sur Cardmarket', cmView: 'Voir sur Cardmarket', cmVersions: 'Voir les versions sur Cardmarket', cmAll: 'Pas la bonne version ? Toutes les versions sur Cardmarket', art: (a) => `Illustration : ${a}`, artApprox: 'Visuel de la version standard (pas d\'image officielle de cette version).', enArt: 'Visuel de la version anglaise.', enOnly: 'Carte imprimée en anglais.',
+    cmSearch: 'Rechercher sur Cardmarket', cmView: 'Voir sur Cardmarket', cmVersions: 'Voir les versions sur Cardmarket', cmAll: 'Pas la bonne version ? Toutes les versions sur Cardmarket', art: (a) => `Illustration : ${a}`, artApprox: 'Visuel de la version standard (pas d\'image officielle de cette version).', enArt: 'Visuel de la version anglaise.', sealedEnArt: 'Visuel de la version anglaise du produit.', sealedArt: 'Pas de photo de ce produit : montage de cartes de la série.', enOnly: 'Carte imprimée en anglais.',
     worth: (q, v) => (q > 1 ? `Vos ${q} exemplaires valent ${v}` : `Votre exemplaire vaut ${v}`),
     energy: 'Énergie', might: 'Puissance', power: 'Rune', dayShort: 'j',
     chartWait: 'Pas encore assez d\'historique pour tracer une courbe. Le prix est relevé chaque jour.', chartNone: 'Pas de prix Cardmarket pour cette carte pour l\'instant.',
@@ -102,7 +104,9 @@ const TEXT = {
     variant: { alt: 'Illustration alternative', star: 'Hors-série', sig: 'Signature', extra: 'Variante', cn: 'Exclusivité chinoise' },
   },
   en: {
-    sealed: 'Sealed', setsTab: 'Sets', toggleView: 'Change view',
+    sealed: 'Sealed', setsTab: 'Sets', toggleView: 'Change view', extraTab: 'Extra',
+    extraIntro: 'Versions sold on Cardmarket but missing from Riot\'s official gallery: signed versions, separate runes and tokens, overnumbered cards not published yet… Their picture is often that of another version, and their price sometimes rests on very few offers.',
+    extraOne: 'Version sold on Cardmarket, missing from Riot\'s official gallery (listed in the Extra tab of the home screen).',
     cats: { booster: 'Boosters', box: 'Booster boxes', case: 'Cases of 6 booster boxes', deck: 'Decks', kit: 'Box sets & kits', set: 'Complete sets' },
     catOne: { booster: 'Booster', box: 'Booster box', case: 'Case of 6 booster boxes', deck: 'Deck', kit: 'Box set', set: 'Complete set' },
     sealedNote: (d, e) => `Cardmarket trend prices for ${TEXT.en.ed[e]} sealed products${d ? ` · updated ${d}` : ''}. Products without a price have no sales yet.`,
@@ -131,7 +135,7 @@ const TEXT = {
     trend: 'Cardmarket trend', noPrice: 'No price yet', over30: 'over 30 days', removeCopy: 'Remove a copy', addCopy: 'Add a copy', copies: 'Copies owned',
     wishBtn: 'Wishlist', ownBtn: 'I own this card', from: 'From', avg7: '7-day avg', avg30: '30-day avg', foil: 'Foil', foilPrice: (v) => `Foil version: ${v}`,
     curve: 'Price history', seeded: 'The first points are Cardmarket\'s 30-day, 7-day and 1-day averages; after that, one reading per day.',
-    cmSearch: 'Search on Cardmarket', cmView: 'View on Cardmarket', cmVersions: 'See the versions on Cardmarket', cmAll: 'Not the right version? All versions on Cardmarket', art: (a) => `Art: ${a}`, artApprox: 'Standard version artwork (no official image of this version).', enArt: '', enOnly: '',
+    cmSearch: 'Search on Cardmarket', cmView: 'View on Cardmarket', cmVersions: 'See the versions on Cardmarket', cmAll: 'Not the right version? All versions on Cardmarket', art: (a) => `Art: ${a}`, artApprox: 'Standard version artwork (no official image of this version).', enArt: '', sealedEnArt: '', sealedArt: 'No picture of this product: collage of cards from the set.', enOnly: '',
     worth: (q, v) => (q > 1 ? `Your ${q} copies are worth ${v}` : `Your copy is worth ${v}`),
     energy: 'Energy', might: 'Might', power: 'Power', dayShort: 'd',
     chartWait: 'Not enough history to draw a curve yet. Prices are recorded every day.', chartNone: 'No Cardmarket price for this card yet.',
@@ -185,7 +189,9 @@ const TEXT = {
     variant: { alt: 'Alternate art', star: 'Overnumbered', sig: 'Signature', extra: 'Variant', cn: 'China exclusive' },
   },
   zh: {
-    sealed: '未拆封', setsTab: '系列', toggleView: '切换显示',
+    sealed: '未拆封', setsTab: '系列', toggleView: '切换显示', extraTab: '其他',
+    extraIntro: 'Cardmarket 上有售但 Riot 官方卡牌库中没有的版本：签名版、单独的符文和衍生物、尚未公布的超编号卡等。卡图常常是其他版本的，价格有时只基于极少的报价。',
+    extraOne: 'Cardmarket 上有售、Riot 官方卡牌库中没有的版本（在首页的“其他”标签中）。',
     cats: { booster: '补充包', box: '补充包盒', case: '整箱', deck: '套牌', kit: '礼盒', set: '全套' },
     catOne: { booster: '补充包', box: '补充包盒', case: '整箱（6 盒）', deck: '套牌', kit: '礼盒', set: '全套' },
     sealedNote: (d, e) => `${TEXT.zh.ed[e]}版未拆封商品的 Cardmarket 趋势价${d ? ` · 更新于 ${d}` : ''}。没有价格的商品暂无成交。`,
@@ -214,7 +220,7 @@ const TEXT = {
     trend: 'Cardmarket 趋势价', noPrice: '暂无价格', over30: '（30 日）', removeCopy: '减少一张', addCopy: '增加一张', copies: '拥有数量',
     wishBtn: '心愿单', ownBtn: '我拥有这张卡', from: '最低价', avg7: '7 日均价', avg30: '30 日均价', foil: '闪卡', foilPrice: (v) => `闪卡版本：${v}`,
     curve: '价格走势', seeded: '最初几个点为 Cardmarket 的 30 日、7 日和 1 日均价，之后每天记录一次。',
-    cmSearch: '在 Cardmarket 上搜索', cmView: '在 Cardmarket 上查看', cmVersions: '在 Cardmarket 上查看所有版本', cmAll: '版本不对？查看 Cardmarket 上的所有版本', art: (a) => `画师：${a}`, artApprox: '显示的是标准版卡图（该版本暂无官方图片）。', enArt: '暂无中文卡图，显示英文版。', enOnly: '该卡仅有英文版。',
+    cmSearch: '在 Cardmarket 上搜索', cmView: '在 Cardmarket 上查看', cmVersions: '在 Cardmarket 上查看所有版本', cmAll: '版本不对？查看 Cardmarket 上的所有版本', art: (a) => `画师：${a}`, artApprox: '显示的是标准版卡图（该版本暂无官方图片）。', enArt: '暂无中文卡图，显示英文版。', sealedEnArt: '显示的是英文版商品图片。', sealedArt: '暂无该商品图片：显示该系列的卡牌拼图。', enOnly: '该卡仅有英文版。',
     worth: (q, v) => (q > 1 ? `你的 ${q} 张价值 ${v}` : `你的这张价值 ${v}`),
     energy: '能量', might: '战力', power: '符能', dayShort: '天',
     chartWait: '历史数据不足，暂时无法绘制走势。价格每天记录一次。', chartNone: '这张卡暂无 Cardmarket 价格。',
@@ -388,7 +394,10 @@ async function loadData() {
 // carte de l'édition : série imprimée dans cette langue (chinois : seulement les cartes avec leur scan chinois) ;
 // « only » = carte imprimée seulement dans ces langues (exclusivités chinoises)
 const inEdition = (c) => (isSealed(c) ? c.lang === lang : !!setOf(c.set)?.langs.includes(lang) && (!c.only || c.only.includes(lang)) && (lang !== 'zh' || !!c.imageZh));
-const setCards = (code) => (cardsBySet.get(code) ?? []).filter(inEdition);
+// versions vendues seulement sur Cardmarket (sans numéro officiel) : à part, dans l'onglet Extra de l'accueil
+const isExtraCard = (c) => c?.variant === 'extra';
+const setCards = (code) => (cardsBySet.get(code) ?? []).filter((c) => inEdition(c) && !isExtraCard(c));
+const extraCards = () => catalog.cards.filter((c) => isExtraCard(c) && inEdition(c));
 const editionSet = (s) => !!s && s.langs.includes(lang) && setCards(s.code).length > 0;
 const visibleSets = () => catalog.sets.filter(editionSet);
 const editionCards = () => catalog.cards.filter(inEdition);
@@ -574,7 +583,7 @@ function homeTopbar(withMode) {
 }
 // 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
 const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
-const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed]].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
+const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
 const langNote = () => (L.langNote(lang) ? `<p class="lang-note">${L.langNote(lang)}</p>` : '');
 function renderSealed() {
   homeTopbar(false);
@@ -585,6 +594,18 @@ function renderSealed() {
     ${homeTabs('sealed')}
     ${items.length ? cats.map((cat) => { const list = items.filter((s) => s.category === cat).sort((a, b) => a.order - b.order); return list.length ? `<h2 class="section-title">${L.cats[cat]}</h2><div class="sealed-grid">${list.map(sealedTile).join('')}</div>` : ''; }).join('') : `<div class="empty"><strong>${L.noSealed}</strong></div>`}
     <p class="note">${L.sealedNote(updated, lang)}</p>
+  </div>`;
+}
+function renderExtra() {
+  homeTopbar(false);
+  const list = extraCards();
+  const bySet = new Map();
+  for (const c of list) { if (!bySet.has(c.set)) bySet.set(c.set, []); bySet.get(c.set).push(c); }
+  const order = (code) => setOf(code)?.order ?? 999;
+  view.innerHTML = `<div class="stack">
+    ${homeTabs('extra')}
+    <p class="note">${L.extraIntro}</p>
+    ${[...bySet].sort((a, b) => order(a[0]) - order(b[0])).map(([code, cards]) => `<h2 class="section-title"><b class="print">${esc(code)}</b> ${esc(setOf(code) ? setName(setOf(code)) : code)}</h2><div class="cards">${sortCards(cards, 'name').map(cardTile).join('')}</div>`).join('') || `<div class="empty"><strong>${L.noSet}</strong></div>`}
   </div>`;
 }
 function renderHome() {
@@ -894,7 +915,7 @@ function openCard(id, keepNav) {
   const stats = [c.energy != null ? `${L.energy} ${c.energy}` : '', c.might != null ? `${L.might} ${c.might}` : '', c.power != null ? `${L.power} ${c.power}` : ''].filter(Boolean).join(' · ');
   const sealedItem = isSealed(c);
   const enOnly = !sealedItem && s?.block === 'promo' && lang !== 'en';
-  const artNote = sealedItem ? '' : c.artApprox ? L.artApprox : !enOnly && (lang === 'fr' || (lang === 'zh' && !c.imageZh)) && c.image ? L.enArt : '';
+  const artNote = sealedItem ? (c.imageArt ? L.sealedArt : c.imageApprox ? L.sealedEnArt : '') : isExtraCard(c) ? `${L.extraOne}${c.artApprox ? ` ${L.artApprox}` : ''}` : c.artApprox ? L.artApprox : !enOnly && (lang === 'fr' || (lang === 'zh' && !c.imageZh)) && c.image ? L.enArt : '';
   const traits = [c.type ? typeLabel(c.type) : '', ...(c.domains ?? []).map(domainLabel)].filter(Boolean).join(' · ');
   sheetPanel.innerHTML = `${sheetTop(navList.length > 1)}
     <div class="stack detail">
@@ -1835,6 +1856,7 @@ function route() {
   else if (h === 'search') currentRender = renderSearch;
   else if (h === 'values') currentRender = renderValues;
   else if (h === 'sealed') { tab = 'sealed'; currentRender = renderSealed; }
+  else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
   else if (h === 'friends') { fr.view = null; fr.msg = ''; currentRender = renderFriends; }
   else if (h.startsWith('friend-')) { tab = 'friends'; const uid = h.slice(7); if (fr.view?.uid !== uid) fr.filter = 'all'; renderFriendCurrent = () => renderFriend(uid); currentRender = renderFriendCurrent; }
   else { tab = 'home'; currentRender = renderHome; }

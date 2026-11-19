@@ -13,7 +13,10 @@ sur le modèle de NightDex :
 - **Accueil** : les séries avec la progression (cartes possédées / total, %), en liste ou en grille, avec favoris et recherche.
 - **Série** : trois affichages (Cartes, Liste, Grille), tri (numéro, prix, nom), filtres (possédées, manquantes, rareté), valeur de la série.
 - **Fiche carte** : image, prix tendance Cardmarket en euros, prix minimum, moyennes 7 j et 30 j, **courbe de prix** (7 J, 1 M, 3 M, 1 A, Tout) et bouton **Cardmarket**.
-- **Scellé** : boosters, booster box, cases, decks de champion, coffrets et sets complets, classés par langue.
+- **Scellé** : boosters, booster box, cases, decks de champion, coffrets et sets complets, classés par langue, avec leur visuel
+  (photo TCGplayer du produit ; version anglaise pour le scellé FR et chinois ; montage de cartes pour les sets de cartes).
+- **Extra** : les versions vendues sur Cardmarket mais absentes de la galerie officielle (Ahri signée V.4, runes et jetons à part,
+  hors-séries pas encore publiés…), rangées à part pour ne pas encombrer les séries.
 - **Collection**, **Cotes** (valeur de la collection dans le temps, hausses, baisses, cartes les plus chères) et **Souhaits**.
 - **Scanner de cartes** (onglet Recherche → Scan) : la caméra reconnaît la carte, sur le téléphone, sans rien envoyer.
 - **Comptes** (Google ou e-mail), **amis** (voir la collection d'un ami, échanges possibles) et **soutien** (Ko-fi).
@@ -115,6 +118,7 @@ python scripts/update_prices.py
 | `data/scan-index.json` | empreintes des images pour le scanner |
 | `data/firebase.json`, `firestore.rules` | configuration Firebase des comptes et règles de sécurité |
 | `images/<série>/` | images des cartes (`zh/` : versions chinoises) |
+| `images/sealed/` | visuels des produits scellés |
 | `cache/riftcodex.json` | dernière copie de Riftcodex |
 | `cache/chinois.json` | dernière copie de la liste des cartes chinoises |
 | `scripts/import_officiel.py` | import des cartes et des images (chaque lundi) |

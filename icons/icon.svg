@@ -1,1 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#070b14"/><path d="M256 70 422 166v180L256 442 90 346V166z" fill="none" stroke="#c8aa6e" stroke-width="22"/><path d="M256 132 368 196v120L256 380 144 316V196z" fill="#0ac8b9" fill-opacity=".16" stroke="#0ac8b9" stroke-width="10"/><path d="M206 330V182h62c34 0 54 18 54 46 0 22-12 37-33 43l39 59h-38l-35-55h-17v55zm32-80h28c16 0 25-8 25-21s-9-20-25-20h-28z" fill="#f0d28c"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101b33"/><stop offset="1" stop-color="#05080f"/></linearGradient>
+<radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#19e3d0" stop-opacity=".55"/><stop offset=".45" stop-color="#0ac8b9" stop-opacity=".18"/><stop offset="1" stop-color="#0ac8b9" stop-opacity="0"/></radialGradient>
+<linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d3157"/><stop offset="1" stop-color="#0b1426"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5dc9c"/><stop offset=".5" stop-color="#c8aa6e"/><stop offset="1" stop-color="#8a6a32"/></linearGradient>
+<linearGradient id="rift" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bafff6"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#5ff2e2"/></linearGradient>
+<filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<circle cx="256" cy="262" r="210" fill="url(#glow)"/>
+<g transform="rotate(-14 256 270)"><rect x="150" y="104" width="200" height="290" rx="24" fill="#0c1628" stroke="#8a6a32" stroke-width="10"/></g>
+<g transform="rotate(9 256 270)">
+  <rect x="160" y="112" width="200" height="290" rx="24" fill="url(#card)" stroke="url(#gold)" stroke-width="14"/>
+  <rect x="182" y="134" width="156" height="246" rx="12" fill="none" stroke="#c8aa6e" stroke-opacity=".35" stroke-width="4"/>
+</g>
+<path d="M262 74 L238 168 L276 214 L230 300 L268 344 L246 446 L300 330 L262 290 L306 206 L270 160 Z" fill="#19e3d0" filter="url(#blur)" opacity=".95"/>
+<path d="M262 74 L238 168 L276 214 L230 300 L268 344 L246 446 L300 330 L262 290 L306 206 L270 160 Z" fill="url(#rift)"/>
+</svg>
