@@ -19,7 +19,7 @@
   "sets": {
     "_aide": "Séries de l'appli. idExpansion = extension Cardmarket, cmSlug = nom de l'extension dans les adresses Cardmarket (null = inconnu : le bouton ouvre la page de toutes les versions de la carte). Les nouvelles séries sont ajoutées automatiquement chaque lundi ; seuls fr, zh et cmSlug sont à préciser à la main.",
     "OGN": {
-      "fr": "Origines",
+      "fr": "Origins",
       "en": "Origins",
       "order": 1,
       "releaseDate": "2025-10-31",
@@ -67,13 +67,13 @@
       "fr": "Radiance",
       "en": "Radiance",
       "order": 6,
-      "releaseDate": null,
+      "releaseDate": "2026-10-24",
       "idExpansion": 6659,
       "block": "main",
       "cmSlug": "Radiance"
     },
     "PR-OGN": {
-      "fr": "Promos Origines",
+      "fr": "Promos Origins",
       "en": "Origins Promos",
       "zh": "起源 宣传卡",
       "order": 20,
@@ -167,6 +167,14 @@
       "idExpansion": 6959,
       "block": "promo",
       "cmSlug": null
+    },
+    "CN": {
+      "fr": "Exclusivités Chine",
+      "en": "China exclusives",
+      "zh": "国服限定",
+      "order": 40,
+      "idExpansion": null,
+      "block": "cn"
     }
   },
   "support": {
