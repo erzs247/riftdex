@@ -26,8 +26,8 @@ const TEXT = {
     sealedCount: (n) => `${n} ${plural(n, 'produit scellé', 'produits scellés')}`, noSealed: 'Aucun produit scellé dans cette langue pour l\'instant.',
     home: 'Accueil', collection: 'Collection', market: 'Cotes', wishlist: 'Souhaits', search: 'Recherche', searchCard: 'Rechercher une carte',
     settings: 'Réglages', list: 'Liste', grid: 'Grille', cards: 'Cartes', searchSet: 'Rechercher une série', noSet: 'Aucune série trouvée', favorites: 'Favoris',
-    blocks: { main: 'Séries', promo: 'Promos & produits spéciaux', new: 'Nouvelles séries' },
-    ed: { fr: 'française', en: 'anglaise', zh: 'chinoise' }, edShort: { fr: 'FR', en: 'EN', zh: 'chinoise' }, langNote: (e) => (e === 'fr' ? '<b>Édition française.</b> Séries sorties en VF, avec une collection et des souhaits propres. Riot ne publie pas encore les scans VF : les visuels sont ceux de la version anglaise.' : e === 'zh' ? '<b>Édition chinoise.</b> Seulement les cartes dont Riot publie la version chinoise, avec une collection et des souhaits propres.' : ''),
+    blocks: { main: 'Séries', promo: 'Promos & produits spéciaux', new: 'Nouvelles séries', cn: 'Exclusivités chinoises' },
+    ed: { fr: 'française', en: 'anglaise', zh: 'chinoise' }, edShort: { fr: 'FR', en: 'EN', zh: 'chinoise' }, langNote: (e) => (e === 'fr' ? '<b>Édition française.</b> Séries sorties en VF, avec une collection et des souhaits propres. Riot ne publie pas encore les scans VF : les visuels sont ceux de la version anglaise.' : e === 'zh' ? '<b>Édition chinoise.</b> Les cartes imprimées en chinois, avec leurs scans chinois officiels et les exclusivités chinoises, et une collection et des souhaits propres.' : ''),
     back: 'Retour', favSet: 'Série favorite', changeSort: 'Changer le tri', filters: 'Filtres',
     owned: (a, b) => `${a}/${b} possédées`, myValue: 'Ma valeur', pricesSoon: 'Prix Cardmarket à venir',
     sorts: { num: 'Numéro', 'price-desc': 'Prix décroissant', 'price-asc': 'Prix croissant', name: 'Nom' },
@@ -53,7 +53,7 @@ const TEXT = {
     energy: 'Énergie', might: 'Puissance', power: 'Rune', dayShort: 'j',
     chartWait: 'Pas encore assez d\'historique pour tracer une courbe. Le prix est relevé chaque jour.', chartNone: 'Pas de prix Cardmarket pour cette carte pour l\'instant.',
     ranges: ['7 J', '1 M', '3 M', '1 A', 'Tout'], chartAria: (a, b, c, d) => `Courbe du prix du ${a} au ${b}, de ${c} à ${d}`,
-    language: 'Langue du site', editionToast: (e) => `Édition ${TEXT.fr.ed[e]}`, langToast: 'Site en français',
+    language: 'Langue du site', hiddenSets: (n, e) => `${n} série${n > 1 ? 's' : ''} (promos, coffrets…) n'${n > 1 ? 'existent' : 'existe'} pas en édition ${TEXT.fr.ed[e]}.`, showEdition: (e) => `Voir l'édition ${TEXT.fr.edShort[e]}`, editionToast: (e) => `Édition ${TEXT.fr.ed[e]}`, langToast: 'Site en français',
     prev: 'Carte précédente', next: 'Carte suivante',
     fr: {
       title: 'Amis', gate: 'Connecte-toi à ton compte RiftDex pour ajouter des amis et voir leurs collections.', noCloud: 'Les amis ont besoin des comptes RiftDex, pas encore activés.',
@@ -99,7 +99,7 @@ const TEXT = {
     rarity: { common: 'Commune', uncommon: 'Peu commune', rare: 'Rare', epic: 'Épique', showcase: 'Showcase', signature: 'Signature', promo: 'Promo' },
     type: { unit: 'Unité', spell: 'Sort', legend: 'Légende', gear: 'Équipement', battlefield: 'Champ de bataille', rune: 'Rune', token: 'Jeton' },
     domain: { fury: 'Fureur', calm: 'Calme', mind: 'Esprit', body: 'Corps', chaos: 'Chaos', order: 'Ordre', colorless: 'Neutre' },
-    variant: { alt: 'Illustration alternative', star: 'Hors-série', sig: 'Signature', extra: 'Variante' },
+    variant: { alt: 'Illustration alternative', star: 'Hors-série', sig: 'Signature', extra: 'Variante', cn: 'Exclusivité chinoise' },
   },
   en: {
     sealed: 'Sealed', setsTab: 'Sets', toggleView: 'Change view',
@@ -109,8 +109,8 @@ const TEXT = {
     sealedCount: (n) => `${n} sealed ${plural(n, 'product', 'products')}`, noSealed: 'No sealed products in this language yet.',
     home: 'Home', collection: 'Collection', market: 'Market', wishlist: 'Wishlist', search: 'Search', searchCard: 'Search a card',
     settings: 'Settings', list: 'List', grid: 'Grid', cards: 'Cards', searchSet: 'Search a set', noSet: 'No set found', favorites: 'Favourites',
-    blocks: { main: 'Sets', promo: 'Promos & special products', new: 'New sets' },
-    ed: { fr: 'French', en: 'English', zh: 'Chinese' }, edShort: { fr: 'French', en: 'English', zh: 'Chinese' }, langNote: (e) => (e === 'fr' ? '<b>French edition.</b> Sets released in French, with their own collection and wishlist. Riot does not publish French scans yet: the pictures are the English ones.' : e === 'zh' ? '<b>Chinese edition.</b> Only the cards Riot publishes in Chinese, with their own collection and wishlist.' : ''),
+    blocks: { main: 'Sets', promo: 'Promos & special products', new: 'New sets', cn: 'China exclusives' },
+    ed: { fr: 'French', en: 'English', zh: 'Chinese' }, edShort: { fr: 'French', en: 'English', zh: 'Chinese' }, langNote: (e) => (e === 'fr' ? '<b>French edition.</b> Sets released in French, with their own collection and wishlist. Riot does not publish French scans yet: the pictures are the English ones.' : e === 'zh' ? '<b>Chinese edition.</b> The cards printed in Chinese, with their official Chinese scans and the China exclusives, and their own collection and wishlist.' : ''),
     back: 'Back', favSet: 'Favourite set', changeSort: 'Change sort', filters: 'Filters',
     owned: (a, b) => `${a}/${b} owned`, myValue: 'My value', pricesSoon: 'Cardmarket prices coming soon',
     sorts: { num: 'Number', 'price-desc': 'Price high to low', 'price-asc': 'Price low to high', name: 'Name' },
@@ -136,7 +136,7 @@ const TEXT = {
     energy: 'Energy', might: 'Might', power: 'Power', dayShort: 'd',
     chartWait: 'Not enough history to draw a curve yet. Prices are recorded every day.', chartNone: 'No Cardmarket price for this card yet.',
     ranges: ['7D', '1M', '3M', '1Y', 'All'], chartAria: (a, b, c, d) => `Price from ${a} to ${b}, from ${c} to ${d}`,
-    language: 'Site language', editionToast: (e) => `${TEXT.en.ed[e]} edition`, langToast: 'Site in English',
+    language: 'Site language', hiddenSets: (n, e) => `${n} set${n > 1 ? 's' : ''} (promos, boxes…) ${n > 1 ? 'are' : 'is'} not in the ${TEXT.en.ed[e]} edition.`, showEdition: (e) => `See the ${TEXT.en.edShort[e]} edition`, editionToast: (e) => `${TEXT.en.ed[e]} edition`, langToast: 'Site in English',
     prev: 'Previous card', next: 'Next card',
     fr: {
       title: 'Friends', gate: 'Sign in to your RiftDex account to add friends and see their collections.', noCloud: 'Friends need RiftDex accounts, which are not enabled yet.',
@@ -182,7 +182,7 @@ const TEXT = {
     rarity: { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', epic: 'Epic', showcase: 'Showcase', signature: 'Signature', promo: 'Promo' },
     type: { unit: 'Unit', spell: 'Spell', legend: 'Legend', gear: 'Gear', battlefield: 'Battlefield', rune: 'Rune', token: 'Token' },
     domain: { fury: 'Fury', calm: 'Calm', mind: 'Mind', body: 'Body', chaos: 'Chaos', order: 'Order', colorless: 'Colorless' },
-    variant: { alt: 'Alternate art', star: 'Overnumbered', sig: 'Signature', extra: 'Variant' },
+    variant: { alt: 'Alternate art', star: 'Overnumbered', sig: 'Signature', extra: 'Variant', cn: 'China exclusive' },
   },
   zh: {
     sealed: '未拆封', setsTab: '系列', toggleView: '切换显示',
@@ -192,8 +192,8 @@ const TEXT = {
     sealedCount: (n) => `${n} 件未拆封商品`, noSealed: '该语言暂无未拆封商品。',
     home: '首页', collection: '收藏', market: '行情', wishlist: '心愿单', search: '搜索', searchCard: '搜索卡牌',
     settings: '设置', list: '列表', grid: '网格', cards: '卡牌', searchSet: '搜索系列', noSet: '未找到系列', favorites: '收藏的系列',
-    blocks: { main: '系列', promo: '宣传卡与特别商品', new: '新系列' },
-    ed: { fr: '法语', en: '英语', zh: '中文' }, edShort: { fr: '法语', en: '英语', zh: '中文' }, langNote: (e) => (e === 'fr' ? '<b>法语版。</b>已发行法语版的系列，收藏与心愿单独立。Riot 尚未公布法语卡图，显示英文版卡图。' : e === 'zh' ? '<b>中文版。</b>仅显示 Riot 已公布中文版的卡牌，收藏与心愿单独立。' : ''),
+    blocks: { main: '系列', promo: '宣传卡与特别商品', new: '新系列', cn: '国服限定' },
+    ed: { fr: '法语', en: '英语', zh: '中文' }, edShort: { fr: '法语', en: '英语', zh: '中文' }, langNote: (e) => (e === 'fr' ? '<b>法语版。</b>已发行法语版的系列，收藏与心愿单独立。Riot 尚未公布法语卡图，显示英文版卡图。' : e === 'zh' ? '<b>中文版。</b>中文印刷的卡牌，使用官方中文卡图，包括国服限定卡，收藏与心愿单独立。' : ''),
     back: '返回', favSet: '收藏系列', changeSort: '更改排序', filters: '筛选',
     owned: (a, b) => `已拥有 ${a}/${b}`, myValue: '我的价值', pricesSoon: 'Cardmarket 价格即将更新',
     sorts: { num: '编号', 'price-desc': '价格从高到低', 'price-asc': '价格从低到高', name: '名称' },
@@ -219,7 +219,7 @@ const TEXT = {
     energy: '能量', might: '战力', power: '符能', dayShort: '天',
     chartWait: '历史数据不足，暂时无法绘制走势。价格每天记录一次。', chartNone: '这张卡暂无 Cardmarket 价格。',
     ranges: ['7天', '1月', '3月', '1年', '全部'], chartAria: (a, b, c, d) => `${a} 至 ${b} 的价格，从 ${c} 到 ${d}`,
-    language: '网站语言', editionToast: (e) => `${TEXT.zh.ed[e]}版`, langToast: '网站语言：中文',
+    language: '网站语言', hiddenSets: (n, e) => `${n} 个系列（宣传卡、礼盒等）没有${TEXT.zh.ed[e]}版。`, showEdition: (e) => `查看${TEXT.zh.ed[e]}版`, editionToast: (e) => `${TEXT.zh.ed[e]}版`, langToast: '网站语言：中文',
     prev: '上一张', next: '下一张',
     fr: {
       title: '好友', gate: '登录 RiftDex 账号即可添加好友并查看他们的收藏。', noCloud: '好友功能需要 RiftDex 账号，目前尚未开放。',
@@ -265,7 +265,7 @@ const TEXT = {
     rarity: { common: '普通', uncommon: '罕见', rare: '稀有', epic: '史诗', showcase: '异画', signature: '签名', promo: '宣传卡' },
     type: { unit: '单位', spell: '法术', legend: '传奇', gear: '装备', battlefield: '战场', rune: '符文', token: '衍生物' },
     domain: { fury: '狂怒', calm: '平静', mind: '心灵', body: '体魄', chaos: '混沌', order: '秩序', colorless: '无色' },
-    variant: { alt: '异画', star: '超编号', sig: '签名', extra: '变体' },
+    variant: { alt: '异画', star: '超编号', sig: '签名', extra: '变体', cn: '国服限定' },
   },
 };
 
@@ -275,6 +275,7 @@ const I = {
   star: '<svg viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></svg>',
   sort: '<svg viewBox="0 0 24 24"><path d="M8 4v16"/><path d="m4 8 4-4 4 4"/><path d="M16 20V4"/><path d="m12 16 4 4 4-4"/></svg>',
   filter: '<svg viewBox="0 0 24 24"><path d="M4 7h10"/><path d="M18 7h2"/><circle cx="16" cy="7" r="2"/><path d="M4 17h2"/><path d="M10 17h10"/><circle cx="8" cy="17" r="2"/></svg>',
+  globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>',
   gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
   heartSmall: '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
@@ -352,7 +353,8 @@ const rarityLabel = (r) => L.rarity[r] ?? r;
 const typeLabel = (t) => L.type[t] ?? t;
 const domainLabel = (d) => L.domain[d] ?? d;
 const cardName = (c) => (lang === 'zh' ? c.nameZh ?? c.nameEn ?? c.name : lang === 'en' ? c.nameEn ?? c.name : c.name);
-const setName = (s) => (ui === 'zh' ? s.nameZh ?? s.nameEn : ui === 'en' ? s.nameEn ?? s.name : s.name);
+// nom de la série dans la langue de l'édition affichée (comme NightDex : « Armes spirituelles » en FR, « 铸魂淬炼 » en 中文)
+const setName = (s) => (lang === 'zh' ? s.nameZh ?? s.nameEn : lang === 'en' ? s.nameEn ?? s.name : s.name);
 const blockName = (b) => L.blocks[b] ?? b;
 
 // ---------- Données ----------
@@ -383,7 +385,9 @@ async function loadData() {
 // Ce que montre chaque édition : ses séries, ses cartes, son scellé
 // - édition chinoise : seulement les cartes dont Riot publie la version chinoise (image chinoise)
 // - promos et coffrets : imprimés en anglais, donc seulement dans l'édition anglaise (langues de la série dans catalog.json)
-const inEdition = (c) => (isSealed(c) ? c.lang === lang : !!setOf(c.set)?.langs.includes(lang) && (lang !== 'zh' || !!c.imageZh));
+// carte de l'édition : série imprimée dans cette langue (chinois : seulement les cartes avec leur scan chinois) ;
+// « only » = carte imprimée seulement dans ces langues (exclusivités chinoises)
+const inEdition = (c) => (isSealed(c) ? c.lang === lang : !!setOf(c.set)?.langs.includes(lang) && (!c.only || c.only.includes(lang)) && (lang !== 'zh' || !!c.imageZh));
 const setCards = (code) => (cardsBySet.get(code) ?? []).filter(inEdition);
 const editionSet = (s) => !!s && s.langs.includes(lang) && setCards(s.code).length > 0;
 const visibleSets = () => catalog.sets.filter(editionSet);
@@ -566,8 +570,10 @@ function progressTile(s) {
 let homeQuery = '';
 function homeTopbar(withMode) {
   const mode = user.prefs.homeMode;
-  setTopbar(`<h1>${L.home}</h1>${withMode ? `<button class="icon-btn" data-action="home-mode" aria-label="${L.toggleView}">${mode === 'grid' ? I.listIcon : I.gridIcon}</button>` : ''}${accountBtn()}<button class="icon-btn" data-action="settings" aria-label="${L.settings}">${I.gear}</button>`);
+  setTopbar(`<h1>${L.home}</h1>${withMode ? `<button class="icon-btn" data-action="home-mode" aria-label="${L.toggleView}">${mode === 'grid' ? I.listIcon : I.gridIcon}</button>` : ''}${globeBtn()}${accountBtn()}<button class="icon-btn" data-action="settings" aria-label="${L.settings}">${I.gear}</button>`);
 }
+// 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
+const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
 const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed]].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
 const langNote = () => (L.langNote(lang) ? `<p class="lang-note">${L.langNote(lang)}</p>` : '');
 function renderSealed() {
@@ -602,7 +608,14 @@ function renderHome() {
     ${langNote()}
     <input class="search" id="setSearch" type="search" placeholder="${L.searchSet}" value="${esc(homeQuery)}" autocomplete="off">
     ${body || `<div class="empty"><strong>${L.noSet}</strong></div>`}
+    ${hiddenNote()}
   </div>`;
+}
+// séries absentes de l'édition affichée (promos et coffrets imprimés en anglais…), avec un lien vers l'édition anglaise
+function hiddenNote() {
+  const n = catalog.sets.filter((s) => !s.langs.includes(lang)).length;
+  const other = lang === 'en' ? null : 'en';
+  return n && other && !homeQuery ? `<p class="note lang-note">${L.hiddenSets(n, lang)} <button class="link-btn" data-action="edition" data-value="${other}">${L.showEdition(other)}</button></p>` : '';
 }
 
 let showFilters = false;
@@ -944,7 +957,7 @@ function openSettings() {
   sheetPanel.innerHTML = `${sheetTop()}<div class="stack">
     <h2 id="sheetTitle" style="margin:0;font:700 22px var(--font-display)">${L.settings}</h2>
     ${cloud.enabled ? `<button class="btn-ghost acct-row" data-action="account">${I.person}<span>${cloud.user ? esc(L.signedAs(cloud.user.email ?? cloud.user.name ?? '')) : L.account}</span></button>` : ''}
-    <div class="panel"><h3>${L.language}</h3>${seg('ui', ui, [['fr', 'Français'], ['en', 'English'], ['zh', '中文']])}<p class="note" style="margin:0">${L.editionHint}</p></div>
+    <div class="panel" id="langPanel"><h3>${L.language}</h3>${seg('ui', ui, [['fr', 'Français'], ['en', 'English'], ['zh', '中文']])}<p class="note" style="margin:0">${L.editionHint}</p></div>
     <p class="note">${L.storage(Object.keys(C.owned).length, wish.size, lang)}</p>
     <div class="menu">
       <button class="btn-ghost" data-action="export">${L.export}</button>
@@ -1729,6 +1742,8 @@ document.addEventListener('click', async (e) => {
     toast(L.sortToast(L.sorts[user.prefs.sort]));
   } else if (d.action === 'filters') { showFilters = !showFilters; currentRender(); }
   else if (d.action === 'settings') openSettings();
+  else if (d.action === 'language') { openSettings(); requestAnimationFrame(() => document.getElementById('langPanel')?.scrollIntoView({ block: 'center' })); }
+  else if (d.action === 'edition') setLang(d.value);
   else if (d.action === 'account') openAccount();
   else if (d.action === 'prev') navStep(-1);
   else if (d.action === 'next') navStep(1);

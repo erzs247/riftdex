@@ -1,7 +1,10 @@
 """Importe les cartes Riftbound et leurs images (lancé chaque lundi par la GitHub Action).
 
 Sources :
-- galerie officielle (riftbound.leagueoflegends.com) en anglais et en chinois simplifié : noms, raretés, images ;
+- galerie officielle (playriftbound.com) en anglais, en français et en chinois simplifié : noms, raretés, images ;
+  une série de la galerie française est une série de l'édition française (Riot n'y publie que les scans anglais) ;
+- cartes chinoises officielles (images cdn.playloltcg.com, liste reprise par runecamp.com) : scans chinois de toutes
+  les séries, dont celles que la galerie chinoise de Riot montre encore en anglais, et les exclusivités chinoises ;
 - Riftcodex (api.riftcodex.com) : signatures et promos absentes de la galerie ;
 - liste des cartes Cardmarket (jeu n° 22) : rattachement de chaque carte à son produit, promos, nouvelles extensions.
 
@@ -22,7 +25,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 from common import (CACHE, CM, CM_GAME, DATA, ROOT, get, get_json, image_file, norm, num_key, read_json, write_json)
 
-GALLERY = 'https://riftbound.leagueoflegends.com/{loc}/card-gallery/'
+GALLERY = 'https://playriftbound.com/{loc}/card-gallery/'  # ancienne adresse : riftbound.leagueoflegends.com
+# cartes chinoises officielles : liste de runecamp.com, reprise du site chinois (images sur cdn.playloltcg.com)
+CN_CARDS = 'https://runecamp.com/public/data/cards_all.json'
 TIER = {'common': 0, 'uncommon': 1, 'rare': 2, 'epic': 3, 'showcase': 4, 'promo': 4}
 IMG_W = 300
 
@@ -51,6 +56,105 @@ def riftcodex():
     except Exception as e:
         print('  Riftcodex indisponible, copie précédente utilisée :', e)
         return read_json(path, [])
+
+
+def chinese_cards():
+    """Cartes chinoises officielles (copie de la dernière réponse dans cache/chinois.json si la source ne répond pas)."""
+    path = CACHE / 'chinois.json'
+    try:
+        b = get(CN_CARDS, binary=True, timeout=90)
+        items = __import__('json').loads(b.decode('utf-8-sig'))['list']
+        write_json(path, [{k: x.get(k) for k in ('cardNo', 'cardName', 'subTitle', 'frontImage', 'rarityName', 'cardCategory')} for x in items])
+    except Exception as e:
+        print('  cartes chinoises indisponibles, copie précédente utilisée :', e)
+    return read_json(path, [])
+
+
+# ---------- édition chinoise ----------
+CN_RUNES = {'炽烈符文': 'Fury Rune', '翠意符文': 'Calm Rune', '灵光符文': 'Mind Rune', '摧破符文': 'Body Rune', '混沌符文': 'Chaos Rune', '序理符文': 'Order Rune',
+            '机器人': 'Mech', '黄沙士兵': 'Sand Soldier'}
+# produits chinois sans équivalent anglais : série « Exclusivités Chine » de l'édition chinoise
+CN_ONLY_SETS = {'ARC', 'FND', 'T1S', 'SGN'}
+
+
+def cn_code(no):
+    """« SFD·025a/221·P » -> (« SFD », « 025a », « P ») ; « UNL-090a/219 » -> (« UNL », « 090a », « »)."""
+    parts = re.split(r'[·-]', no)
+    flags = '·'.join(p for p in parts[2:] if p in ('P', 'SC'))
+    return parts[0], parts[1].split('/')[0], flags
+
+
+def add_chinese(cards, sources, cn, sets_cfg):
+    """Scans chinois officiels : image chinoise des cartes déjà connues (même numéro, ou même rune / jeton dans
+    l'ordre des produits Cardmarket) et cartes imprimées seulement en chinois (illustrations « b », versions
+    « P », coffrets chinois), visibles seulement dans l'édition chinoise."""
+    by_id = {c['id']: c for c in cards}
+    extras = defaultdict(list)  # runes et jetons rangés par Cardmarket sans numéro (variantes « extra »)
+    for c in sorted(cards, key=lambda c: (c.get('cardmarket') or {}).get('idProduct', 0)):
+        if c.get('variant') == 'extra':
+            extras[(c['set'], norm(c['name']))].append(c)
+    matched = added = 0
+    seen = set()
+    for x in sorted(cn, key=lambda x: x['cardNo']):
+        img = x.get('frontImage') or ''
+        if 'playloltcg.com' not in img:  # image anglaise reprise par la source : rien de chinois à ajouter
+            continue
+        s, number, flags = cn_code(x['cardNo'])
+        name = f"{x['cardName']}·{x['subTitle']}" if x.get('subTitle') else x['cardName']
+        cid = f'{s}-{number}' + (f'-{flags.replace("·", "")}' if flags else '')
+        c = by_id.get(cid)
+        token = re.fullmatch(r'(R0\d|T\d\d)[ab]?', number)
+        if not c and token:
+            # rune ou jeton : Cardmarket ne les numérote pas, on prend la version de même rang (normale, puis « a »)
+            en = CN_RUNES.get(x['cardName'])
+            pool = extras.get((s, norm(en))) if en else None
+            if pool and not number.endswith('b'):
+                c = pool[1 if number.endswith('a') and len(pool) > 1 else 0]
+            if not c:  # rune ou jeton sans version connue : pas de carte à part
+                continue
+        if c:
+            if c['id'] in seen:
+                continue
+            seen.add(c['id'])
+            src = sources.setdefault(c['id'], {})
+            if not src.get('zh'):  # le scan chinois de la galerie de Riot reste prioritaire
+                src['zh'] = img
+            if not c.get('nameZh'):
+                c['nameZh'] = name
+            matched += 1
+            continue
+        # version que Cardmarket vend mais que la galerie de Riot n'a pas encore (hors-séries de Radiance…) :
+        # variante « extra » de même nom, qui prend ce scan chinois et son numéro
+        base = next((b for b in cards if b['set'] == s and b.get('nameZh') == name and b.get('variant') != 'extra'), None)
+        pool = [e for e in extras.get((s, norm(base['name'])), []) if e['id'] not in seen] if base else []
+        if pool and not flags and not number.endswith('b'):
+            e = pool[0]
+            seen.add(e['id'])
+            sources.setdefault(e['id'], {})['zh'] = img
+            e['nameZh'] = e.get('nameZh') or name
+            matched += 1
+            continue
+        # carte imprimée seulement en chinois
+        code = 'CN' if s in CN_ONLY_SETS or s not in sets_cfg else s
+        if code != 'CN' and sets_cfg[s].get('block') != 'main':
+            continue
+        if code == 'CN':
+            cid = f'CN-{s}-{number}' + (f'-{flags.replace("·", "")}' if flags else '')
+        if cid in by_id:
+            continue
+        rarity = 'showcase' if x.get('rarityName') in ('异画', '超编', '签名') else (base or {}).get('rarity') or 'rare'
+        card = {
+            'id': cid, 'set': code, 'number': f'{number}' if code != 'CN' else f'{s} {number}', 'name': (base or {}).get('name') or name,
+            'nameZh': name, 'rarity': rarity, 'type': (base or {}).get('type') or x.get('cardCategory'),
+            'domains': (base or {}).get('domains', []), 'energy': (base or {}).get('energy'), 'might': (base or {}).get('might'),
+            'power': (base or {}).get('power'), 'artist': None, 'variant': 'cn', 'landscape': (base or {}).get('landscape', False),
+            'only': ['zh'], '_tier': 8,
+        }
+        cards.append(card)
+        by_id[cid] = card
+        sources[cid] = {'zh': img}
+        added += 1
+    print(f'  {matched} cartes avec leur scan chinois officiel, {added} cartes imprimées seulement en chinois')
 
 
 # ---------- noms ----------
@@ -134,6 +238,8 @@ def tcg_images(cards, sources, sets_cfg):
         return products[abbr]
     need = defaultdict(list)
     for c in cards:
+        if c.get('only'):  # exclusivité chinoise : pas de version anglaise
+            continue
         promo = sets_cfg.get(c['set'], {}).get('block') == 'promo'
         # coffrets avec leur propre groupe TCGplayer (K/DA, T1, Secret Garden…) : TCGplayer d'abord, c'est leur visuel exact
         if (promo and (c.get('artApprox') or c['set'] in TCG_GROUPS)) or not sources.get(c['id'], {}).get('en'):
@@ -262,6 +368,15 @@ def main():
 
     print('Galerie officielle (anglais, chinois)…')
     gal_en, gal_zh = gallery('en-us'), gallery('zh-cn')
+    try:
+        gal_fr = gallery('fr-fr')
+    except Exception as e:
+        print('  galerie française indisponible :', e)
+        gal_fr = {'sets': {'items': []}}
+    fr_sets = {s['id']: s['name'] for s in gal_fr['sets']['items']}
+    for code, name in fr_sets.items():  # nom officiel français des séries (« Armes spirituelles »…)
+        if code in sets_cfg:
+            sets_cfg[code]['fr'] = name
     zh = {x['id']: x for x in gal_zh['cards']['items']}
     zh_sets = {s['id']: s['name'] for s in gal_zh['sets']['items']}
     totals = {s['id']: s['collectorNumberMax'] for s in gal_en['sets']['items']}
@@ -276,7 +391,7 @@ def main():
     order_next = max([v.get('order', 0) for v in sets_cfg.values() if v.get('block') == 'main'] + [0]) + 1
     for code, name in en_sets.items():
         if code not in sets_cfg:
-            sets_cfg[code] = {'fr': name, 'en': name, 'order': order_next, 'releaseDate': None, 'idExpansion': None, 'block': 'main', 'new': True, 'cmSlug': cm_slug(name)}
+            sets_cfg[code] = {'fr': fr_sets.get(code, name), 'en': name, 'order': order_next, 'releaseDate': None, 'idExpansion': None, 'block': 'main', 'new': True, 'cmSlug': cm_slug(name)}
             order_next += 1
             print(f'  Nouvelle série {code} « {name} »')
 
@@ -417,7 +532,7 @@ def main():
             rc_promo[norm(r['name'])].append(r)
     old_by_product = {c['cardmarket']['idProduct']: c for c in old['cards'] if c.get('cardmarket')}
     for code, v in sets_cfg.items():
-        if v.get('block') != 'promo':
+        if v.get('block') != 'promo' or not v.get('idExpansion'):
             continue
         prods = sorted((p for p in singles if p['idExpansion'] == v['idExpansion']), key=lambda p: p['idProduct'])
         seen = defaultdict(int)
@@ -446,7 +561,12 @@ def main():
                 'cardmarket': {'idProduct': p['idProduct']},
             })
 
-    # --- langues imprimées : français et chinois quand Cardmarket vend du scellé dans cette langue ---
+    # --- édition chinoise : scans chinois officiels et cartes imprimées seulement en chinois ---
+    print('Cartes chinoises officielles…')
+    add_chinese(cards, sources, chinese_cards(), sets_cfg)
+
+    # --- langues imprimées : français si la série est dans la galerie française de Riot (ou si Cardmarket vend du scellé
+    # français), chinois si elle a des scans chinois (ou du scellé chinois) ---
     fr_exp = {p['idExpansion'] for p in nonsingles if '(French)' in p['name']}
     zh_exp = {p['idExpansion'] for p in nonsingles if '(Chinese' in p['name']}
     zh_art = {c['set'] for c in cards if sources.get(c['id'], {}).get('zh')}
@@ -454,7 +574,9 @@ def main():
     for code, v in sets_cfg.items():
         langs = ['en']
         # promos et coffrets : imprimés en anglais, donc seulement dans l'édition anglaise
-        if v.get('block') == 'main' and v.get('idExpansion') in fr_exp:
+        if v.get('block') == 'cn':  # exclusivités chinoises
+            langs = ['zh']
+        if v.get('block') == 'main' and (code in fr_sets or v.get('idExpansion') in fr_exp):
             langs.append('fr')
         if v.get('block') == 'main' and (v.get('idExpansion') in zh_exp or code in zh_art):
             langs.append('zh')
@@ -475,7 +597,7 @@ def main():
     added = [c['id'] for c in cards if c['id'] not in old_cards]
     config['sets'] = {'_aide': config['sets'].get('_aide', '')} | {k: v for k, v in sets_cfg.items()}
     (DATA / 'config.json').write_text(__import__('json').dumps(config, ensure_ascii=False, indent=2), encoding='utf8')
-    write_json(DATA / 'catalog.json', {'source': 'riftbound.leagueoflegends.com + Riftcodex + Cardmarket', 'sets': sets, 'cards': cards})
+    write_json(DATA / 'catalog.json', {'source': 'playriftbound.com + cartes chinoises officielles + Riftcodex + Cardmarket', 'sets': sets, 'cards': cards})
     print(f'{len(cards)} cartes dans {len(sets)} séries ; {len(added)} nouvelles{(" : " + ", ".join(added[:20])) if added else ""}{" …" if len(added) > 20 else ""}')
 
 

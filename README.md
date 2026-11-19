@@ -4,9 +4,12 @@ Appli web (installable sur téléphone) pour suivre sa collection de **Riftbound
 sur le modèle de NightDex :
 
 - **Onglets FR · EN · 中文** en haut de l'écran : chaque langue est une **édition à part**, avec ses cartes, son scellé,
-  sa collection, ses souhaits et ses favoris. FR : séries sorties en français. EN : tout, promos et coffrets compris
-  (imprimés en anglais). 中文 : seulement les cartes dont Riot publie la version chinoise.
-- **Langue du site** (Réglages) : français, anglais ou chinois, indépendante de l'édition affichée.
+  sa collection, ses souhaits et ses favoris. FR : les séries de la galerie officielle française (Origins, Proving Grounds,
+  Armes spirituelles, Déchaînement, Vendetta, Radiance). EN : tout, promos et coffrets compris (imprimés en anglais).
+  中文 : les cartes imprimées en chinois avec leurs scans chinois officiels, plus les exclusivités chinoises.
+  Les noms des séries suivent l'édition affichée.
+- **Langue du site** (bouton 🌐 de l'accueil ou Réglages) : français, anglais ou chinois, indépendante de l'édition
+  affichée — changer d'onglet FR · EN · 中文 ne change jamais la langue du site (comme NightDex).
 - **Accueil** : les séries avec la progression (cartes possédées / total, %), en liste ou en grille, avec favoris et recherche.
 - **Série** : trois affichages (Cartes, Liste, Grille), tri (numéro, prix, nom), filtres (possédées, manquantes, rareté), valeur de la série.
 - **Fiche carte** : image, prix tendance Cardmarket en euros, prix minimum, moyennes 7 j et 30 j, **courbe de prix** (7 J, 1 M, 3 M, 1 A, Tout) et bouton **Cardmarket**.
@@ -22,14 +25,19 @@ Aucune dépendance côté appli : HTML, CSS et JavaScript. Les scripts de donné
 
 | Source | Contenu |
 |---|---|
-| Galerie officielle Riftbound (anglais et chinois simplifié) | noms, raretés, domaines, statistiques, images |
+| Galerie officielle Riftbound, playriftbound.com (anglais, français, chinois simplifié) | noms, raretés, domaines, statistiques, images ; séries de l'édition française |
+| Cartes chinoises officielles (images cdn.playloltcg.com, liste reprise par runecamp.com) | scans chinois de toutes les séries, exclusivités chinoises |
 | Riftcodex (api.riftcodex.com) | cartes signées et promos absentes de la galerie |
 | Cardmarket, fichiers publics du jeu n° 22 | rattachement des cartes, promos, scellé, **prix du jour** |
 | TCGplayer, via tcgcsv.com | images des promos et coffrets absents de la galerie (K/DA, T1, Secret Garden…) |
 
-Les séries sont visibles en français dès que Cardmarket vend du scellé « (French) » de la série, en chinois dès qu'il existe
-du scellé « (Chinese) » ou des images chinoises officielles.
-Riot ne publie pas encore les scans français : l'édition française affiche les images anglaises (c'est indiqué dans l'appli).
+Une série est visible en français dès qu'elle est dans la galerie officielle française de Riot (ou que Cardmarket vend
+du scellé « (French) » de la série) ; c'est aussi la liste de riftboundfrance.fr/cartes. En chinois, dès qu'il existe des scans
+chinois officiels (ou du scellé « (Chinese) ») ; une carte n'est dans l'édition chinoise qu'avec son scan chinois.
+Riot ne publie pas les scans français (la galerie française montre les images anglaises, et riftboundfrance.fr aussi) :
+l'édition française affiche les images anglaises (c'est indiqué dans l'appli).
+Les cartes imprimées seulement en chinois (illustrations « b », versions « P », coffrets Arcane et T1 chinois…) ont
+`only: ["zh"]` dans `data/catalog.json` ; celles des coffrets chinois sont dans la série « Exclusivités Chine » (`CN`), sans prix Cardmarket.
 Les prix Cardmarket ne distinguent pas les langues : une carte a le même prix dans les trois éditions.
 
 **Liens Cardmarket** : le bouton de la fiche ouvre la page exacte de la carte (`Products/Singles/<extension>/<Nom>`),
@@ -108,6 +116,7 @@ python scripts/update_prices.py
 | `data/firebase.json`, `firestore.rules` | configuration Firebase des comptes et règles de sécurité |
 | `images/<série>/` | images des cartes (`zh/` : versions chinoises) |
 | `cache/riftcodex.json` | dernière copie de Riftcodex |
+| `cache/chinois.json` | dernière copie de la liste des cartes chinoises |
 | `scripts/import_officiel.py` | import des cartes et des images (chaque lundi) |
 | `scripts/import_scelle.py` | import des produits scellés (chaque lundi) |
 | `scripts/update_prices.py` | relevé quotidien des prix Cardmarket |
