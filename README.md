@@ -26,7 +26,18 @@ sur le modèle de NightDex :
   (photo TCGplayer du produit ; version anglaise pour le scellé FR et chinois ; montage de cartes pour les sets de cartes).
 - **Extra** : les versions vendues sur Cardmarket mais absentes de la galerie officielle (Ahri signée V.4, runes et jetons à part,
   hors-séries pas encore publiés…), rangées à part pour ne pas encombrer les séries.
-- **Collection**, **Cotes** (valeur de la collection dans le temps, hausses, baisses, cartes les plus chères) et **Souhaits**.
+- **Collection** : onglets Cartes (avec la puce « Doubles »), **Classeurs** (classeurs perso en 2×2, 3×3, 3×4, 4×3 ou 4×4 : un en gratuit,
+  illimités avec le statut Soutien ; classeurs Master Set de chaque série), **Stats** (raretés, domaines, séries, badges débloqués avec
+  célébration) et **Gradées** (slabs PSA, BGS, CGC… : note, prix payé, ventes relevées, courbe, photo gardée sur l'appareil).
+- **Fiche carte** : état (Mint à Poor) et foil de chaque exemplaire, alerte de prix, ajout à une sous-liste de souhaits, version gradée,
+  badge des cartes interdites en tournoi (annonces officielles, `banlist` de `data/config.json`).
+- **Cotes** (valeur de la collection dans le temps, hausses, baisses, cartes les plus chères) et **Souhaits** : sous-listes avec budget,
+  alertes de prix (notification du navigateur), liste d'achat Cardmarket des cartes manquantes (copie au format « 1 Nom (Série) »).
+- **Decks** (accueil) : créateur de decks selon les règles de Riftbound (Légende, champion choisi, 40 cartes, 12 runes, 3 champs de bataille,
+  3 exemplaires, couleurs, cartes interdites), cartes manquantes et leur coût, et **decks de tournoi** (Riftbound France, source riftdecks.com).
+- **Actualités officielles** (bouton 📣 de l'accueil, FR / EN / 中文) et **calendrier des sorties**.
+- **Amis** : échanges (ses doubles qui te manquent, tes doubles qui lui manquent) et **classement** amis / monde (valeur, cartes, séries complètes ;
+  le classement mondial est sur inscription et ne publie que le pseudo et les totaux).
 - **Scanner de cartes** (onglet Recherche → Scan) : la caméra reconnaît la carte, sur le téléphone, sans rien envoyer.
 - **Comptes** (Google ou e-mail), **amis** (voir la collection d'un ami, échanges possibles) et **soutien** (Ko-fi).
 - Interface **PC** (barre latérale, fiche en fenêtre) et **appli installable** hors ligne.
@@ -93,6 +104,11 @@ Les comptes utilisent **Firebase** (gratuit à cette échelle). Mise en place, u
 
 Tant que `data/firebase.json` est vide (`{}`), l'appli fonctionne sans comptes ni amis.
 
+**Nouvelles règles à publier** (Firestore → Règles : recoller tout `firestore.rules`, puis *Publier*) pour :
+- `private/<uid>` : classeurs, decks, sous-listes de souhaits, alertes, états des exemplaires et cartes gradées synchronisés entre appareils
+  (sans ces règles, ils restent sur l'appareil et dans l'export) ;
+- `leaderboard/<uid>` : classement mondial (le classement entre amis marche sans).
+
 **Soutiens** : le bouton « Soutenir RiftDex » ouvre `support.url` de `data/config.json` (Ko-fi). Pour activer les bonus d'un
 donateur depuis l'appli, mettre ton ID RiftDex (*Mon compte*) dans `admins` de `data/config.json` **et** dans `isAdmin()`
 de `firestore.rules` (puis republier les règles) : un panneau *Administration* apparaît dans *Mon compte*.
@@ -131,6 +147,8 @@ python scripts/update_prices.py
 | `images/sealed/` | visuels des produits scellés |
 | `cache/riftcodex.json` | dernière copie de Riftcodex |
 | `cache/chinois.json` | dernière copie de la liste des cartes chinoises |
+| `data/news.json`, `scripts/import_news.py` | actualités officielles (chaque jour) |
+| `data/decks.json`, `scripts/import_decks.py` | decks de tournoi (chaque lundi) |
 | `scripts/import_officiel.py` | import des cartes et des images (chaque lundi) |
 | `scripts/import_scelle.py` | import des produits scellés (chaque lundi) |
 | `scripts/update_prices.py` | relevé quotidien des prix Cardmarket |
