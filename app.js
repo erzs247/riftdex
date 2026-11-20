@@ -1087,14 +1087,53 @@ const sheet = document.getElementById('sheet');
 // haut des panneaux : poignée (téléphone), boutons précédent / suivant (PC) et fermer
 const sheetTop = (nav) => `<div class="grab"></div><div class="sheet-tools">${nav ? `<button class="icon-btn nav-btn" data-action="prev" aria-label="${L.prev}">${I.back}</button><button class="icon-btn nav-btn flip" data-action="next" aria-label="${L.next}">${I.back}</button>` : ''}<button class="icon-btn" data-close aria-label="${L.close}">${I.x}</button></div>`;
 let navList = [];
-function navStep(dir) {
+function navStep(dir, slide = false) {
   const i = navList.indexOf(openId);
   const next = navList[i + dir];
-  if (i >= 0 && next) openCard(next, true);
+  if (i < 0 || !next) return false;
+  openCard(next, true);
+  if (slide) sheetPanel.querySelector('.detail')?.classList.add(dir > 0 ? 'slide-from-right' : 'slide-from-left');
+  return true;
 }
 const sheetPanel = document.getElementById('sheetPanel');
 let openId = null;
 let lastFocus = null;
+// Fiche carte : glisser à gauche / à droite pour passer à la carte suivante / précédente de la page
+const swipe = { x: 0, y: 0, t: 0, on: false, active: false };
+const noSwipe = '.chart, input, textarea, select, .ranges, .stepper, .paid-line, .sheet-tools';
+sheetPanel.addEventListener('touchstart', (e) => {
+  swipe.on = !!openId && e.touches.length === 1 && navList.length > 1 && !e.target.closest(noSwipe);
+  swipe.active = false;
+  if (!swipe.on) return;
+  swipe.x = e.touches[0].clientX; swipe.y = e.touches[0].clientY; swipe.t = performance.now();
+}, { passive: true });
+sheetPanel.addEventListener('touchmove', (e) => {
+  if (!swipe.on) return;
+  const dx = e.touches[0].clientX - swipe.x, dy = e.touches[0].clientY - swipe.y;
+  if (!swipe.active) {
+    if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) { swipe.on = false; return; } // défilement vertical : on laisse faire
+    if (Math.abs(dx) < 14) return;
+    swipe.active = true;
+  }
+  const i = navList.indexOf(openId);
+  const edge = (dx > 0 && i <= 0) || (dx < 0 && i >= navList.length - 1); // première / dernière carte : résistance
+  const el = sheetPanel.querySelector('.detail');
+  if (el) { el.style.transition = 'none'; el.style.transform = `translateX(${edge ? dx * 0.25 : dx}px)`; el.style.opacity = String(1 - Math.min(0.5, Math.abs(dx) / 600)); }
+}, { passive: true });
+function swipeEnd(e) {
+  if (!swipe.on || !swipe.active) { swipe.on = false; return; }
+  swipe.on = false;
+  const t = e.changedTouches?.[0];
+  const dx = t ? t.clientX - swipe.x : 0;
+  const fast = Math.abs(dx) / Math.max(1, performance.now() - swipe.t) > 0.5;
+  const el = sheetPanel.querySelector('.detail');
+  const reset = () => { if (el) { el.style.transition = 'transform .2s ease, opacity .2s ease'; el.style.transform = ''; el.style.opacity = ''; } };
+  if (Math.abs(dx) > 70 || (fast && Math.abs(dx) > 30)) {
+    if (!navStep(dx < 0 ? 1 : -1, true)) reset();
+  } else reset();
+}
+sheetPanel.addEventListener('touchend', swipeEnd);
+sheetPanel.addEventListener('touchcancel', swipeEnd);
 
 function openCard(id, keepNav) {
   const c = cardsById.get(id);
@@ -1966,8 +2005,8 @@ document.addEventListener('click', async (e) => {
   else if (d.action === 'language') { openSettings(); requestAnimationFrame(() => document.getElementById('langPanel')?.scrollIntoView({ block: 'center' })); }
   else if (d.action === 'edition') setLang(d.value);
   else if (d.action === 'account') openAccount();
-  else if (d.action === 'prev') navStep(-1);
-  else if (d.action === 'next') navStep(1);
+  else if (d.action === 'prev') navStep(-1, true);
+  else if (d.action === 'next') navStep(1, true);
   else if (d.action === 'scan') openScanner();
   else if (d.action === 'install') doInstall();
   else if (d.action === 'install-dismiss') { try { localStorage.setItem('riftdex:installDismissed', '1'); } catch { /* */ } document.getElementById('installBanner')?.remove(); }
@@ -2046,7 +2085,7 @@ document.addEventListener('keydown', (e) => {
   if (v3d && !v3d.hidden) { if (e.key === 'Escape') zoomClose(); return; }
   if (sheet.hidden) return;
   if (e.key === 'Escape') closeCard();
-  else if (openId && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.closest('input, textarea')) { e.preventDefault(); navStep(e.key === 'ArrowRight' ? 1 : -1); }
+  else if (openId && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.closest('input, textarea')) { e.preventDefault(); navStep(e.key === 'ArrowRight' ? 1 : -1, true); }
 });
 sheet.addEventListener('click', (e) => { if (e.target.matches('.sheet-backdrop')) closeCard(); });
 // ---------- Vue 3D d'une carte (comme NightDex) : la tourner dans tous les sens, la retourner, reflet holographique ----------

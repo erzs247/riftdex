@@ -802,3 +802,12 @@ body {
   .list-card:hover::before { transform: scale(1.06); opacity: .75; }
 }
 @media (prefers-reduced-motion: reduce) { .list-card, .list-card::before { transition: none; } .list-card:hover { transform: none; } }
+
+/* ---------- Fiche carte : glisser pour changer de carte ---------- */
+.sheet-panel { touch-action: pan-y; overflow-x: hidden; }
+.detail { will-change: transform; }
+.detail.slide-from-right { animation: slideFromRight .24s ease-out; }
+.detail.slide-from-left { animation: slideFromLeft .24s ease-out; }
+@keyframes slideFromRight { from { transform: translateX(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes slideFromLeft { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .detail.slide-from-right, .detail.slide-from-left { animation: none; } }
