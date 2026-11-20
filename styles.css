@@ -939,3 +939,28 @@ body {
 .picker-head .search { flex: 1; }
 .pick-card { padding: 0; border: 0; background: none; text-align: left; }
 .pick-card.missing .card-img img { filter: grayscale(.85) brightness(.55); }
+
+/* ---------- Souhaits : listes, budget, alertes, liste d'achat ---------- */
+.wl-form { display: grid; grid-template-columns: minmax(0, 1fr) 130px auto; gap: 8px; }
+.wl-form[hidden] { display: none; }
+@media (max-width: 480px) { .wl-form { grid-template-columns: 1fr 1fr; } .wl-form .cta { grid-column: 1 / -1; } }
+.wl-budget { display: grid; gap: 6px; width: 100%; margin-top: 8px; }
+.wl-budget span { font-size: 13px; color: var(--muted); }
+.wl-budget.over .bar > i { background: var(--down); } .wl-budget.over span { color: var(--down); }
+.buy-list ol { margin: 0; padding: 0; list-style: none; display: grid; }
+.buy-list li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; padding: 7px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); font-size: 14px; }
+.buy-list li span { font-weight: 700; color: var(--accent-2); } .buy-list li a { text-decoration: none; min-width: 0; } .buy-list li small { color: var(--muted); }
+.alerts-fired { border-color: color-mix(in srgb, var(--up) 60%, transparent); background: color-mix(in srgb, var(--up) 8%, var(--surface)); }
+.alerts-fired h3 { color: var(--up); }
+.alert-item { position: relative; }
+.alert-tag { display: inline-block; margin: -4px 0 8px 12px; padding: 2px 9px; border-radius: 99px; font-size: 12px; background: var(--surface-2); color: var(--muted); }
+.alert-tag.fired { background: color-mix(in srgb, var(--up) 20%, transparent); color: var(--up); font-weight: 700; }
+.wl-detail { gap: 12px; }
+.muted-label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+.alert-line { display: grid; grid-template-columns: auto 110px 1fr; align-items: center; gap: 10px; font-size: 14px; }
+.alert-line label { font-weight: 600; }
+.alert-line input { width: 100%; min-width: 0; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 16px; }
+.alert-line small.muted { color: var(--muted); font-size: 12px; }
+@media (max-width: 380px) { .alert-line { grid-template-columns: auto 1fr; } .alert-line > :last-child { grid-column: 1 / -1; } }
+.tabbar a { position: relative; }
+.alert-dot { position: absolute; top: 4px; left: calc(50% + 8px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 99px; background: var(--up); color: #04220f; font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }

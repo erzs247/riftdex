@@ -936,22 +936,6 @@ function renderCollection() {
   </div>`;
 }
 
-function renderWishlist() {
-  setTopbar(`<h1>${L.wishlist}</h1>`);
-  const list = sortCards([...wish].map((id) => cardsById.get(id)).filter((c) => c && inEdition(c)), 'price-desc');
-  if (!list.length) {
-    view.innerHTML = `<div class="empty"><strong>${L.emptyWish}</strong>${L.emptyWishHint}</div>`;
-    return;
-  }
-  const missing = list.filter((c) => !qty(c.id));
-  const cost = missing.reduce((a, c) => a + (price(c.id) ?? 0), 0);
-  view.innerHTML = `<div class="stack">
-    <div class="hero-value"><small>${L.wishBudget}</small><strong class="num">${eur(cost)}</strong>
-    <span class="note">${L.wishNote(missing.length, list.length)}</span></div>
-    <div class="rows">${list.map((c) => cardRow(c)).join('')}</div>
-  </div>`;
-}
-
 let searchQuery = '';
 function renderSearch() {
   setTopbar(`<h1>${L.search}</h1><button class="chip scan-chip" data-action="scan">${I.camera}<span>${L.scan.btn}</span></button>`);
@@ -1196,6 +1180,7 @@ function openCard(id, keepNav) {
         <input id="cardPaid" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" value="${paidOf(id) ?? ''}" data-paid-id="${esc(id)}" title="${esc(L.paidPrivate)}">
         <span class="paid-diff num" id="paidDiff">${paidDiffHtml(id)}</span>
       </div>` : ''}
+      ${wlDetailHtml(c)}
       ${p.trend != null ? `<div class="stats">
         <div class="stat"><small>${L.from}</small><b class="num">${eur(p.low)}</b></div>
         <div class="stat"><small>${L.avg7}</small><b class="num">${eur(p.avg7)}</b></div>
@@ -2646,6 +2631,165 @@ document.addEventListener('touchend', (e) => {
   document.querySelector(`[data-bd="${dx < 0 ? 'next' : 'prev'}"]:not([disabled])`)?.click();
 }, { passive: true });
 
+// ---------- Souhaits : sous-listes avec budget, alertes de prix, liste d'achat Cardmarket (comme NightDex) ----------
+Object.assign(TX.fr, { wl: {
+  all: 'Tous', new: 'Nouvelle liste', namePh: 'Nom de la liste (ex. Deck Jinx, Cadeaux)', budget: 'Budget (€, facultatif)', create: 'Créer',
+  inLists: 'Dans mes listes de souhaits', budgetLeft: (a, b) => `${a} sur ${b} de budget`, over: (v) => `Dépassement : ${v}`, del: 'Supprimer cette liste', delConfirm: 'Toucher encore pour supprimer',
+  buy: 'Liste d\'achat Cardmarket', buyTitle: 'Liste d\'achat', buyHint: 'Les cartes de la liste qui te manquent, de la moins chère à la plus chère. Le bouton copie la liste au format « 1 Nom (Série) » pour l\'importer dans une liste de souhaits Cardmarket (Wants).',
+  copy: 'Copier la liste', copied: 'Liste copiée', total: 'Total au prix tendance',
+  alert: 'Alerte de prix', alertPh: 'Prix en €', alertHint: 'Te prévenir quand la carte passe sous ce prix.', alertOn: (v) => `Alerte sous ${v}`, alertSet: 'Alerte enregistrée', alertDel: 'Supprimer l\'alerte',
+  alerts: 'Alertes de prix', fired: 'Sous ton prix d\'alerte !', waiting: 'En attente', notif: 'Activer les notifications', notifOn: 'Notifications activées', notifNo: 'Notifications refusées par le navigateur',
+  notifTitle: 'RiftDex : alerte de prix', notifBody: (n, p, t) => `${n} est à ${p} (alerte : ${t})`,
+} });
+Object.assign(TX.en, { wl: {
+  all: 'All', new: 'New list', namePh: 'List name (e.g. Jinx deck, Gifts)', budget: 'Budget (€, optional)', create: 'Create',
+  inLists: 'In my wishlists', budgetLeft: (a, b) => `${a} out of ${b} budget`, over: (v) => `Over budget: ${v}`, del: 'Delete this list', delConfirm: 'Tap again to delete',
+  buy: 'Cardmarket shopping list', buyTitle: 'Shopping list', buyHint: 'The cards of the list you are missing, cheapest first. The button copies the list as “1 Name (Set)” to import it into a Cardmarket wants list.',
+  copy: 'Copy the list', copied: 'List copied', total: 'Total at trend price',
+  alert: 'Price alert', alertPh: 'Price in €', alertHint: 'Tell me when the card drops below this price.', alertOn: (v) => `Alert below ${v}`, alertSet: 'Alert saved', alertDel: 'Delete the alert',
+  alerts: 'Price alerts', fired: 'Below your alert price!', waiting: 'Waiting', notif: 'Turn on notifications', notifOn: 'Notifications on', notifNo: 'Notifications blocked by the browser',
+  notifTitle: 'RiftDex: price alert', notifBody: (n, p, t) => `${n} is at ${p} (alert: ${t})`,
+} });
+Object.assign(TX.zh, { wl: {
+  all: '全部', new: '新建列表', namePh: '列表名称（如 金克丝卡组、礼物）', budget: '预算（€，可选）', create: '创建',
+  inLists: '在我的心愿列表中', budgetLeft: (a, b) => `${a} / 预算 ${b}`, over: (v) => `超出预算：${v}`, del: '删除此列表', delConfirm: '再点一次删除',
+  buy: 'Cardmarket 购物清单', buyTitle: '购物清单', buyHint: '列表中你缺少的卡牌，从便宜到贵排列。按钮会以“1 名称 (系列)”格式复制清单，可导入 Cardmarket 心愿单。',
+  copy: '复制清单', copied: '已复制清单', total: '按趋势价合计',
+  alert: '价格提醒', alertPh: '价格（€）', alertHint: '当卡牌价格低于此价时提醒我。', alertOn: (v) => `低于 ${v} 时提醒`, alertSet: '已保存提醒', alertDel: '删除提醒',
+  alerts: '价格提醒', fired: '已低于提醒价！', waiting: '等待中', notif: '开启通知', notifOn: '已开启通知', notifNo: '浏览器已阻止通知',
+  notifTitle: 'RiftDex：价格提醒', notifBody: (n, p, t) => `${n} 现价 ${p}（提醒价：${t}）`,
+} });
+const wl = { filter: '', confirmDel: false, buy: false };
+const myWl = () => user.x.wl.filter((l) => l.lang === lang);
+// alertes de l'édition affichée : alerts[`${lang}:${id}`] = { target, notified }
+const alertKey = (id) => `${lang}:${id}`;
+const alertOf = (id) => user.x.alerts[alertKey(id)] ?? null;
+const alertFired = (id) => { const a = alertOf(id), p = price(id); return !!a && p != null && p <= a.target; };
+const firedAlerts = () => Object.keys(user.x.alerts).filter((k) => k.startsWith(`${lang}:`)).map((k) => k.slice(lang.length + 1)).filter((id) => cardsById.has(id) && alertFired(id));
+function alertsBadge() {
+  const n = firedAlerts().length;
+  const a = document.querySelector('.tabbar a[data-tab="wishlist"]');
+  if (!a) return;
+  let b = a.querySelector('.alert-dot');
+  if (!n) { b?.remove(); return; }
+  if (!b) { b = document.createElement('span'); b.className = 'alert-dot'; a.append(b); }
+  b.textContent = n;
+}
+// notification du navigateur pour chaque alerte déclenchée, une fois par relevé de prix
+function alertsNotify() {
+  const day = priceFile.updatedAt ?? '';
+  let changed = false;
+  for (const l of LANGS) {
+    for (const [k, a] of Object.entries(user.x.alerts)) {
+      if (!k.startsWith(`${l}:`) || a.notified === day) continue;
+      const id = k.slice(l.length + 1), c = cardsById.get(id), p = price(id);
+      if (!c || p == null || p > a.target) continue;
+      a.notified = day; changed = true;
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification(T().wl.notifTitle, { body: T().wl.notifBody(c.nameEn ?? c.name, eur(p), eur(a.target)), icon: 'icons/icon-192.png', tag: k }); } catch { /* */ }
+      }
+    }
+  }
+  if (changed) xSave();
+  alertsBadge();
+}
+function wlFilterItems(list) {
+  if (!wl.filter) return list;
+  const l = myWl().find((x) => x.id === wl.filter);
+  return l ? list.filter((c) => l.ids.includes(c.id)) : list;
+}
+function renderWishlistX() {
+  setTopbar(`<h1>${L.wishlist}</h1>`);
+  const fired = firedAlerts().map((id) => cardsById.get(id));
+  const alertIds = Object.keys(user.x.alerts).filter((k) => k.startsWith(`${lang}:`)).map((k) => k.slice(lang.length + 1)).filter((id) => cardsById.has(id));
+  const all = sortCards([...wish].map((id) => cardsById.get(id)).filter((c) => c && inEdition(c)), 'price-desc');
+  if (wl.filter && !myWl().some((l) => l.id === wl.filter)) wl.filter = '';
+  const list = wlFilterItems(all);
+  const cur = myWl().find((x) => x.id === wl.filter);
+  const missing = list.filter((c) => !qty(c.id));
+  const cost = missing.reduce((a, c) => a + (price(c.id) ?? 0), 0);
+  const budgetHtml = cur?.budget ? `<div class="wl-budget ${cost > cur.budget ? 'over' : ''}"><div class="bar"><i style="width:${Math.min(100, (cost / cur.budget) * 100).toFixed(1)}%"></i></div>
+    <span class="num">${cost > cur.budget ? T().wl.over(eur(cost - cur.budget)) : T().wl.budgetLeft(eur(cost), eur(cur.budget))}</span></div>` : '';
+  const notifBtn = 'Notification' in window && Notification.permission === 'default' && alertIds.length ? `<button class="chip" data-wl="notif">${T().wl.notif}</button>` : '';
+  view.innerHTML = `<div class="stack">
+    ${fired.length ? `<section class="panel alerts-fired"><h3>🔔 ${T().wl.fired}</h3><div class="rows">${fired.map((c) => cardRow(c, 7)).join('')}</div></section>` : ''}
+    <div class="chips wl-chips"><button class="chip" data-wlf="" aria-pressed="${!wl.filter}">${T().wl.all} · ${all.length}</button>
+      ${myWl().map((l) => `<button class="chip" data-wlf="${esc(l.id)}" aria-pressed="${wl.filter === l.id}">${esc(l.name)} · ${l.ids.filter((id) => wish.has(id)).length}</button>`).join('')}
+      <button class="chip" data-wl="new">+ ${T().wl.new}</button></div>
+    <form id="wlForm" class="wl-form" hidden><input class="search" id="wlName" maxlength="30" placeholder="${esc(T().wl.namePh)}" autocomplete="off"><input class="search" id="wlBudget" type="number" inputmode="decimal" min="0" step="1" placeholder="${esc(T().wl.budget)}"><button class="cta">${T().wl.create}</button></form>
+    ${list.length ? `<div class="hero-value"><small>${L.wishBudget}</small><strong class="num">${eur(cost)}</strong><span class="note">${L.wishNote(missing.length, list.length)}</span>${budgetHtml}</div>
+      <div class="chips">${missing.length ? `<button class="chip" data-wl="buy">🛒 ${T().wl.buy}</button>` : ''}${notifBtn}${cur ? `<button class="chip ${wl.confirmDel ? 'danger' : ''}" data-wl="del">${wl.confirmDel ? T().wl.delConfirm : T().wl.del}</button>` : ''}</div>
+      ${wl.buy ? buyListHtml(missing) : ''}
+      <div class="rows">${list.map((c) => cardRow(c)).join('')}</div>`
+    : `<div class="empty"><strong>${L.emptyWish}</strong>${L.emptyWishHint}</div>`}
+    ${alertIds.length ? `<h2 class="section-title">${T().wl.alerts}</h2><div class="rows">${alertIds.map((id) => { const c = cardsById.get(id); const a = alertOf(id); return `<div class="alert-item">${cardRow(c, 7)}<span class="alert-tag ${alertFired(id) ? 'fired' : ''}">${alertFired(id) ? '🔔 ' : ''}${T().wl.alertOn(eur(a.target))}</span></div>`; }).join('')}</div>` : ''}
+  </div>`;
+}
+function buyListHtml(missing) {
+  const l = [...missing].sort((a, b) => (price(a.id) ?? 1e9) - (price(b.id) ?? 1e9));
+  const total = l.reduce((a, c) => a + (price(c.id) ?? 0), 0);
+  return `<section class="panel buy-list"><h3>${T().wl.buyTitle} <small class="num">${l.length} · ${T().wl.total} ${eur(total)}</small></h3>
+    <p class="note" style="margin:0">${T().wl.buyHint}</p>
+    <ol>${l.map((c) => { const cm = cmLinks(c); return `<li><span class="num">${eur(price(c.id))}</span><a href="${esc(cm?.url ?? '#')}" target="_blank" rel="noopener">${esc(c.nameEn ?? c.name)} <small>${esc(c.set)} ${esc(numLabel(c))}</small></a></li>`; }).join('')}</ol>
+    <button class="cta" data-wl="copy">${T().wl.copy}</button></section>`;
+}
+// fiche carte : sous-listes de souhaits et alerte de prix
+function wlDetailHtml(c) {
+  if (isSealed(c)) return '';
+  const a = alertOf(c.id);
+  const lists = myWl();
+  return `<section class="panel wl-detail">
+    ${wish.has(c.id) && lists.length ? `<div><small class="muted-label">${T().wl.inLists}</small><div class="chips">${lists.map((l) => `<button class="chip" data-wladd="${esc(l.id)}" aria-pressed="${l.ids.includes(c.id)}">${esc(l.name)}</button>`).join('')}</div></div>` : ''}
+    <div class="alert-line"><label for="alertInput">🔔 ${T().wl.alert}</label>
+      <input id="alertInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${esc(T().wl.alertPh)}" value="${a ? a.target : ''}" data-alert-id="${esc(c.id)}">
+      ${a ? `<button class="chip" data-wl="alertdel" data-id="${esc(c.id)}">${T().wl.alertDel}</button>` : `<small class="muted">${T().wl.alertHint}</small>`}</div>
+  </section>`;
+}
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-wl],[data-wlf],[data-wladd]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.wlf !== undefined) { wl.filter = d.wlf; wl.confirmDel = false; wl.buy = false; currentRender(); return; }
+  if (d.wladd) {
+    const l = user.x.wl.find((x) => x.id === d.wladd);
+    if (!l || !openId) return;
+    l.ids = l.ids.includes(openId) ? l.ids.filter((x) => x !== openId) : [...l.ids, openId];
+    xSave(); t.setAttribute('aria-pressed', l.ids.includes(openId)); return;
+  }
+  if (d.wl === 'new') { const f = document.getElementById('wlForm'); f.hidden = !f.hidden; if (!f.hidden) f.querySelector('#wlName').focus(); }
+  else if (d.wl === 'buy') { wl.buy = !wl.buy; currentRender(); }
+  else if (d.wl === 'del') {
+    if (!wl.confirmDel) { wl.confirmDel = true; currentRender(); return; }
+    user.x.wl = user.x.wl.filter((l) => l.id !== wl.filter); wl.filter = ''; wl.confirmDel = false; xSave(); currentRender();
+  } else if (d.wl === 'copy') {
+    const all = wlFilterItems(sortCards([...wish].map((id) => cardsById.get(id)).filter((c) => c && inEdition(c)), 'price-asc')).filter((c) => !qty(c.id));
+    const text = all.map((c) => `1 ${c.nameEn ?? c.name} (${setOf(c.set)?.nameEn ?? c.set})`).join('\n');
+    try { await navigator.clipboard.writeText(text); toast(T().wl.copied); } catch { prompt(T().wl.copy, text); }
+  } else if (d.wl === 'notif') {
+    const r = await Notification.requestPermission().catch(() => 'denied');
+    toast(r === 'granted' ? T().wl.notifOn : T().wl.notifNo); if (r === 'granted') alertsNotify(); currentRender();
+  } else if (d.wl === 'alertdel') {
+    delete user.x.alerts[alertKey(d.id)]; xSave(); alertsBadge(); openCard(d.id, true);
+  }
+});
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'wlForm') return;
+  e.preventDefault();
+  const name = document.getElementById('wlName').value.trim();
+  if (!name) return;
+  const budget = Number(document.getElementById('wlBudget').value) || null;
+  const l = { id: `w${Date.now().toString(36)}`, name: name.slice(0, 30), budget, lang, ids: [] };
+  user.x.wl.push(l); wl.filter = l.id; xSave(); currentRender();
+});
+document.addEventListener('change', (e) => {
+  if (e.target.id !== 'alertInput') return;
+  const id = e.target.dataset.alertId;
+  const v = e.target.value.trim() === '' ? null : Math.round(Number(e.target.value) * 100) / 100;
+  if (v == null || !(v > 0)) delete user.x.alerts[alertKey(id)];
+  else { user.x.alerts[alertKey(id)] = { target: v, notified: null }; toast(T().wl.alertSet); }
+  xSave(); alertsNotify(); openCard(id, true);
+});
+
 // @@NEXT-FEATURES@@
 
 function markTabs() {
@@ -2661,7 +2805,7 @@ function route() {
   let tab = h;
   if (h.startsWith('set-')) { tab = 'home'; currentRender = () => renderSet(h.slice(4)); }
   else if (h === 'collection') currentRender = renderCollection;
-  else if (h === 'wishlist') currentRender = renderWishlist;
+  else if (h === 'wishlist') { wl.buy = false; wl.confirmDel = false; currentRender = renderWishlistX; }
   else if (h === 'search') currentRender = renderSearch;
   else if (h === 'values') currentRender = renderValues;
   else if (h === 'sealed') { tab = 'sealed'; currentRender = renderSealed; }
@@ -2693,6 +2837,7 @@ try {
   route();
   initCloud();
   badgeCheck();
+  alertsNotify();
   newsLoad().then(() => {
     if (!user.x.newsSeen && newsItems()[0]) { user.x.newsSeen = newsItems()[0].date; save(); } // premier passage : pas de pastille
     if (currentRender === renderHome || currentRender === renderSealed || currentRender === renderLists) currentRender();
