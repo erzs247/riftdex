@@ -1180,6 +1180,7 @@ function openCard(id, keepNav) {
         <input id="cardPaid" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" value="${paidOf(id) ?? ''}" data-paid-id="${esc(id)}" title="${esc(L.paidPrivate)}">
         <span class="paid-diff num" id="paidDiff">${paidDiffHtml(id)}</span>
       </div>` : ''}
+      ${copiesHtml(c)}
       ${wlDetailHtml(c)}
       ${p.trend != null ? `<div class="stats">
         <div class="stat"><small>${L.from}</small><b class="num">${eur(p.low)}</b></div>
@@ -1193,6 +1194,7 @@ function openCard(id, keepNav) {
         ${p.seeded && (p.history?.length ?? 0) > 1 ? `<p class="note">${L.seeded}</p>` : ''}
       </section>
       ${cm ? `<a class="cta" href="${esc(cm.url)}" target="_blank" rel="noopener">${cm.label} ${I.ext}</a>` : ''}
+      ${gradedDetailBtn(c)}
       ${cm?.all ? `<a class="link-btn cm-all" href="${esc(cm.all)}" target="_blank" rel="noopener">${L.cmAll}</a>` : ''}
       ${q > 0 && p.trend ? `<p class="note num" style="text-align:center">${L.worth(q, eur(q * p.trend))}${paidOf(id) != null ? ` · ${L.boughtFor(eur(q * paidOf(id)))}` : ''}</p>` : ''}
       ${artNote ? `<p class="note" style="text-align:center">${esc(artNote)}</p>` : ''}
@@ -2441,6 +2443,7 @@ const colTabMounted = (tab) => COL_TAB_MOUNT[tab]?.();
 // Classeurs perso : pages de 9 (3×3) ou 12 (4×3) cases, couverture de couleur, cartes placées case par case.
 // Classeurs « Master Set » : une série entière dans l'ordre des numéros, les cartes manquantes en gris (lecture seule).
 Object.assign(TX.fr, { bd: {
+  layout: 'Format des pages', limit: 'Un classeur perso en version gratuite. Classeurs illimités avec le statut Soutien.', plusTitle: 'RiftDex Soutien', plusUnlimited: 'Classeurs illimités', plusMore: '… et d\'autres avantages (photo de profil, cadre doré)', plusBtn: 'Soutenir RiftDex', plusHint: 'Après ton don, ton statut Soutien est activé sur ton compte (mets ton ID RiftDex dans le message).', value: (a, b) => `~${a} / ~${b}`, owned: (a, b) => `${a}/${b} carte${b > 1 ? 's' : ''} possédée${b > 1 ? 's' : ''}`, settings: 'Réglages du classeur',
   mine: 'Mes classeurs', master: 'Master Set des séries', new: 'Nouveau classeur', name: 'Nom du classeur', namePh: 'Mes Légendes, Mon classeur Zaun…', size: 'Cases par page',
   color: 'Couverture', create: 'Créer', pages: (n) => `${n} page${n > 1 ? 's' : ''}`, cards: (a, b) => `${a}/${b} cartes`, page: (a, b) => `Page ${a} / ${b}`,
   edit: 'Modifier', done: 'Terminé', fill: 'Remplir avec…', fillSet: 'une série', fillList: 'une liste', fillOwned: 'mes cartes possédées', addPage: 'Ajouter une page',
@@ -2448,6 +2451,7 @@ Object.assign(TX.fr, { bd: {
   none: 'Crée ton premier classeur pour ranger tes cartes comme dans un vrai classeur.', readOnly: 'Classeur automatique : la série dans l\'ordre, les cartes manquantes en gris.', created: 'Classeur créé', deleted: 'Classeur supprimé',
 } });
 Object.assign(TX.en, { bd: {
+  layout: 'Page layout', limit: 'One custom binder in the free version. Unlimited binders with the Supporter status.', plusTitle: 'RiftDex Supporter', plusUnlimited: 'Unlimited binders', plusMore: '… and other perks (profile picture, gold frame)', plusBtn: 'Support RiftDex', plusHint: 'After your donation, the Supporter status is turned on for your account (put your RiftDex ID in the message).', value: (a, b) => `~${a} / ~${b}`, owned: (a, b) => `${a}/${b} card${b > 1 ? 's' : ''} owned`, settings: 'Binder settings',
   mine: 'My binders', master: 'Master Set binders', new: 'New binder', name: 'Binder name', namePh: 'My Legends, Zaun binder…', size: 'Pockets per page',
   color: 'Cover', create: 'Create', pages: (n) => `${n} page${n > 1 ? 's' : ''}`, cards: (a, b) => `${a}/${b} cards`, page: (a, b) => `Page ${a} / ${b}`,
   edit: 'Edit', done: 'Done', fill: 'Fill with…', fillSet: 'a set', fillList: 'a list', fillOwned: 'my owned cards', addPage: 'Add a page',
@@ -2455,6 +2459,7 @@ Object.assign(TX.en, { bd: {
   none: 'Create your first binder to store your cards like in a real binder.', readOnly: 'Automatic binder: the set in order, missing cards in grey.', created: 'Binder created', deleted: 'Binder deleted',
 } });
 Object.assign(TX.zh, { bd: {
+  layout: '页面格式', limit: '免费版可创建一本自定义卡册。支持者无限制。', plusTitle: 'RiftDex 支持者', plusUnlimited: '无限卡册', plusMore: '…以及其他特权（头像、金色边框）', plusBtn: '支持 RiftDex', plusHint: '捐赠后，你的账号将开通支持者身份（请在留言中写上你的 RiftDex ID）。', value: (a, b) => `~${a} / ~${b}`, owned: (a, b) => `已拥有 ${a}/${b} 张`, settings: '卡册设置',
   mine: '我的卡册', master: '系列大师卡册', new: '新建卡册', name: '卡册名称', namePh: '我的传奇、祖安卡册…', size: '每页格数',
   color: '封面', create: '创建', pages: (n) => `${n} 页`, cards: (a, b) => `${a}/${b} 张`, page: (a, b) => `第 ${a} / ${b} 页`,
   edit: '编辑', done: '完成', fill: '填充…', fillSet: '一个系列', fillList: '一个列表', fillOwned: '我拥有的卡牌', addPage: '添加一页',
@@ -2464,49 +2469,69 @@ Object.assign(TX.zh, { bd: {
 const BD_COLORS = ['#7a1f2b', '#1f3a7a', '#1f6b4a', '#5b2a86', '#8a6a1f', '#1b1b1f', '#b0475f', '#2a7d8c'];
 const bd = { page: 0, edit: false, confirmDel: false, pickSlot: null, pickQ: '' };
 const myBinders = () => user.x.binders.filter((b) => b.lang === lang);
+// formats de page (colonnes × lignes) ; anciens classeurs : 9 cases = 3×3, 12 cases = 4×3
+const BD_LAYOUTS = [['2x2', '2×2'], ['3x3', '3×3'], ['3x4', '3×4'], ['4x3', '4×3'], ['4x4', '4×4']];
+const bdDims = (b) => { if (!b.cols) { b.cols = b.size === 12 ? 4 : 3; b.rows = b.size === 12 ? 3 : 3; } return [b.cols, b.rows]; };
+// gratuit : un seul classeur perso (toutes éditions) ; illimité avec le statut Soutien
+const BD_FREE = 1;
+const canAddBinder = () => !!cloud.supporter || user.x.binders.length < BD_FREE;
 function binderOf(id) {
   if (id.startsWith('set-')) {   // Master Set d'une série
     const s = setOf(id.slice(4));
     if (!s || !editionSet(s)) return null;
-    return { id, name: setName(s), size: 9, color: '#0f1625', auto: true, set: s, slots: setCards(s.code).map((c) => c.id) };
+    return { id, name: setName(s), size: 9, cols: 3, rows: 3, color: '#0f1625', auto: true, set: s, slots: setCards(s.code).map((c) => c.id) };
   }
-  return myBinders().find((b) => b.id === id) ?? null;
+  const b = myBinders().find((x) => x.id === id) ?? null;
+  if (b) bdDims(b);
+  return b;
 }
 const binderPages = (b) => Math.max(1, Math.ceil(b.slots.length / b.size));
 function binderCover(b) {
+  bdDims(b);
   const cards = b.slots.map((id) => cardsById.get(id)).filter(Boolean);
-  const own = cards.filter((c) => qty(c.id) > 0).length;
+  const ownedCards = cards.filter((c) => qty(c.id) > 0);
+  const vOwn = ownedCards.reduce((a, c) => a + (price(c.id) ?? 0), 0), vAll = cards.reduce((a, c) => a + (price(c.id) ?? 0), 0);
   const art = bestArt(cards);
-  return `<a class="binder-cover ${b.auto ? 'auto' : ''}" href="#binder-${esc(b.id)}" style="--bc:${esc(b.color)};${art ? `--art:url('${esc(art)}')` : ''}">
-    <span class="bc-spine"></span>
-    <span class="bc-title">${b.auto ? `<b class="print">${esc(b.set.code)}</b>` : ''}<strong>${esc(b.name)}</strong></span>
-    <span class="bc-meta num">${T().bd.cards(own, cards.length)} · ${T().bd.pages(binderPages(b))}</span>
+  return `<a class="binder-card ${b.auto ? 'auto' : ''}" href="#binder-${esc(b.id)}" style="--bc:${esc(b.color)}">
+    <span class="bk-art">${art ? `<img src="${esc(art)}" alt="" loading="lazy">` : ''}</span>
+    <span class="bk-text">${b.auto ? `<b class="print">${esc(b.set.code)}</b>` : ''}<strong>${esc(b.name)}</strong>
+      <span>${T().bd.owned(ownedCards.length, cards.length)}</span><span>${T().bd.pages(binderPages(b))} · ${b.cols}×${b.rows}</span>
+      <em class="num">${T().bd.value(eur(vOwn), eur(vAll))}</em></span>
   </a>`;
 }
 function renderBinders() {
   const mine = myBinders();
-  return `<section class="panel binder-new">
+  const form = canAddBinder() ? `<section class="panel binder-new">
       <h3>${T().bd.new}</h3>
       <form id="binderForm" class="binder-form">
         <input class="search" id="binderName" maxlength="40" placeholder="${esc(T().bd.namePh)}" aria-label="${esc(T().bd.name)}" autocomplete="off">
-        <div class="bf-row"><span>${T().bd.size}</span>${seg('bdSize', String(user.prefs.bdSize ?? 9), [['9', '9 · 3×3'], ['12', '12 · 4×3']])}</div>
+        <div class="bf-row"><span>${T().bd.layout}</span>${seg('bdLayout', user.prefs.bdLayout ?? '3x3', BD_LAYOUTS)}</div>
         <div class="bf-row"><span>${T().bd.color}</span><div class="bd-colors">${BD_COLORS.map((c, i) => `<label style="--c:${c}"><input type="radio" name="bdColor" value="${c}" ${i === 0 ? 'checked' : ''}><i></i></label>`).join('')}</div></div>
         <button class="cta">${T().bd.create}</button>
       </form>
-    </section>
-    <h2 class="section-title">${T().bd.mine} <small class="num">${mine.length}</small></h2>
-    ${mine.length ? `<div class="binder-grid">${mine.map(binderCover).join('')}</div>` : `<p class="note">${T().bd.none}</p>`}
+      ${cloud.supporter ? '' : `<p class="note" style="margin:0">${T().bd.limit}</p>`}
+    </section>` : `<section class="plus-card">
+      <strong class="plus-logo">RIFT<i>DEX</i><span>+</span></strong>
+      <p><span class="plus-ic">📚</span>${T().bd.plusUnlimited}</p>
+      <p><span class="plus-ic">⭐</span>${T().bd.plusMore}</p>
+      ${supportUrl() ? `<a class="plus-btn" href="${esc(supportUrl())}" target="_blank" rel="noopener">🚀 ${T().bd.plusBtn}</a>` : ''}
+      <small>${T().bd.plusHint}</small>
+    </section>`;
+  return `<h2 class="section-title">${T().bd.mine} <small class="num">${mine.length}</small></h2>
+    ${mine.length ? `<div class="binder-list">${mine.map(binderCover).join('')}</div>` : `<p class="note">${T().bd.none}</p>`}
+    ${form}
     <h2 class="section-title">${T().bd.master}</h2>
-    <div class="binder-grid">${visibleSets().sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).map((s) => binderCover(binderOf(`set-${s.code}`))).join('')}</div>`;
+    <div class="binder-list">${visibleSets().sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).map((s) => binderCover(binderOf(`set-${s.code}`))).join('')}</div>`;
 }
 COL_TAB_RENDER.binders = renderBinders;
 function slotHtml(b, i) {
   const id = b.slots[i];
   const c = id ? cardsById.get(id) : null;
   if (!c) return `<button class="slot empty" ${b.auto ? 'disabled' : `data-bslot="${i}"`} aria-label="${T().bd.pick}">${b.auto ? '' : '+'}</button>`;
-  const q = qty(c.id);
+  const q = qty(c.id), p = price(c.id);
   return `<div class="slot ${q ? 'owned' : 'missing'}">
     <button class="slot-card" data-open="${esc(c.id)}" aria-label="${esc(cardName(c))}">${cardImg(c)}</button>
+    ${p != null && user.prefs.bdPrices !== 'off' ? `<span class="slot-price num">${eur(p)}</span>` : ''}
     ${bd.edit && !b.auto ? `<button class="slot-x" data-bremove="${i}" aria-label="${T().bd.remove}">${I.x}</button>` : ''}
     ${q > 1 ? `<span class="slot-q num">×${q}</span>` : ''}
   </div>`;
@@ -2521,28 +2546,32 @@ function renderBinder(id) {
   const cards = b.slots.map((x) => cardsById.get(x)).filter(Boolean);
   const own = cards.filter((c) => qty(c.id) > 0).length;
   setTopbar(`<a class="icon-btn" href="#collection" aria-label="${L.back}">${I.back}</a><h1 class="small">${b.auto ? `<span class="title-code">${esc(b.set.code)}</span>` : ''}${esc(b.name)}</h1>
-    ${b.auto ? '' : `<button class="chip ${bd.edit ? 'on' : ''}" data-bd="edit">${bd.edit ? T().bd.done : T().bd.edit}</button>`}`);
-  const page = (p) => `<div class="bpage cols-${b.size === 12 ? 4 : 3}" style="--bc:${esc(b.color)}">${Array.from({ length: b.size }, (_, k) => slotHtml(b, p * b.size + k)).join('')}<span class="bpage-num num">${p + 1}</span></div>`;
+    <button class="icon-btn ${user.prefs.bdPrices === 'off' ? '' : 'on'}" data-bd="prices" aria-label="€" title="€">€</button>`);
+  const page = (p) => `<div class="bpage" style="--bc:${esc(b.color)};--cols:${b.cols}">${Array.from({ length: b.size }, (_, k) => slotHtml(b, p * b.size + k)).join('')}<span class="bpage-num num">${p + 1}</span></div>`;
   view.innerHTML = `<div class="stack">
-    <div class="toolbar num"><span>${T().bd.cards(own, cards.length)}</span><span class="grow"></span><span>${T().bd.page(first + 1, pages)}</span></div>
+    <div class="toolbar num"><span>${T().bd.owned(own, cards.length)}</span><span class="grow"></span><span>${T().bd.value(eur(cards.filter((c) => qty(c.id) > 0).reduce((a, c) => a + (price(c.id) ?? 0), 0)), eur(cards.reduce((a, c) => a + (price(c.id) ?? 0), 0)))}</span></div>
     <div class="binder-view" id="binderView">${Array.from({ length: spread }, (_, k) => first + k).filter((p) => p < pages).map(page).join('')}</div>
     <div class="binder-nav">
-      <button class="icon-btn" data-bd="prev" ${first <= 0 ? 'disabled' : ''} aria-label="${L.prev}">${I.back}</button>
-      <span class="num">${T().bd.page(first + 1, pages)}</span>
-      <button class="icon-btn flip-x" data-bd="next" ${first + spread >= pages ? 'disabled' : ''} aria-label="${L.next}">${I.back}</button>
+      <button class="bn-btn" data-bd="prev" ${first <= 0 ? 'disabled' : ''} aria-label="${L.prev}">${I.back}</button>
+      <span class="bn-page num">${first + 1} / ${pages}</span>
+      <button class="bn-btn primary flip-x" data-bd="next" ${first + spread >= pages ? 'disabled' : ''} aria-label="${L.next}">${I.back}</button>
+      ${b.auto ? '' : `<button class="bn-btn primary ${bd.edit ? 'on' : ''}" data-bd="edit" aria-label="${T().bd.settings}" title="${T().bd.settings}">${I.gear}</button>`}
     </div>
     ${b.auto ? `<p class="note">${T().bd.readOnly}</p>` : bd.edit ? `<section class="panel">
       <h3>${T().bd.fill}</h3>
       <div class="chips">${visibleSets().map((s) => `<button class="chip" data-bfill="set:${esc(s.code)}">${esc(s.code)}</button>`).join('')}<button class="chip" data-bfill="owned">${T().bd.fillOwned}</button></div>
       <select class="search" id="bdFillList"><option value="">${T().bd.fillList}…</option>${allLists().filter((d) => d.group !== 'artist').map((d) => `<option value="${esc(d.id)}">${esc(listTitle(d))}</option>`).join('')}</select>
+      <div class="bf-row"><span>${T().bd.layout}</span>${BD_LAYOUTS.map(([k, l]) => `<button class="chip" data-bdlayout="${k}" aria-pressed="${`${b.cols}x${b.rows}` === k}">${l}</button>`).join('')}</div>
       <div class="chips"><button class="chip" data-bd="addpage">${T().bd.addPage}</button><button class="chip" data-bd="rename">${T().bd.rename}</button>
       <button class="chip ${bd.confirmDel ? 'danger' : ''}" data-bd="delete">${bd.confirmDel ? T().bd.delConfirm : T().bd.del}</button></div>
     </section>` : ''}
   </div>`;
 }
 // choix d'une carte pour une case vide : recherche dans l'édition (cartes possédées d'abord)
-function openPicker(slot) {
-  bd.pickSlot = slot; bd.pickQ = '';
+// choix d'une carte (classeurs, cartes gradées…) : onPick(id) est appelé avec la carte choisie
+let pickCb = null;
+function openPicker(slot, onPick = null) {
+  bd.pickSlot = slot; bd.pickQ = ''; pickCb = onPick;
   let el = document.getElementById('picker');
   if (!el) { el = document.createElement('div'); el.id = 'picker'; el.className = 'picker'; document.body.append(el); }
   el.hidden = false;
@@ -2558,13 +2587,13 @@ function pickerResults() {
     .sort((a, b) => (qty(b.id) > 0) - (qty(a.id) > 0) || setOrder(a) - setOrder(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true })).slice(0, 60);
   document.getElementById('pickerRes').innerHTML = res.map((c) => `<button class="card ${qty(c.id) ? 'owned' : 'missing'} pick-card" data-pick="${esc(c.id)}"><span class="card-img">${cardImg(c)}<span class="num-badge num">${esc(c.set)} ${esc(numLabel(c))}</span></span></button>`).join('');
 }
-function closePicker() { const el = document.getElementById('picker'); if (el) el.hidden = true; bd.pickSlot = null; }
+function closePicker() { const el = document.getElementById('picker'); if (el) el.hidden = true; bd.pickSlot = null; pickCb = null; }
 function binderEdit(fn) {
   const id = location.hash.slice(8);
   const b = user.x.binders.find((x) => x.id === id);
   if (!b) return;
+  bdDims(b);
   fn(b);
-  while (b.slots.length && b.slots[b.slots.length - 1] == null && b.slots.length % b.size === 0 && b.slots.slice(-b.size).every((x) => x == null) && b.slots.length > b.size) b.slots.splice(-b.size);
   xSave(); currentRender();
 }
 function binderFill(b, ids) {
@@ -2583,17 +2612,25 @@ document.addEventListener('submit', (e) => {
   e.preventDefault();
   const name = document.getElementById('binderName').value.trim() || T().bd.new;
   const color = e.target.querySelector('input[name="bdColor"]:checked')?.value ?? BD_COLORS[0];
-  const size = Number(user.prefs.bdSize ?? 9) === 12 ? 12 : 9;
-  const b = { id: `b${Date.now().toString(36)}`, name: name.slice(0, 40), size, color, lang, slots: Array(size).fill(null) };
+  if (!canAddBinder()) { currentRender(); return; }
+  const [cols, rows] = String(user.prefs.bdLayout ?? '3x3').split('x').map(Number);
+  const size = cols * rows;
+  const b = { id: `b${Date.now().toString(36)}`, name: name.slice(0, 40), size, cols, rows, color, lang, slots: Array(size).fill(null) };
   user.x.binders.push(b); xSave(); toast(T().bd.created);
   Object.assign(bd, { id: b.id, edit: true, page: 0, confirmDel: false }); location.hash = `#binder-${b.id}`;
 });
 document.addEventListener('click', (e) => {
+  const lay = e.target.closest('[data-bdlayout]');
+  if (lay) {   // changement de format : les cartes gardent leur ordre, les pages sont recalculées
+    const [cols, rows] = lay.dataset.bdlayout.split('x').map(Number);
+    binderEdit((b) => { const cards = b.slots; Object.assign(b, { cols, rows, size: cols * rows }); const n = Math.max(1, Math.ceil(cards.length / b.size)) * b.size; b.slots = Array.from({ length: n }, (_, k) => cards[k] ?? null); bd.page = 0; });
+    return;
+  }
   const t = e.target.closest('[data-bd],[data-bslot],[data-bremove],[data-bfill],[data-pick]');
   if (!t) return;
   const d = t.dataset;
   if (d.pick === 'close' || (e.target.id === 'picker')) { closePicker(); return; }
-  if (d.pick) { const slot = bd.pickSlot; closePicker(); binderEdit((b) => { b.slots[slot] = d.pick; }); return; }
+  if (d.pick) { const slot = bd.pickSlot, cb = pickCb; closePicker(); if (cb) cb(d.pick); else binderEdit((b) => { b.slots[slot] = d.pick; }); return; }
   if (d.bslot !== undefined) { openPicker(Number(d.bslot)); return; }
   if (d.bremove !== undefined) { binderEdit((b) => { b.slots[Number(d.bremove)] = null; }); return; }
   if (d.bfill) {
@@ -2602,6 +2639,7 @@ document.addEventListener('click', (e) => {
     binderEdit((b) => binderFill(b, ids)); return;
   }
   const act = d.bd;
+  if (act === 'prices') { user.prefs.bdPrices = user.prefs.bdPrices === 'off' ? 'on' : 'off'; save(); currentRender(); return; }
   if (act === 'edit') { bd.edit = !bd.edit; bd.confirmDel = false; currentRender(); }
   else if (act === 'prev' || act === 'next') { const spread = isPC() ? 2 : 1; bd.page = Math.max(0, bd.page + (act === 'next' ? spread : -spread)); currentRender(); }
   else if (act === 'addpage') binderEdit((b) => { for (let k = 0; k < b.size; k++) b.slots.push(null); bd.page = binderPages(b) - 1; });
@@ -2790,6 +2828,236 @@ document.addEventListener('change', (e) => {
   xSave(); alertsNotify(); openCard(id, true);
 });
 
+// ---------- État et foil de chaque exemplaire (comme NightDex) ----------
+Object.assign(TX.fr, { cp: {
+  title: 'Mes exemplaires', cond: 'État', foil: 'Foil', copy: (n) => `Ex. ${n}`, value: (v) => `Valeur de tes exemplaires, état et foil compris : ${v}`,
+  conds: { MT: 'Mint', NM: 'Near Mint', EX: 'Excellent', GD: 'Good', LP: 'Light Played', PL: 'Played', PO: 'Poor' },
+  hint: 'Décote Cardmarket approximative selon l\'état ; le foil utilise le prix foil quand il existe.',
+} });
+Object.assign(TX.en, { cp: {
+  title: 'My copies', cond: 'Condition', foil: 'Foil', copy: (n) => `Copy ${n}`, value: (v) => `Value of your copies, condition and foil included: ${v}`,
+  conds: { MT: 'Mint', NM: 'Near Mint', EX: 'Excellent', GD: 'Good', LP: 'Light Played', PL: 'Played', PO: 'Poor' },
+  hint: 'Approximate Cardmarket discount by condition; foil uses the foil price when there is one.',
+} });
+Object.assign(TX.zh, { cp: {
+  title: '我的卡牌', cond: '品相', foil: '闪卡', copy: (n) => `第 ${n} 张`, value: (v) => `按品相和闪卡计算的价值：${v}`,
+  conds: { MT: '全新', NM: '近全新', EX: '极好', GD: '良好', LP: '轻微使用', PL: '使用过', PO: '差' },
+  hint: '按品相的 Cardmarket 大致折扣；闪卡使用闪卡价格（如有）。',
+} });
+const CONDS = ['MT', 'NM', 'EX', 'GD', 'LP', 'PL', 'PO'];
+const COND_K = { MT: 1.1, NM: 1, EX: 0.85, GD: 0.72, LP: 0.62, PL: 0.48, PO: 0.3 };
+const cpKey = (id) => `${lang}:${id}`;
+// exemplaires d'une carte : autant que la quantité possédée ; état Near Mint et foil d'origine par défaut
+function copiesOf(id) {
+  const c = cardsById.get(id), q = qty(id);
+  const saved = user.x.copies[cpKey(id)] ?? [];
+  return Array.from({ length: q }, (_, i) => saved[i] ?? { c: 'NM', f: isShiny(c) });
+}
+function copyValue(id) {
+  const p = P(id); if (!p?.trend) return null;
+  return copiesOf(id).reduce((a, cp) => a + (cp.f && !p.foil && p.trendFoil ? p.trendFoil : p.trend) * (COND_K[cp.c] ?? 1), 0);
+}
+function copiesHtml(c) {
+  if (isSealed(c)) return '';
+  const list = copiesOf(c.id);
+  if (!list.length) return '';
+  const v = copyValue(c.id);
+  return `<section class="panel copies"><h3>${T().cp.title}</h3>
+    ${list.map((cp, i) => `<div class="copy-row"><span>${T().cp.copy(i + 1)}</span>
+      <select data-cpc="${i}" aria-label="${T().cp.cond}">${CONDS.map((k) => `<option value="${k}" ${cp.c === k ? 'selected' : ''}>${k} · ${esc(T().cp.conds[k])}</option>`).join('')}</select>
+      <label class="foil-toggle"><input type="checkbox" data-cpf="${i}" ${cp.f ? 'checked' : ''}><span>${T().cp.foil}</span></label></div>`).join('')}
+    ${v != null ? `<p class="note num" style="margin:0">${T().cp.value(eur(v))}</p>` : ''}<p class="note" style="margin:0;font-size:12px">${T().cp.hint}</p>
+  </section>`;
+}
+document.addEventListener('change', (e) => {
+  const el = e.target.closest('[data-cpc],[data-cpf]');
+  if (!el || !openId) return;
+  const list = copiesOf(openId);
+  const i = Number(el.dataset.cpc ?? el.dataset.cpf);
+  if (el.dataset.cpc !== undefined) list[i].c = el.value; else list[i].f = el.checked;
+  user.x.copies[cpKey(openId)] = list;
+  xSave(); openCard(openId, true);
+});
+
+// ---------- Cartes gradées : slabs PSA, BGS, CGC… avec photo, note, ventes relevées (comme NightDex) ----------
+Object.assign(TX.fr, { gr: {
+  title: 'Mes cartes gradées', add: 'Ajouter une carte gradée', addThis: 'Ajouter une version gradée', youHave: (n) => `${n} gradée${n > 1 ? 's' : ''}`,
+  card: 'Carte', chooseCard: 'Choisir la carte', company: 'Société', grade: 'Note', cert: 'N° de certification', paid: 'Prix payé (€)', value: 'Valeur estimée',
+  photo: 'Photo du slab', photoAdd: 'Ajouter une photo', save: 'Enregistrer', del: 'Supprimer', delConfirm: 'Toucher encore pour supprimer',
+  sales: 'Ventes relevées', saleAdd: 'Ajouter une vente', saleDate: 'Date', salePrice: 'Prix (€)', noSales: 'Ajoute les ventes réussies que tu vois (eBay, Cardmarket…) : la valeur estimée est la médiane des 3 dernières.',
+  ebay: 'Voir les ventes réussies sur eBay', none: 'Aucune carte gradée pour l\'instant. Ajoute tes slabs PSA, BGS, CGC… pour suivre leur valeur.', total: (n, v) => `${n} slab${n > 1 ? 's' : ''} · ${v}`,
+  photoLocal: 'Les photos restent sur cet appareil.',
+} });
+Object.assign(TX.en, { gr: {
+  title: 'My graded cards', add: 'Add a graded card', addThis: 'Add a graded copy', youHave: (n) => `${n} graded`,
+  card: 'Card', chooseCard: 'Choose the card', company: 'Company', grade: 'Grade', cert: 'Certification no.', paid: 'Price paid (€)', value: 'Estimated value',
+  photo: 'Slab photo', photoAdd: 'Add a photo', save: 'Save', del: 'Delete', delConfirm: 'Tap again to delete',
+  sales: 'Recorded sales', saleAdd: 'Add a sale', saleDate: 'Date', salePrice: 'Price (€)', noSales: 'Add the sold listings you see (eBay, Cardmarket…): the estimated value is the median of the last 3.',
+  ebay: 'See sold listings on eBay', none: 'No graded card yet. Add your PSA, BGS, CGC… slabs to track their value.', total: (n, v) => `${n} slab${n > 1 ? 's' : ''} · ${v}`,
+  photoLocal: 'Photos stay on this device.',
+} });
+Object.assign(TX.zh, { gr: {
+  title: '我的评级卡', add: '添加评级卡', addThis: '添加评级版本', youHave: (n) => `${n} 张评级卡`,
+  card: '卡牌', chooseCard: '选择卡牌', company: '评级公司', grade: '分数', cert: '证书编号', paid: '买入价（€）', value: '估值',
+  photo: '评级卡照片', photoAdd: '添加照片', save: '保存', del: '删除', delConfirm: '再点一次删除',
+  sales: '成交记录', saleAdd: '添加成交', saleDate: '日期', salePrice: '价格（€）', noSales: '添加你看到的成交价（eBay、Cardmarket…）：估值为最近 3 次的中位数。',
+  ebay: '在 eBay 查看成交记录', none: '暂无评级卡。添加你的 PSA、BGS、CGC 评级卡以跟踪价值。', total: (n, v) => `${n} 张 · ${v}`,
+  photoLocal: '照片仅保存在此设备上。',
+} });
+const GRADERS = ['PSA', 'BGS', 'CGC', 'PCA', 'Collect Aura', 'SGC', 'TAG', 'ACE'];
+const GRADES = ['10', '9.5', '9', '8.5', '8', '7.5', '7', '6', '5', '4', '3', '2', '1'];
+const gr = { form: null, confirmDel: false, photos: new Map() };
+const myGraded = () => user.x.graded.filter((g) => g.lang === lang && cardsById.has(g.id));
+function gValue(g) {
+  const s = [...(g.sales ?? [])].sort((a, b) => (a[0] < b[0] ? -1 : 1)).slice(-3).map(([, p]) => p).sort((a, b) => a - b);
+  return s.length ? s[Math.floor(s.length / 2)] : null;
+}
+// photos : IndexedDB de l'appareil (trop lourdes pour le compte)
+function gIdb(mode, fn) {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('riftdex', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('slabs');
+    r.onerror = () => rej(r.error);
+    r.onsuccess = () => { const tx = r.result.transaction('slabs', mode); const q = fn(tx.objectStore('slabs')); tx.oncomplete = () => res(q?.result); tx.onerror = () => rej(tx.error); };
+  });
+}
+async function gPhoto(gid) {
+  if (gr.photos.has(gid)) return gr.photos.get(gid);
+  let url = null;
+  try { url = (await gIdb('readonly', (s) => s.get(gid))) ?? null; } catch { /* */ }
+  gr.photos.set(gid, url);
+  return url;
+}
+function gHydrate() {
+  for (const img of document.querySelectorAll('img[data-gphoto]')) gPhoto(img.dataset.gphoto).then((u) => { if (u) { img.src = u; img.closest('.slab')?.classList.add('has-photo'); } });
+}
+function resizePhoto(file, max = 900) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      res(cv.toDataURL('image/webp', 0.82)); URL.revokeObjectURL(img.src);
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+function slabHtml(g, big = false) {
+  const c = cardsById.get(g.id);
+  const v = gValue(g);
+  return `<a class="slab ${big ? 'big' : ''}" href="#graded-${esc(g.gid)}">
+    <span class="slab-label"><b>${esc(g.co)}</b><span>${esc(cardName(c))}</span><strong class="num">${esc(g.grade)}</strong></span>
+    <span class="slab-card"><img src="${esc(imageOf(c) || placeholderArt(c))}" alt="${esc(cardName(c))}" data-gphoto="${esc(g.gid)}"></span>
+    ${big ? '' : `<span class="slab-val num">${v != null ? eur(v) : g.paid ? eur(g.paid) : '—'}</span>`}
+  </a>`;
+}
+function renderGraded() {
+  const list = myGraded();
+  const total = list.reduce((a, g) => a + (gValue(g) ?? g.paid ?? 0), 0);
+  return `<div class="toolbar num"><span>${T().gr.total(list.length, eur(total))}</span><span class="grow"></span><button class="chip" data-gr="new">+ ${T().gr.add}</button></div>
+    ${gr.form ? gFormHtml() : ''}
+    ${list.length ? `<div class="slab-grid">${list.map((g) => slabHtml(g)).join('')}</div>` : gr.form ? '' : `<div class="empty"><strong>${T().gr.title}</strong>${T().gr.none}</div>`}`;
+}
+COL_TAB_RENDER.graded = renderGraded;
+COL_TAB_MOUNT.graded = gHydrate;
+function gFormHtml() {
+  const f = gr.form, c = f.id ? cardsById.get(f.id) : null;
+  return `<section class="panel gform"><h3>${T().gr.add}</h3>
+    <button class="btn-ghost gpick" data-gr="pick">${c ? `<img src="${esc(imageOf(c) || placeholderArt(c))}" alt=""><span><b>${esc(cardName(c))}</b><small>${esc(c.set)} · ${esc(numLabel(c))}</small></span>` : `<span>${T().gr.chooseCard}</span>`}</button>
+    <div class="gform-row"><label>${T().gr.company}<select id="gCo">${GRADERS.map((x) => `<option ${f.co === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select></label>
+      <label>${T().gr.grade}<select id="gGrade">${GRADES.map((x) => `<option ${f.grade === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label></div>
+    <div class="gform-row"><label>${T().gr.cert}<input id="gCert" class="search" maxlength="20" value="${esc(f.cert ?? '')}" autocomplete="off"></label>
+      <label>${T().gr.paid}<input id="gPaid" class="search" type="number" inputmode="decimal" min="0" step="0.01" value="${f.paid ?? ''}"></label></div>
+    <button class="cta" data-gr="save" ${c ? '' : 'disabled'}>${T().gr.save}</button>
+  </section>`;
+}
+function gFormRead() {
+  Object.assign(gr.form, { co: document.getElementById('gCo')?.value ?? gr.form.co, grade: document.getElementById('gGrade')?.value ?? gr.form.grade,
+    cert: document.getElementById('gCert')?.value.trim() ?? '', paid: Number(document.getElementById('gPaid')?.value) || null });
+}
+function gEbayUrl(g) {
+  const c = cardsById.get(g.id);
+  return `https://www.ebay.fr/sch/i.html?LH_Sold=1&LH_Complete=1&_nkw=${encodeURIComponent(`Riftbound ${c.nameEn ?? c.name} ${g.co} ${g.grade}`)}`;
+}
+async function renderGradedOne(gid) {
+  const g = user.x.graded.find((x) => x.gid === gid);
+  if (!g || !cardsById.has(g.id)) { location.hash = '#collection'; return; }
+  const c = cardsById.get(g.id), v = gValue(g);
+  const sales = [...(g.sales ?? [])].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  setTopbar(`<a class="icon-btn" href="#collection" aria-label="${L.back}">${I.back}</a><h1 class="small">${esc(g.co)} ${esc(g.grade)} · ${esc(cardName(c))}</h1>`);
+  view.innerHTML = `<div class="stack graded-one">
+    <div class="g-top">${slabHtml(g, true)}
+      <div class="g-info">
+        <div class="big-price num"><small>${T().gr.value}</small>${v != null ? eur(v) : '—'}</div>
+        ${g.paid ? `<span class="sub num">${T().gr.paid} : ${eur(g.paid)}${v != null ? ` · ${diffHtml({ diff: v - g.paid, pct: (v - g.paid) / g.paid })}` : ''}</span>` : ''}
+        ${g.cert ? `<span class="sub num">${T().gr.cert} : ${esc(g.cert)}</span>` : ''}
+        <span class="sub">${esc(c.set)} · ${esc(numLabel(c))} · ${esc(L.trend)} ${eur(price(c.id))}</span>
+        <label class="btn-ghost g-photo">${I.camera}<span>${T().gr.photoAdd}</span><input type="file" accept="image/*" id="gPhotoInput" hidden></label>
+        <small class="note">${T().gr.photoLocal}</small>
+      </div>
+    </div>
+    <section class="panel"><h3>${T().gr.sales}</h3>
+      ${sales.length > 1 ? '<div class="chart" id="gChart"></div>' : ''}
+      ${sales.length ? `<div class="g-sales">${sales.map(([d, p], i) => `<div><span class="num">${fmt.date.format(parseDay(d))}</span><b class="num">${eur(p)}</b><button class="icon-btn" data-gsdel="${i}" aria-label="${T().gr.del}">${I.x}</button></div>`).join('')}</div>` : `<p class="note" style="margin:0">${T().gr.noSales}</p>`}
+      <form id="gSaleForm" class="g-sale-form"><input class="search" type="date" id="gSaleDate" value="${new Date().toISOString().slice(0, 10)}" aria-label="${T().gr.saleDate}"><input class="search" type="number" inputmode="decimal" min="0" step="0.01" id="gSalePrice" placeholder="${T().gr.salePrice}"><button class="cta">${T().gr.saleAdd}</button></form>
+      <a class="btn-ghost" style="text-align:center;text-decoration:none" href="${esc(gEbayUrl(g))}" target="_blank" rel="noopener">${T().gr.ebay}</a>
+    </section>
+    <button class="btn-ghost" data-open="${esc(c.id)}">${esc(cardName(c))}</button>
+    <button class="btn-ghost ${gr.confirmDel ? 'danger' : ''}" data-gr="del" data-gid="${esc(g.gid)}">${gr.confirmDel ? T().gr.delConfirm : T().gr.del}</button>
+  </div>`;
+  gHydrate();
+  const ch = document.getElementById('gChart');
+  if (ch) drawChart(ch, [...sales].reverse(), true);
+}
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-gr],[data-gsdel]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.gsdel !== undefined) {
+    const g = user.x.graded.find((x) => x.gid === location.hash.slice(8));
+    const sorted = [...(g.sales ?? [])].sort((a, b) => (a[0] < b[0] ? 1 : -1));
+    sorted.splice(Number(d.gsdel), 1); g.sales = sorted; xSave(); currentRender(); return;
+  }
+  if (d.gr === 'new') { gr.form = { id: openId && !isSealed(cardsById.get(openId) ?? {}) ? openId : null, co: 'PSA', grade: '10' }; user.prefs.colTab = 'graded'; if (!sheet.hidden) closeCard(); if (location.hash !== '#collection') location.hash = '#collection'; else currentRender(); }
+  else if (d.gr === 'pick') { gFormRead(); openPicker(null, (id) => { gr.form.id = id; currentRender(); }); }
+  else if (d.gr === 'save') {
+    gFormRead();
+    const f = gr.form;
+    if (!f?.id) return;
+    user.x.graded.push({ gid: `g${Date.now().toString(36)}`, id: f.id, lang, co: f.co, grade: f.grade, cert: f.cert, paid: f.paid, sales: [] });
+    gr.form = null; xSave(); currentRender();
+  } else if (d.gr === 'del') {
+    if (!gr.confirmDel) { gr.confirmDel = true; currentRender(); return; }
+    user.x.graded = user.x.graded.filter((g) => g.gid !== d.gid); gr.confirmDel = false;
+    gIdb('readwrite', (s) => s.delete(d.gid)).catch(() => {});
+    xSave(); location.hash = '#collection';
+  }
+});
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'gSaleForm') return;
+  e.preventDefault();
+  const p = Number(document.getElementById('gSalePrice').value), d = document.getElementById('gSaleDate').value;
+  if (!(p > 0) || !d) return;
+  const g = user.x.graded.find((x) => x.gid === location.hash.slice(8));
+  (g.sales ??= []).push([d, Math.round(p * 100) / 100]); xSave(); currentRender();
+});
+document.addEventListener('change', async (e) => {
+  if (e.target.id !== 'gPhotoInput' || !e.target.files?.[0]) return;
+  const gid = location.hash.slice(8);
+  try {
+    const url = await resizePhoto(e.target.files[0]);
+    await gIdb('readwrite', (s) => s.put(url, gid));
+    gr.photos.set(gid, url); currentRender();
+  } catch { toast(L.badFile ?? 'Photo illisible'); }
+});
+function gradedDetailBtn(c) {
+  if (isSealed(c)) return '';
+  const n = myGraded().filter((g) => g.id === c.id).length;
+  return `<button class="btn-ghost g-add" data-gr="new">🏅 <span>${T().gr.addThis}${n ? ` · ${T().gr.youHave(n)}` : ''}</span></button>`;
+}
+
 // @@NEXT-FEATURES@@
 
 function markTabs() {
@@ -2812,6 +3080,7 @@ function route() {
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
   else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
   else if (h === 'news') { tab = 'home'; currentRender = renderNews; }
+  else if (h.startsWith('graded-')) { tab = 'collection'; gr.confirmDel = false; const gid = h.slice(7); currentRender = () => renderGradedOne(gid); }
   else if (h.startsWith('binder-')) { tab = 'collection'; const id = h.slice(7); if (bd.id !== id) Object.assign(bd, { id, page: 0, edit: false, confirmDel: false }); currentRender = () => renderBinder(id); }
   else if (h.startsWith('list-')) { tab = 'home'; currentRender = () => renderList(h.slice(5)); }
   else if (h === 'friends') { fr.view = null; fr.msg = ''; currentRender = renderFriends; }

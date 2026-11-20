@@ -964,3 +964,78 @@ body {
 @media (max-width: 380px) { .alert-line { grid-template-columns: auto 1fr; } .alert-line > :last-child { grid-column: 1 / -1; } }
 .tabbar a { position: relative; }
 .alert-dot { position: absolute; top: 4px; left: calc(50% + 8px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 99px; background: var(--up); color: #04220f; font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }
+
+/* ---------- Exemplaires : état et foil ---------- */
+.copies { gap: 8px; }
+.copy-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: 14px; }
+.copy-row > span { color: var(--muted); }
+.copy-row select { min-width: 0; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+.foil-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px; border: 1px solid var(--line); cursor: pointer; font-size: 13px; }
+.foil-toggle:has(input:checked) { border-color: transparent; color: #111; background: linear-gradient(115deg, #ffd6e7, #c9f0ff, #e8ffd1, #fff2c2); }
+.foil-toggle input { accent-color: var(--accent); }
+
+/* ---------- Cartes gradées (slabs) ---------- */
+.slab-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (min-width: 640px) { .slab-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); } }
+.slab { position: relative; display: grid; gap: 8px; padding: 8px 8px 12px; border-radius: 10px; text-decoration: none; color: var(--fg);
+  background: linear-gradient(160deg, #e9edf5 0%, #c9d1df 45%, #eef2f8 100%); box-shadow: 0 14px 28px -14px #000, inset 0 0 0 1px #ffffffaa; }
+.slab-label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 5px; background: #fff; color: #111; font-size: 11px; box-shadow: inset 0 0 0 2px #c4202f; }
+.slab-label b { color: #c4202f; font-size: 12px; letter-spacing: .04em; } .slab-label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slab-label strong { font-size: 17px; }
+.slab-card { display: block; margin: 0 6px; padding: 6px; border-radius: 6px; background: #0b0e14; box-shadow: inset 0 0 0 1px #0006; }
+.slab-card img { width: 100%; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 4px; }
+.slab.has-photo .slab-card { padding: 0; background: none; } .slab.has-photo .slab-card img { aspect-ratio: auto; }
+.slab-val { justify-self: center; padding: 2px 10px; border-radius: 99px; background: #0b0e14; color: var(--accent-2); font-weight: 700; font-size: 13px; }
+.slab.big { max-width: 260px; }
+.g-top { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 480px) { .g-top { grid-template-columns: minmax(0, 150px) minmax(0, 1fr); } }
+.g-info { display: grid; gap: 6px; align-content: start; }
+.g-photo { display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.g-photo svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.g-sales { display: grid; } .g-sales > div { display: grid; grid-template-columns: minmax(0, 1fr) auto 36px; align-items: center; gap: 8px; padding: 4px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.g-sales .icon-btn { width: 32px; height: 32px; } .g-sales svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+.g-sale-form { display: grid; grid-template-columns: minmax(0, 1fr) 110px auto; gap: 8px; }
+@media (max-width: 420px) { .g-sale-form { grid-template-columns: 1fr 1fr; } .g-sale-form .cta { grid-column: 1 / -1; } }
+.gform { gap: 10px; }
+.gform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gform-row label { display: grid; gap: 4px; color: var(--muted); font-size: 12.5px; }
+.gform-row select { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); }
+.gpick { display: flex; align-items: center; gap: 10px; text-align: left; }
+.gpick img { width: 44px; border-radius: 4px; } .gpick span { display: grid; } .gpick small { color: var(--muted); }
+.btn-ghost.g-add { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-ghost.danger { color: var(--down); border-color: var(--down); }
+
+/* classeurs : cartes de la liste (comme Pokécardex), pages en colonnes libres, barre du bas */
+.binder-list { display: grid; gap: 12px; }
+@media (min-width: 640px) { .binder-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.binder-card { position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 14px; align-items: center; padding: 14px 16px;
+  border-radius: 18px; border: 1px solid var(--line); text-decoration: none; color: var(--fg);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--bc) 30%, var(--surface-2)), var(--surface) 70%); transition: border-color .2s, transform .2s; }
+.binder-card.auto { background: linear-gradient(120deg, var(--surface-2), var(--surface) 70%); }
+.bk-art { display: grid; place-items: center; height: 100%; }
+.bk-art img { width: 70px; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 6px; transform: rotate(-6deg); box-shadow: 0 10px 20px -8px #000, 0 0 0 2px #ffffff22; }
+.bk-text { display: grid; gap: 3px; justify-items: start; min-width: 0; font-size: 14px; color: color-mix(in srgb, var(--fg) 82%, var(--muted)); }
+.bk-text strong { font: 700 18px/1.2 var(--font-body); color: var(--fg); }
+.bk-text em { font-style: normal; margin-top: 4px; padding: 3px 10px; border-radius: 8px; background: #e9eef8; color: #10141f; font-weight: 600; font-size: 13.5px; }
+@media (hover: hover) { .binder-card:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); transform: translateY(-2px); } }
+.bpage { grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); }
+.slot-price { position: absolute; z-index: 1; right: 5px; bottom: 6px; padding: 2px 7px; border-radius: 99px; background: color-mix(in srgb, #fff 92%, transparent); color: #10141f; font-size: 11.5px; font-weight: 700; box-shadow: 0 2px 6px #0007; }
+.binder-nav { display: grid; grid-template-columns: 1fr auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
+.bn-btn { height: 48px; display: grid; place-items: center; border: 0; border-radius: 14px; background: var(--surface-2); color: var(--fg); padding: 0 18px; }
+.bn-btn.primary { background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: var(--accent-ink); }
+.bn-btn.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.bn-btn:disabled { opacity: .35; }
+.bn-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.bn-btn.flip-x svg { transform: scaleX(-1); }
+.bn-page { padding: 8px 16px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); color: var(--fg); }
+.topbar .icon-btn.on { color: var(--accent-2); }
+/* RiftDex+ (statut Soutien) */
+.plus-card { position: relative; overflow: hidden; display: grid; gap: 12px; padding: 20px 18px; border-radius: 18px; border: 1px solid var(--line);
+  background: radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%), repeating-linear-gradient(45deg, #ffffff05 0 12px, transparent 12px 24px), var(--surface); }
+.plus-logo { justify-self: center; font: 800 30px/1 var(--font-display); letter-spacing: .08em; color: #fff; }
+.plus-logo i { font-style: normal; color: var(--accent-2); } .plus-logo span { margin-left: 4px; background: linear-gradient(135deg, var(--cyan), #ff6fae); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.plus-card p { margin: 0; display: flex; align-items: center; gap: 12px; font-size: 17px; }
+.plus-ic { font-size: 22px; }
+.plus-btn { display: block; text-align: center; padding: 15px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 17px; color: #fff; background: linear-gradient(90deg, #b22fc4, #3f7cf2 60%, #18a7ff); box-shadow: 0 10px 24px -10px #3f7cf2; }
+.plus-card small { color: var(--muted); font-size: 12.5px; text-align: center; }
+.slot-q { top: 5px; left: 5px; right: auto; bottom: auto; }
