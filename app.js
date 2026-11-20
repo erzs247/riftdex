@@ -654,7 +654,7 @@ function homeTopbar(withMode) {
 }
 // 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
 const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
-const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ['lists', L.listsTab], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
+const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ['lists', L.listsTab], ['decks', T().dk.tab], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
 const langNote = () => (L.langNote(lang) ? `<p class="lang-note">${L.langNote(lang)}</p>` : '');
 function renderSealed() {
   homeTopbar(false);
@@ -2570,8 +2570,9 @@ function renderBinder(id) {
 // choix d'une carte pour une case vide : recherche dans l'édition (cartes possédées d'abord)
 // choix d'une carte (classeurs, cartes gradées…) : onPick(id) est appelé avec la carte choisie
 let pickCb = null;
-function openPicker(slot, onPick = null) {
-  bd.pickSlot = slot; bd.pickQ = ''; pickCb = onPick;
+let pickOpts = {};
+function openPicker(slot, onPick = null, opts = {}) {
+  bd.pickSlot = slot; bd.pickQ = ''; pickCb = onPick; pickOpts = opts;
   let el = document.getElementById('picker');
   if (!el) { el = document.createElement('div'); el.id = 'picker'; el.className = 'picker'; document.body.append(el); }
   el.hidden = false;
@@ -2583,7 +2584,10 @@ function openPicker(slot, onPick = null) {
 }
 function pickerResults() {
   const q = fold(bd.pickQ.trim());
-  const res = editionCards().filter((c) => !q || fold([c.name, c.nameEn, c.nameZh, `${c.set} ${c.number}`, `${c.set}-${c.number}`].join(' ')).includes(q))
+  // options : filter (cartes permises), unique (une seule version par nom, ex. créateur de decks)
+  const seen = new Set();
+  const res = editionCards().filter((c) => (!pickOpts.filter || pickOpts.filter(c)) && (!q || fold([c.name, c.nameEn, c.nameZh, `${c.set} ${c.number}`, `${c.set}-${c.number}`].join(' ')).includes(q)))
+    .filter((c) => !pickOpts.unique || (!seen.has(c.name) && seen.add(c.name)))
     .sort((a, b) => (qty(b.id) > 0) - (qty(a.id) > 0) || setOrder(a) - setOrder(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true })).slice(0, 60);
   document.getElementById('pickerRes').innerHTML = res.map((c) => `<button class="card ${qty(c.id) ? 'owned' : 'missing'} pick-card" data-pick="${esc(c.id)}"><span class="card-img">${cardImg(c)}<span class="num-badge num">${esc(c.set)} ${esc(numLabel(c))}</span></span></button>`).join('');
 }
@@ -3058,6 +3062,266 @@ function gradedDetailBtn(c) {
   return `<button class="btn-ghost g-add" data-gr="new">🏅 <span>${T().gr.addThis}${n ? ` · ${T().gr.youHave(n)}` : ''}</span></button>`;
 }
 
+// ---------- Créateur de decks (règles Riftbound) et decks de tournoi ----------
+// Deck : 1 Légende, 1 champion choisi (unité du champion de la Légende), 40 cartes au deck principal champion compris,
+// 12 runes, 3 champs de bataille, réserve facultative ; 3 exemplaires maximum par nom ; couleurs de la Légende.
+Object.assign(TX.fr, { dk: {
+  tab: 'Decks', mine: 'Mes decks', new: 'Nouveau deck', newName: 'Nouveau deck', tourney: 'Decks de tournoi', tourneyHint: 'Listes gagnantes des derniers tournois, relevées chaque lundi sur Riftbound France (source riftdecks.com).',
+  legend: 'Légende', champion: 'Champion choisi', main: 'Deck principal', rune: 'Runes', battlefield: 'Champs de bataille', side: 'Réserve',
+  add: 'Ajouter une carte', chooseLegend: 'Choisir la Légende', setChamp: 'Champion choisi', copyDeck: 'Copier dans mes decks', copied: 'Deck copié dans tes decks',
+  missing: (n, v) => (n ? `Il te manque ${n} carte${n > 1 ? 's' : ''} (≈ ${v})` : 'Tu as toutes les cartes !'), price: (v) => `Prix du deck ≈ ${v}`, owned: (a, b) => `${a}/${b}`,
+  copyList: 'Copier la liste', listCopied: 'Liste copiée', toWish: 'Manquantes → souhaits', wished: (n) => `${n} carte${n > 1 ? 's' : ''} ajoutée${n > 1 ? 's' : ''} aux souhaits`,
+  rename: 'Renommer', del: 'Supprimer le deck', delConfirm: 'Toucher encore pour supprimer', none: 'Crée un deck ou copie un deck de tournoi pour voir ce qu\'il te manque.',
+  ok: 'Deck valide', warn: {
+    legend: 'Choisis une Légende.', champ: 'Choisis ton champion (une unité de ton champion, touche ★).', main: (n) => `Deck principal : ${n}/40 cartes (champion compris).`,
+    rune: (n) => `Runes : ${n}/12.`, bf: (n) => `Champs de bataille : ${n}/3.`, copies: (x) => `Plus de 3 exemplaires : ${x}.`, domain: (x) => `Hors des couleurs de la Légende : ${x}.`, banned: (x) => `Interdites en Standard : ${x}.`,
+  },
+  event: (e, p, d) => [p, String(e ?? '').replace(/\s*\(\d{4}-\d{2}-\d{2}\)/, ''), d].filter(Boolean).join(' · '), source: 'Voir le deck sur Riftbound France',
+} });
+Object.assign(TX.en, { dk: {
+  tab: 'Decks', mine: 'My decks', new: 'New deck', newName: 'New deck', tourney: 'Tournament decks', tourneyHint: 'Winning lists from recent tournaments, collected every Monday from Riftbound France (source riftdecks.com).',
+  legend: 'Legend', champion: 'Chosen champion', main: 'Main deck', rune: 'Runes', battlefield: 'Battlefields', side: 'Sideboard',
+  add: 'Add a card', chooseLegend: 'Choose the Legend', setChamp: 'Chosen champion', copyDeck: 'Copy to my decks', copied: 'Deck copied to your decks',
+  missing: (n, v) => (n ? `You are missing ${n} card${n > 1 ? 's' : ''} (≈ ${v})` : 'You have every card!'), price: (v) => `Deck price ≈ ${v}`, owned: (a, b) => `${a}/${b}`,
+  copyList: 'Copy the list', listCopied: 'List copied', toWish: 'Missing → wishlist', wished: (n) => `${n} card${n > 1 ? 's' : ''} added to the wishlist`,
+  rename: 'Rename', del: 'Delete the deck', delConfirm: 'Tap again to delete', none: 'Create a deck or copy a tournament deck to see what you are missing.',
+  ok: 'Valid deck', warn: {
+    legend: 'Choose a Legend.', champ: 'Choose your champion (a unit of your champion, tap ★).', main: (n) => `Main deck: ${n}/40 cards (champion included).`,
+    rune: (n) => `Runes: ${n}/12.`, bf: (n) => `Battlefields: ${n}/3.`, copies: (x) => `More than 3 copies: ${x}.`, domain: (x) => `Outside the Legend's colours: ${x}.`, banned: (x) => `Banned in Standard: ${x}.`,
+  },
+  event: (e, p, d) => [p, String(e ?? '').replace(/\s*\(\d{4}-\d{2}-\d{2}\)/, ''), d].filter(Boolean).join(' · '), source: 'See the deck on Riftbound France',
+} });
+Object.assign(TX.zh, { dk: {
+  tab: '卡组', mine: '我的卡组', new: '新建卡组', newName: '新卡组', tourney: '赛事卡组', tourneyHint: '近期赛事的获胜卡组，每周一从 Riftbound France 收集（来源 riftdecks.com）。',
+  legend: '传奇', champion: '选定英雄', main: '主卡组', rune: '符文', battlefield: '战场', side: '备牌',
+  add: '添加卡牌', chooseLegend: '选择传奇', setChamp: '选定英雄', copyDeck: '复制到我的卡组', copied: '已复制到你的卡组',
+  missing: (n, v) => (n ? `还缺 ${n} 张（≈ ${v}）` : '你拥有所有卡牌！'), price: (v) => `卡组价格 ≈ ${v}`, owned: (a, b) => `${a}/${b}`,
+  copyList: '复制清单', listCopied: '已复制清单', toWish: '缺少的 → 心愿单', wished: (n) => `已将 ${n} 张加入心愿单`,
+  rename: '重命名', del: '删除卡组', delConfirm: '再点一次删除', none: '新建卡组或复制赛事卡组，查看你还缺哪些卡牌。',
+  ok: '卡组合法', warn: {
+    legend: '请选择传奇。', champ: '请选择英雄（你的英雄的单位卡，点 ★）。', main: (n) => `主卡组：${n}/40 张（含英雄）。`,
+    rune: (n) => `符文：${n}/12。`, bf: (n) => `战场：${n}/3。`, copies: (x) => `超过 3 张：${x}。`, domain: (x) => `不属于传奇的颜色：${x}。`, banned: (x) => `标准赛制禁用：${x}。`,
+  },
+  event: (e, p, d) => [p, String(e ?? '').replace(/\s*\(\d{4}-\d{2}-\d{2}\)/, ''), d].filter(Boolean).join(' · '), source: '在 Riftbound France 查看卡组',
+} });
+const dk = { confirmDel: false };
+let deckFile = null;
+async function decksLoad() {
+  if (!deckFile) { try { deckFile = await fetch('data/decks.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : { items: [] })); } catch { deckFile = { items: [] }; } }
+  return deckFile;
+}
+// une carte par nom : la version de base la plus ancienne de l'édition (image et prix) ; possédés = toutes versions confondues
+let byName = null;
+function nameIndex() {
+  if (byName && byName.lang === lang) return byName;
+  const m = new Map();
+  for (const c of editionCards()) {
+    if (isExtraCard(c) || c.only) continue;
+    const k = fold(c.name).replace(/[’']/g, "'");
+    const e = m.get(k) ?? { card: null, all: [] };
+    e.all.push(c);
+    const rk = (x) => (x.variant ? 10 : 0) + (RARITIES.indexOf(x.rarity) + 1);
+    const better = !e.card || rk(c) < rk(e.card) || (rk(c) === rk(e.card) && setOrder(c) < setOrder(e.card));
+    if (better && c.rarity !== 'promo') e.card = c;
+    if (!e.card) e.card = c;
+    m.set(k, e);
+  }
+  byName = { lang, m };
+  return byName;
+}
+const nk = (n) => fold(n).replace(/[’']/g, "'");
+const cardByName = (n) => nameIndex().m.get(nk(n))?.card ?? null;
+const ownedByName = (n) => (nameIndex().m.get(nk(n))?.all ?? []).reduce((a, c) => a + qty(c.id), 0);
+const priceByName = (n) => { const ps = (nameIndex().m.get(nk(n))?.all ?? []).map((c) => price(c.id)).filter((p) => p != null); return ps.length ? Math.min(...ps) : null; };
+const champOf = (legendName) => String(legendName ?? '').split(',')[0].trim();
+const SECTIONS = ['main', 'rune', 'battlefield', 'side'];
+function deckCounts(d) {
+  const sum = (o) => Object.values(o ?? {}).reduce((a, q) => a + q, 0);
+  return { main: sum(d.main) + (d.champion ? 1 : 0), rune: sum(d.rune), battlefield: sum(d.battlefield), side: sum(d.side) };
+}
+// toutes les cartes du deck (nom → quantité), champion et Légende compris
+function deckNeeds(d) {
+  const need = new Map();
+  const add = (n, q) => need.set(n, (need.get(n) ?? 0) + q);
+  if (d.legend) add(d.legend, 1);
+  if (d.champion) add(d.champion, 1);
+  for (const s of SECTIONS) for (const [n, q] of Object.entries(d[s] ?? {})) add(n, q);
+  return need;
+}
+function deckMissing(d) {
+  let n = 0, v = 0, total = 0;
+  const list = [];
+  for (const [name, q] of deckNeeds(d)) {
+    const p = priceByName(name) ?? 0;
+    total += p * q;
+    const miss = Math.max(0, q - ownedByName(name));
+    if (miss) { n += miss; v += miss * p; list.push([name, miss]); }
+  }
+  return { n, v, total, list };
+}
+function deckWarnings(d) {
+  const w = T().dk.warn, out = [];
+  const leg = d.legend ? cardByName(d.legend) : null;
+  if (!leg) out.push(w.legend);
+  else if (!d.champion) out.push(w.champ);
+  const c = deckCounts(d);
+  if (c.main !== 40) out.push(w.main(c.main));
+  if (c.rune !== 12) out.push(w.rune(c.rune));
+  if (c.battlefield !== 3) out.push(w.bf(c.battlefield));
+  const copies = new Map();
+  for (const s of ['main']) for (const [n, q] of Object.entries(d[s] ?? {})) copies.set(n, (copies.get(n) ?? 0) + q);
+  if (d.champion) copies.set(d.champion, (copies.get(d.champion) ?? 0) + 1);
+  const over = [...copies].filter(([, q]) => q > 3).map(([n]) => n);
+  if (over.length) out.push(w.copies(over.join(', ')));
+  if (leg) {
+    const doms = new Set(leg.domains ?? []);
+    // couleurs vérifiées sur le champion, le deck principal et les runes (pas la réserve)
+    const inDeck = [d.champion, ...Object.keys(d.main ?? {}), ...Object.keys(d.rune ?? {})].filter(Boolean);
+    const bad = [...new Set(inDeck)].filter((n) => { const x = cardByName(n); return x && x.type !== 'battlefield' && (x.domains ?? []).some((dm) => dm !== 'colorless' && !doms.has(dm)); });
+    if (bad.length) out.push(w.domain(bad.join(', ')));
+  }
+  const banned = [...deckNeeds(d).keys()].filter((n) => { const x = cardByName(n); const b = x && banInfo(x); return b && b.formats.includes('standard') && b.from <= new Date().toISOString().slice(0, 10); });
+  if (banned.length) out.push(w.banned(banned.join(', ')));
+  return out;
+}
+const myDecks = () => user.x.decks.filter((d) => d.lang === lang);
+function deckTile(d, href, extra = '') {
+  const leg = d.legend ? cardByName(d.legend) : null;
+  const m = deckMissing(d);
+  return `<a class="deck-tile" href="${href}" ${leg && imageOf(leg) ? `style="--art:url('${esc(imageOf(leg))}')"` : ''}>
+    <span class="dt-text"><strong>${esc(d.name || d.legend || T().dk.newName)}</strong>${extra}
+      <span class="num">${T().dk.price(eur(m.total))}</span>
+      <em class="${m.n ? '' : 'ok'} num">${T().dk.missing(m.n, eur(m.v))}</em></span>
+  </a>`;
+}
+async function renderDecks() {
+  homeTopbar(false);
+  await decksLoad();
+  if (currentRender !== renderDecks) return;
+  const t = deckFile?.items ?? [];
+  view.innerHTML = `<div class="stack">
+    ${homeTabs('decks')}
+    <div class="toolbar"><h2 class="section-title" style="margin:0;flex:1">${T().dk.mine}</h2><button class="chip" data-dk="new">+ ${T().dk.new}</button></div>
+    ${myDecks().length ? `<div class="deck-grid">${myDecks().map((d) => deckTile(d, `#deck-${esc(d.id)}`)).join('')}</div>` : `<p class="note">${T().dk.none}</p>`}
+    ${t.length ? `<h2 class="section-title">${T().dk.tourney}</h2><p class="note">${T().dk.tourneyHint}</p>
+    <div class="deck-grid">${t.map((x) => deckTile(tourneyDeck(x), `#tdeck-${esc(x.id)}`, `<span class="dt-event">${esc(T().dk.event(x.event, x.place, x.date ? fmt.date.format(parseDay(x.date)) : ''))}</span>`)).join('')}</div>` : ''}
+  </div>`;
+}
+// deck de tournoi → même forme qu'un deck perso
+function tourneyDeck(x) {
+  const leg = Object.keys(x.cards.legend ?? {});
+  const legend = leg.find((n) => cardByName(n)?.type === 'legend') ?? leg[0];
+  const champion = leg.find((n) => n !== legend) ?? null;
+  return { id: `t${x.id}`, name: legend, lang, legend, champion, main: { ...(x.cards.main ?? {}) }, rune: { ...(x.cards.rune ?? {}) }, battlefield: { ...(x.cards.battlefield ?? {}) }, side: { ...(x.cards.side ?? {}) }, tourney: x };
+}
+function deckRow(d, name, q, sec, ro) {
+  const c = cardByName(name);
+  const own = ownedByName(name);
+  const isChampCand = sec === 'main' && c?.type === 'unit' && d.legend && champOf(c.name) === champOf(d.legend) && d.champion !== name;
+  return `<div class="deck-row ${own >= q ? 'have' : 'need'}">
+    ${c ? `<button class="dr-img" data-open="${esc(c.id)}">${cardImg(c)}</button>` : '<span class="dr-img"></span>'}
+    <span class="dr-name"><b>${esc(c ? cardName(c) : name)}</b><small class="num">${own >= q ? '✔' : '✖'} ${T().dk.owned(Math.min(own, q), q)} · ${eur(priceByName(name))}</small></span>
+    ${ro ? `<span class="dr-q num">×${q}</span>` : `<span class="dr-ctl">${isChampCand ? `<button class="icon-btn" data-dkchamp="${esc(name)}" title="${T().dk.setChamp}">★</button>` : ''}<button data-dkq="-1" data-sec="${sec}" data-name="${esc(name)}">−</button><output class="num">${q}</output><button data-dkq="1" data-sec="${sec}" data-name="${esc(name)}">+</button></span>`}
+  </div>`;
+}
+function deckSection(d, sec, ro) {
+  const entries = Object.entries(d[sec] ?? {}).sort((a, b) => (cardByName(a[0])?.energy ?? 99) - (cardByName(b[0])?.energy ?? 99) || a[0].localeCompare(b[0]));
+  if (!entries.length && (ro || sec === 'side')) return '';
+  const c = deckCounts(d)[sec];
+  const target = { main: 40, rune: 12, battlefield: 3 }[sec];
+  return `<section class="panel deck-sec"><h3>${T().dk[sec]} <small class="num ${target && c !== target ? 'bad' : ''}">${c}${target ? `/${target}` : ''}</small></h3>
+    ${entries.map(([n, q]) => deckRow(d, n, q, sec, ro)).join('')}</section>`;
+}
+async function renderDeck(id) {
+  const tourney = id.startsWith('t');
+  if (tourney) await decksLoad();
+  const d = tourney ? (deckFile?.items ?? []).map(tourneyDeck).find((x) => x.id === id) : myDecks().find((x) => x.id === id);
+  if (!d) { location.hash = '#decks'; return; }
+  const ro = tourney;
+  const leg = d.legend ? cardByName(d.legend) : null, champ = d.champion ? cardByName(d.champion) : null;
+  const m = deckMissing(d), warns = deckWarnings(d);
+  setTopbar(`<a class="icon-btn" href="#decks" aria-label="${L.back}">${I.back}</a><h1 class="small">${esc(d.name || d.legend || T().dk.newName)}</h1>`);
+  view.innerHTML = `<div class="stack">
+    <div class="deck-head" ${leg && imageOf(leg) ? `style="--art:url('${esc(imageOf(leg))}')"` : ''}>
+      <div class="dh-cards">
+        ${leg ? `<button class="dh-card" data-open="${esc(leg.id)}"><small>${T().dk.legend}</small>${cardImg(leg)}</button>` : `<button class="dh-card empty" data-dk="legend">+ ${T().dk.chooseLegend}</button>`}
+        ${champ ? `<button class="dh-card" data-open="${esc(champ.id)}"><small>${T().dk.champion}</small>${cardImg(champ)}</button>` : leg ? `<span class="dh-card empty">${T().dk.champion}<br>★</span>` : ''}
+      </div>
+      <div class="dh-info">
+        ${tourney ? `<span class="dt-event">${esc(T().dk.event(d.tourney.event, d.tourney.place, d.tourney.date ? fmt.date.format(parseDay(d.tourney.date)) : ''))}</span>` : ''}
+        <b class="num">${T().dk.price(eur(m.total))}</b>
+        <span class="${m.n ? 'need' : 'ok'} num">${T().dk.missing(m.n, eur(m.v))}</span>
+        ${leg ? `<span class="dh-doms">${(leg.domains ?? []).map((x) => `<i style="--c:${DOMAIN_HEX[x] ?? '#888'}">${esc(domainLabel(x))}</i>`).join('')}</span>` : ''}
+      </div>
+    </div>
+    ${warns.length ? `<ul class="deck-warn">${warns.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p class="deck-ok">✔ ${T().dk.ok}</p>`}
+    <div class="chips">
+      ${ro ? `<button class="chip" data-dk="copy">${T().dk.copyDeck}</button>` : `<button class="chip" data-dk="add">+ ${T().dk.add}</button>${!leg ? '' : `<button class="chip" data-dk="legend">${T().dk.legend}</button>`}`}
+      <button class="chip" data-dk="list">${T().dk.copyList}</button>
+      ${m.n ? `<button class="chip" data-dk="wish">${T().dk.toWish}</button>` : ''}
+      ${ro ? '' : `<button class="chip" data-dk="rename">${T().dk.rename}</button><button class="chip ${dk.confirmDel ? 'danger' : ''}" data-dk="del">${dk.confirmDel ? T().dk.delConfirm : T().dk.del}</button>`}
+    </div>
+    ${SECTIONS.map((s) => deckSection(d, s, ro)).join('')}
+    ${tourney ? `<a class="btn-ghost" style="text-align:center;text-decoration:none" href="${esc(d.tourney.url)}" target="_blank" rel="noopener">${T().dk.source}</a>` : ''}
+  </div>`;
+  dk.current = d;
+}
+function deckEdit(fn) {
+  const d = user.x.decks.find((x) => x.id === location.hash.slice(6));
+  if (!d) return;
+  fn(d);
+  for (const s of SECTIONS) for (const [n, q] of Object.entries(d[s] ?? {})) if (q <= 0) delete d[s][n];
+  xSave(); currentRender();
+}
+const sectionFor = (c) => (c.type === 'rune' ? 'rune' : c.type === 'battlefield' ? 'battlefield' : 'main');
+function deckLegal(d) {
+  const leg = d.legend ? cardByName(d.legend) : null;
+  if (!leg) return (c) => c.type === 'legend';
+  const doms = new Set(leg.domains ?? []);
+  return (c) => c.type !== 'legend' && c.type !== 'token' && (c.type === 'battlefield' || !(c.domains ?? []).some((x) => x !== 'colorless' && !doms.has(x)));
+}
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-dk],[data-dkq],[data-dkchamp]');
+  if (!t) return;
+  const a = t.dataset;
+  if (a.dkq) { deckEdit((d) => { d[a.sec] ??= {}; d[a.sec][a.name] = Math.max(0, (d[a.sec][a.name] ?? 0) + Number(a.dkq)); }); return; }
+  if (a.dkchamp) { deckEdit((d) => { if (d.champion) d.main[d.champion] = (d.main[d.champion] ?? 0) + 1; d.champion = a.dkchamp; d.main[a.dkchamp] -= 1; }); return; }
+  const act = a.dk;
+  if (act === 'new') {
+    const d = { id: `d${Date.now().toString(36)}`, name: '', lang, legend: null, champion: null, main: {}, rune: {}, battlefield: {}, side: {} };
+    user.x.decks.push(d); xSave(); location.hash = `#deck-${d.id}`;
+  } else if (act === 'legend' || (act === 'add' && !dk.current?.legend)) {
+    openPicker(null, (id) => deckEdit((d) => { const c = cardsById.get(id); d.legend = c.name; if (!d.name) d.name = c.name; d.champion = null; }), { filter: (c) => c.type === 'legend', unique: true });
+  } else if (act === 'add') {
+    const d = dk.current; if (!d) return;
+    openPicker(null, (id) => deckEdit((x) => { const c = cardsById.get(id); const s = sectionFor(c); x[s] ??= {}; x[s][c.name] = (x[s][c.name] ?? 0) + 1; }), { filter: deckLegal(d), unique: true });
+  } else if (act === 'copy') {
+    const src = dk.current; if (!src) return;
+    const d = { ...JSON.parse(JSON.stringify(src)), id: `d${Date.now().toString(36)}`, name: `${src.legend} (${src.tourney.event || 'Top'})`.slice(0, 50), lang };
+    delete d.tourney; user.x.decks.push(d); xSave(); toast(T().dk.copied); location.hash = `#deck-${d.id}`;
+  } else if (act === 'list') {
+    const d = dk.current; if (!d) return;
+    const line = (n, q) => `${q} ${n}`;
+    const text = [d.legend && `# ${T().dk.legend}\n${line(d.legend, 1)}${d.champion ? `\n${line(d.champion, 1)}` : ''}`,
+      ...SECTIONS.map((s) => Object.keys(d[s] ?? {}).length ? `# ${T().dk[s]}\n${Object.entries(d[s]).map(([n, q]) => line(n, q)).join('\n')}` : '')].filter(Boolean).join('\n\n');
+    try { await navigator.clipboard.writeText(text); toast(T().dk.listCopied); } catch { prompt(T().dk.copyList, text); }
+  } else if (act === 'wish') {
+    const d = dk.current; if (!d) return;
+    const ids = deckMissing(d).list.map(([n]) => cardByName(n)?.id).filter(Boolean);
+    ids.forEach((id) => wish.add(id));
+    let l = user.x.wl.find((x) => x.lang === lang && x.name === (d.name || d.legend));
+    if (!l) { l = { id: `w${Date.now().toString(36)}`, name: (d.name || d.legend || T().dk.tab).slice(0, 30), budget: null, lang, ids: [] }; user.x.wl.push(l); }
+    l.ids = [...new Set([...l.ids, ...ids])];
+    save(); xSave(); toast(T().dk.wished(ids.length));
+  } else if (act === 'rename') {
+    const d = user.x.decks.find((x) => x.id === location.hash.slice(6)); const n = d && prompt(T().dk.rename, d.name || d.legend || '');
+    if (n && n.trim()) deckEdit((x) => { x.name = n.trim().slice(0, 50); });
+  } else if (act === 'del') {
+    if (!dk.confirmDel) { dk.confirmDel = true; currentRender(); return; }
+    user.x.decks = user.x.decks.filter((x) => x.id !== location.hash.slice(6)); dk.confirmDel = false; xSave(); location.hash = '#decks';
+  }
+});
+
 // @@NEXT-FEATURES@@
 
 function markTabs() {
@@ -3080,6 +3344,9 @@ function route() {
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
   else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
   else if (h === 'news') { tab = 'home'; currentRender = renderNews; }
+  else if (h === 'decks') { tab = 'home'; currentRender = renderDecks; }
+  else if (h.startsWith('tdeck-')) { tab = 'home'; const id = `t${h.slice(6)}`; currentRender = () => renderDeck(id); }
+  else if (h.startsWith('deck-')) { tab = 'home'; dk.confirmDel = false; const id = h.slice(5); currentRender = () => renderDeck(id); }
   else if (h.startsWith('graded-')) { tab = 'collection'; gr.confirmDel = false; const gid = h.slice(7); currentRender = () => renderGradedOne(gid); }
   else if (h.startsWith('binder-')) { tab = 'collection'; const id = h.slice(7); if (bd.id !== id) Object.assign(bd, { id, page: 0, edit: false, confirmDel: false }); currentRender = () => renderBinder(id); }
   else if (h.startsWith('list-')) { tab = 'home'; currentRender = () => renderList(h.slice(5)); }

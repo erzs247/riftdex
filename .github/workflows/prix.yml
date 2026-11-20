@@ -39,6 +39,9 @@ jobs:
         run: python scripts/import_scelle.py
       - name: Empreintes du scanner (nouvelles cartes)
         run: python scripts/make_scan_index.py
+      - name: Decks de tournoi (Riftbound France)
+        continue-on-error: true
+        run: python scripts/import_decks.py
       - name: Enregistrer les nouveautés
         run: |
           git config user.name "riftdex-bot"
