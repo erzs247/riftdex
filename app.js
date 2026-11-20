@@ -2452,6 +2452,200 @@ const colTabsSeg = (tab) => seg('colTab', tab, colTabs().map((t) => [t, T().colT
 const colTabHtml = (tab) => (COL_TAB_RENDER[tab] ? COL_TAB_RENDER[tab]() : '');
 const colTabMounted = (tab) => COL_TAB_MOUNT[tab]?.();
 
+// ---------- Classeurs virtuels (comme les « Classeurs » de Pokécardex) ----------
+// Classeurs perso : pages de 9 (3×3) ou 12 (4×3) cases, couverture de couleur, cartes placées case par case.
+// Classeurs « Master Set » : une série entière dans l'ordre des numéros, les cartes manquantes en gris (lecture seule).
+Object.assign(TX.fr, { bd: {
+  mine: 'Mes classeurs', master: 'Master Set des séries', new: 'Nouveau classeur', name: 'Nom du classeur', namePh: 'Mes Légendes, Mon classeur Zaun…', size: 'Cases par page',
+  color: 'Couverture', create: 'Créer', pages: (n) => `${n} page${n > 1 ? 's' : ''}`, cards: (a, b) => `${a}/${b} cartes`, page: (a, b) => `Page ${a} / ${b}`,
+  edit: 'Modifier', done: 'Terminé', fill: 'Remplir avec…', fillSet: 'une série', fillList: 'une liste', fillOwned: 'mes cartes possédées', addPage: 'Ajouter une page',
+  rename: 'Renommer', del: 'Supprimer le classeur', delConfirm: 'Toucher encore pour supprimer', pick: 'Choisir une carte', pickPh: 'Nom ou numéro de carte', remove: 'Retirer',
+  none: 'Crée ton premier classeur pour ranger tes cartes comme dans un vrai classeur.', readOnly: 'Classeur automatique : la série dans l\'ordre, les cartes manquantes en gris.', created: 'Classeur créé', deleted: 'Classeur supprimé',
+} });
+Object.assign(TX.en, { bd: {
+  mine: 'My binders', master: 'Master Set binders', new: 'New binder', name: 'Binder name', namePh: 'My Legends, Zaun binder…', size: 'Pockets per page',
+  color: 'Cover', create: 'Create', pages: (n) => `${n} page${n > 1 ? 's' : ''}`, cards: (a, b) => `${a}/${b} cards`, page: (a, b) => `Page ${a} / ${b}`,
+  edit: 'Edit', done: 'Done', fill: 'Fill with…', fillSet: 'a set', fillList: 'a list', fillOwned: 'my owned cards', addPage: 'Add a page',
+  rename: 'Rename', del: 'Delete binder', delConfirm: 'Tap again to delete', pick: 'Choose a card', pickPh: 'Card name or number', remove: 'Remove',
+  none: 'Create your first binder to store your cards like in a real binder.', readOnly: 'Automatic binder: the set in order, missing cards in grey.', created: 'Binder created', deleted: 'Binder deleted',
+} });
+Object.assign(TX.zh, { bd: {
+  mine: '我的卡册', master: '系列大师卡册', new: '新建卡册', name: '卡册名称', namePh: '我的传奇、祖安卡册…', size: '每页格数',
+  color: '封面', create: '创建', pages: (n) => `${n} 页`, cards: (a, b) => `${a}/${b} 张`, page: (a, b) => `第 ${a} / ${b} 页`,
+  edit: '编辑', done: '完成', fill: '填充…', fillSet: '一个系列', fillList: '一个列表', fillOwned: '我拥有的卡牌', addPage: '添加一页',
+  rename: '重命名', del: '删除卡册', delConfirm: '再点一次删除', pick: '选择卡牌', pickPh: '卡牌名称或编号', remove: '移除',
+  none: '创建你的第一本卡册，像真正的卡册一样整理卡牌。', readOnly: '自动卡册：按编号排列整个系列，缺少的卡牌显示为灰色。', created: '已创建卡册', deleted: '已删除卡册',
+} });
+const BD_COLORS = ['#7a1f2b', '#1f3a7a', '#1f6b4a', '#5b2a86', '#8a6a1f', '#1b1b1f', '#b0475f', '#2a7d8c'];
+const bd = { page: 0, edit: false, confirmDel: false, pickSlot: null, pickQ: '' };
+const myBinders = () => user.x.binders.filter((b) => b.lang === lang);
+function binderOf(id) {
+  if (id.startsWith('set-')) {   // Master Set d'une série
+    const s = setOf(id.slice(4));
+    if (!s || !editionSet(s)) return null;
+    return { id, name: setName(s), size: 9, color: '#0f1625', auto: true, set: s, slots: setCards(s.code).map((c) => c.id) };
+  }
+  return myBinders().find((b) => b.id === id) ?? null;
+}
+const binderPages = (b) => Math.max(1, Math.ceil(b.slots.length / b.size));
+function binderCover(b) {
+  const cards = b.slots.map((id) => cardsById.get(id)).filter(Boolean);
+  const own = cards.filter((c) => qty(c.id) > 0).length;
+  const art = bestArt(cards);
+  return `<a class="binder-cover ${b.auto ? 'auto' : ''}" href="#binder-${esc(b.id)}" style="--bc:${esc(b.color)};${art ? `--art:url('${esc(art)}')` : ''}">
+    <span class="bc-spine"></span>
+    <span class="bc-title">${b.auto ? `<b class="print">${esc(b.set.code)}</b>` : ''}<strong>${esc(b.name)}</strong></span>
+    <span class="bc-meta num">${T().bd.cards(own, cards.length)} · ${T().bd.pages(binderPages(b))}</span>
+  </a>`;
+}
+function renderBinders() {
+  const mine = myBinders();
+  return `<section class="panel binder-new">
+      <h3>${T().bd.new}</h3>
+      <form id="binderForm" class="binder-form">
+        <input class="search" id="binderName" maxlength="40" placeholder="${esc(T().bd.namePh)}" aria-label="${esc(T().bd.name)}" autocomplete="off">
+        <div class="bf-row"><span>${T().bd.size}</span>${seg('bdSize', String(user.prefs.bdSize ?? 9), [['9', '9 · 3×3'], ['12', '12 · 4×3']])}</div>
+        <div class="bf-row"><span>${T().bd.color}</span><div class="bd-colors">${BD_COLORS.map((c, i) => `<label style="--c:${c}"><input type="radio" name="bdColor" value="${c}" ${i === 0 ? 'checked' : ''}><i></i></label>`).join('')}</div></div>
+        <button class="cta">${T().bd.create}</button>
+      </form>
+    </section>
+    <h2 class="section-title">${T().bd.mine} <small class="num">${mine.length}</small></h2>
+    ${mine.length ? `<div class="binder-grid">${mine.map(binderCover).join('')}</div>` : `<p class="note">${T().bd.none}</p>`}
+    <h2 class="section-title">${T().bd.master}</h2>
+    <div class="binder-grid">${visibleSets().sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).map((s) => binderCover(binderOf(`set-${s.code}`))).join('')}</div>`;
+}
+COL_TAB_RENDER.binders = renderBinders;
+function slotHtml(b, i) {
+  const id = b.slots[i];
+  const c = id ? cardsById.get(id) : null;
+  if (!c) return `<button class="slot empty" ${b.auto ? 'disabled' : `data-bslot="${i}"`} aria-label="${T().bd.pick}">${b.auto ? '' : '+'}</button>`;
+  const q = qty(c.id);
+  return `<div class="slot ${q ? 'owned' : 'missing'}">
+    <button class="slot-card" data-open="${esc(c.id)}" aria-label="${esc(cardName(c))}">${cardImg(c)}</button>
+    ${bd.edit && !b.auto ? `<button class="slot-x" data-bremove="${i}" aria-label="${T().bd.remove}">${I.x}</button>` : ''}
+    ${q > 1 ? `<span class="slot-q num">×${q}</span>` : ''}
+  </div>`;
+}
+function renderBinder(id) {
+  const b = binderOf(id);
+  if (!b) { location.hash = '#collection'; return; }
+  const pages = binderPages(b);
+  bd.page = Math.min(bd.page, pages - 1);
+  const spread = isPC() ? 2 : 1;
+  const first = Math.floor(bd.page / spread) * spread;
+  const cards = b.slots.map((x) => cardsById.get(x)).filter(Boolean);
+  const own = cards.filter((c) => qty(c.id) > 0).length;
+  setTopbar(`<a class="icon-btn" href="#collection" aria-label="${L.back}">${I.back}</a><h1 class="small">${b.auto ? `<span class="title-code">${esc(b.set.code)}</span>` : ''}${esc(b.name)}</h1>
+    ${b.auto ? '' : `<button class="chip ${bd.edit ? 'on' : ''}" data-bd="edit">${bd.edit ? T().bd.done : T().bd.edit}</button>`}`);
+  const page = (p) => `<div class="bpage cols-${b.size === 12 ? 4 : 3}" style="--bc:${esc(b.color)}">${Array.from({ length: b.size }, (_, k) => slotHtml(b, p * b.size + k)).join('')}<span class="bpage-num num">${p + 1}</span></div>`;
+  view.innerHTML = `<div class="stack">
+    <div class="toolbar num"><span>${T().bd.cards(own, cards.length)}</span><span class="grow"></span><span>${T().bd.page(first + 1, pages)}</span></div>
+    <div class="binder-view" id="binderView">${Array.from({ length: spread }, (_, k) => first + k).filter((p) => p < pages).map(page).join('')}</div>
+    <div class="binder-nav">
+      <button class="icon-btn" data-bd="prev" ${first <= 0 ? 'disabled' : ''} aria-label="${L.prev}">${I.back}</button>
+      <span class="num">${T().bd.page(first + 1, pages)}</span>
+      <button class="icon-btn flip-x" data-bd="next" ${first + spread >= pages ? 'disabled' : ''} aria-label="${L.next}">${I.back}</button>
+    </div>
+    ${b.auto ? `<p class="note">${T().bd.readOnly}</p>` : bd.edit ? `<section class="panel">
+      <h3>${T().bd.fill}</h3>
+      <div class="chips">${visibleSets().map((s) => `<button class="chip" data-bfill="set:${esc(s.code)}">${esc(s.code)}</button>`).join('')}<button class="chip" data-bfill="owned">${T().bd.fillOwned}</button></div>
+      <select class="search" id="bdFillList"><option value="">${T().bd.fillList}…</option>${allLists().filter((d) => d.group !== 'artist').map((d) => `<option value="${esc(d.id)}">${esc(listTitle(d))}</option>`).join('')}</select>
+      <div class="chips"><button class="chip" data-bd="addpage">${T().bd.addPage}</button><button class="chip" data-bd="rename">${T().bd.rename}</button>
+      <button class="chip ${bd.confirmDel ? 'danger' : ''}" data-bd="delete">${bd.confirmDel ? T().bd.delConfirm : T().bd.del}</button></div>
+    </section>` : ''}
+  </div>`;
+}
+// choix d'une carte pour une case vide : recherche dans l'édition (cartes possédées d'abord)
+function openPicker(slot) {
+  bd.pickSlot = slot; bd.pickQ = '';
+  let el = document.getElementById('picker');
+  if (!el) { el = document.createElement('div'); el.id = 'picker'; el.className = 'picker'; document.body.append(el); }
+  el.hidden = false;
+  el.innerHTML = `<div class="picker-panel" role="dialog" aria-modal="true" aria-label="${T().bd.pick}">
+    <div class="picker-head"><input class="search" id="pickerQ" placeholder="${esc(T().bd.pickPh)}" autocomplete="off"><button class="icon-btn" data-pick="close" aria-label="${L.close}">${I.x}</button></div>
+    <div class="cards compact" id="pickerRes"></div></div>`;
+  pickerResults();
+  el.querySelector('#pickerQ').focus();
+}
+function pickerResults() {
+  const q = fold(bd.pickQ.trim());
+  const res = editionCards().filter((c) => !q || fold([c.name, c.nameEn, c.nameZh, `${c.set} ${c.number}`, `${c.set}-${c.number}`].join(' ')).includes(q))
+    .sort((a, b) => (qty(b.id) > 0) - (qty(a.id) > 0) || setOrder(a) - setOrder(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true })).slice(0, 60);
+  document.getElementById('pickerRes').innerHTML = res.map((c) => `<button class="card ${qty(c.id) ? 'owned' : 'missing'} pick-card" data-pick="${esc(c.id)}"><span class="card-img">${cardImg(c)}<span class="num-badge num">${esc(c.set)} ${esc(numLabel(c))}</span></span></button>`).join('');
+}
+function closePicker() { const el = document.getElementById('picker'); if (el) el.hidden = true; bd.pickSlot = null; }
+function binderEdit(fn) {
+  const id = location.hash.slice(8);
+  const b = user.x.binders.find((x) => x.id === id);
+  if (!b) return;
+  fn(b);
+  while (b.slots.length && b.slots[b.slots.length - 1] == null && b.slots.length % b.size === 0 && b.slots.slice(-b.size).every((x) => x == null) && b.slots.length > b.size) b.slots.splice(-b.size);
+  xSave(); currentRender();
+}
+function binderFill(b, ids) {
+  // remplit les cases vides à partir de la première, puis ajoute des pages
+  let i = 0;
+  for (const id of ids) {
+    if (b.slots.includes(id)) continue;
+    while (b.slots[i] != null) i++;
+    b.slots[i] = id; i++;
+  }
+  const pages = Math.ceil(b.slots.length / b.size);
+  for (let k = 0; k < pages * b.size; k++) if (b.slots[k] === undefined) b.slots[k] = null;
+}
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'binderForm') return;
+  e.preventDefault();
+  const name = document.getElementById('binderName').value.trim() || T().bd.new;
+  const color = e.target.querySelector('input[name="bdColor"]:checked')?.value ?? BD_COLORS[0];
+  const size = Number(user.prefs.bdSize ?? 9) === 12 ? 12 : 9;
+  const b = { id: `b${Date.now().toString(36)}`, name: name.slice(0, 40), size, color, lang, slots: Array(size).fill(null) };
+  user.x.binders.push(b); xSave(); toast(T().bd.created);
+  Object.assign(bd, { id: b.id, edit: true, page: 0, confirmDel: false }); location.hash = `#binder-${b.id}`;
+});
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-bd],[data-bslot],[data-bremove],[data-bfill],[data-pick]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.pick === 'close' || (e.target.id === 'picker')) { closePicker(); return; }
+  if (d.pick) { const slot = bd.pickSlot; closePicker(); binderEdit((b) => { b.slots[slot] = d.pick; }); return; }
+  if (d.bslot !== undefined) { openPicker(Number(d.bslot)); return; }
+  if (d.bremove !== undefined) { binderEdit((b) => { b.slots[Number(d.bremove)] = null; }); return; }
+  if (d.bfill) {
+    const ids = d.bfill === 'owned' ? editionCards().filter((c) => qty(c.id) > 0).sort((a, b) => setOrder(a) - setOrder(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true })).map((c) => c.id)
+      : setCards(d.bfill.slice(4)).map((c) => c.id);
+    binderEdit((b) => binderFill(b, ids)); return;
+  }
+  const act = d.bd;
+  if (act === 'edit') { bd.edit = !bd.edit; bd.confirmDel = false; currentRender(); }
+  else if (act === 'prev' || act === 'next') { const spread = isPC() ? 2 : 1; bd.page = Math.max(0, bd.page + (act === 'next' ? spread : -spread)); currentRender(); }
+  else if (act === 'addpage') binderEdit((b) => { for (let k = 0; k < b.size; k++) b.slots.push(null); bd.page = binderPages(b) - 1; });
+  else if (act === 'rename') { const id = location.hash.slice(8); const b = user.x.binders.find((x) => x.id === id); const n = b && prompt(T().bd.name, b.name); if (n && n.trim()) binderEdit((x) => { x.name = n.trim().slice(0, 40); }); }
+  else if (act === 'delete') {
+    if (!bd.confirmDel) { bd.confirmDel = true; currentRender(); return; }
+    const id = location.hash.slice(8);
+    user.x.binders = user.x.binders.filter((b) => b.id !== id); bd.confirmDel = false; xSave(); toast(T().bd.deleted); location.hash = '#collection';
+  }
+});
+document.addEventListener('click', (e) => { if (e.target.id === 'picker') closePicker(); });
+document.addEventListener('input', (e) => { if (e.target.id === 'pickerQ') { bd.pickQ = e.target.value; pickerResults(); } });
+document.addEventListener('change', (e) => {
+  if (e.target.id !== 'bdFillList' || !e.target.value) return;
+  const d = allLists().find((x) => x.id === e.target.value);
+  if (d) binderEdit((b) => binderFill(b, listCards(d).map((c) => c.id)));
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.getElementById('picker') && !document.getElementById('picker').hidden) closePicker(); });
+// glisser pour tourner les pages d'un classeur
+let bdSwipe = null;
+document.addEventListener('touchstart', (e) => { if (e.target.closest('#binderView') && e.touches.length === 1) bdSwipe = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (!bdSwipe) return;
+  const t = e.changedTouches[0], dx = t.clientX - bdSwipe.x, dy = t.clientY - bdSwipe.y;
+  bdSwipe = null;
+  if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return;
+  document.querySelector(`[data-bd="${dx < 0 ? 'next' : 'prev'}"]:not([disabled])`)?.click();
+}, { passive: true });
+
 // @@NEXT-FEATURES@@
 
 function markTabs() {
@@ -2474,6 +2668,7 @@ function route() {
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
   else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
   else if (h === 'news') { tab = 'home'; currentRender = renderNews; }
+  else if (h.startsWith('binder-')) { tab = 'collection'; const id = h.slice(7); if (bd.id !== id) Object.assign(bd, { id, page: 0, edit: false, confirmDel: false }); currentRender = () => renderBinder(id); }
   else if (h.startsWith('list-')) { tab = 'home'; currentRender = () => renderList(h.slice(5)); }
   else if (h === 'friends') { fr.view = null; fr.msg = ''; currentRender = renderFriends; }
   else if (h.startsWith('friend-')) { tab = 'friends'; const uid = h.slice(7); if (fr.view?.uid !== uid) fr.filter = 'all'; renderFriendCurrent = () => renderFriend(uid); currentRender = renderFriendCurrent; }
