@@ -189,5 +189,216 @@
     "main": null,
     "rune": null,
     "legend": null
+  },
+  "banlist": {
+    "_aide": "Cartes interdites en tournoi (annonces officielles de Riot, playriftbound.com/news). from = date d'effet ; formats : standard (et 2v2 constructed), ou 2v2 seulement.",
+    "items": [
+      {
+        "name": "Called Shot",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "Draven, Vanquisher",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "Fight or Flight",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "Scrapheap",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "The Dreaming Tree",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "Obelisk of Power",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "Reaver's Row",
+        "from": "2026-03-31",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans/"
+      },
+      {
+        "name": "Stealthy Pursuer",
+        "from": "2026-07-24",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates/"
+      },
+      {
+        "name": "The Arena's Greatest",
+        "from": "2026-07-24",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates/"
+      },
+      {
+        "name": "Aspirant's Climb",
+        "from": "2026-07-24",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates/"
+      },
+      {
+        "name": "Master Yi, Wuju Bladesman",
+        "from": "2026-07-24",
+        "formats": [
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates/"
+      },
+      {
+        "name": "Ekko, Recurrent",
+        "from": "2026-09-18",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026/"
+      },
+      {
+        "name": "Stacked Deck",
+        "from": "2026-09-18",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026/"
+      },
+      {
+        "name": "Riven, Broken Blade",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Zhonya's Hourglass",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Stellacorn Herder",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Nocturne, Horrifying",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Rhasa the Sunderer",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Brynhir Thundersong",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Dazzling Aurora",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Baited Hook",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Emperor's Dais",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      },
+      {
+        "name": "Star Spring",
+        "from": "2026-11-23",
+        "formats": [
+          "standard",
+          "2v2"
+        ],
+        "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026/"
+      }
+    ]
   }
 }

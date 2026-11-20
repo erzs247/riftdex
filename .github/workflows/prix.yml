@@ -60,6 +60,9 @@ jobs:
           python-version: "3.12"
       - name: Relevé des prix Cardmarket du jour
         run: python scripts/update_prices.py
+      - name: Actualités officielles
+        continue-on-error: true
+        run: python scripts/import_news.py
       - name: Enregistrer l'historique
         run: |
           git config user.name "riftdex-bot"

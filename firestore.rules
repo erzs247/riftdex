@@ -65,6 +65,16 @@ service cloud.firestore {
         && request.resource.data.pseudo == get(/databases/$(database)/documents/publicProfiles/$(from)).data.pseudo;
     }
 
+    // données perso des fonctions collectionneur (classeurs, decks, alertes, souhaits en listes, cartes gradées…) :
+    // un document par compte, lisible et modifiable par lui seul ; contenu JSON dans « blob »
+    match /private/{uid} {
+      allow read, delete: if isMe(uid);
+      allow create, update: if isMe(uid)
+        && request.resource.data.keys().hasOnly(['blob', 'updatedAt'])
+        && request.resource.data.blob is string
+        && request.resource.data.blob.size() < 900000;
+    }
+
     // amitiés : créées des deux côtés par celui qui accepte une demande existante
     match /friends/{owner}/list/{friend} {
       allow read, delete: if isMe(owner) || isMe(friend);

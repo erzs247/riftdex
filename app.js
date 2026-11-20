@@ -21,7 +21,7 @@ const TEXT = {
   fr: {
     v3d: { open: 'Voir la carte en 3D', flip: 'Retourner', reset: 'Remettre de face', tip: 'Glisse pour tourner la carte · double-touche pour la retourner' },
     listsTab: 'Listes', listsIntro: 'Listes thématiques : les cartes d\'une région, d\'un peuple, d\'un champion ou d\'un type, toutes séries confondues.', listFavOn: 'Liste ajoutée aux favoris', listFavOff: 'Liste retirée des favoris', favList: 'Liste favorite',
-    listGroups: { fav: 'Favoris', music: 'Groupes de musique', collection: 'Collection', region: 'Régions', people: 'Peuples et créatures', champion: 'Champions' },
+    listGroups: { fav: 'Favoris', artist: 'Artistes', music: 'Groupes de musique', collection: 'Collection', region: 'Régions', people: 'Peuples et créatures', champion: 'Champions' },
     sealed: 'Scellé', setsTab: 'Séries', toggleView: 'Changer l\'affichage', extraTab: 'Extra',
     extraIntro: 'Versions vendues sur Cardmarket mais absentes de la galerie officielle de Riot : versions signées, runes et jetons à part, hors-séries pas encore publiés… Leur visuel est souvent celui d\'une autre version, et leur prix repose parfois sur très peu d\'offres.',
     extraOne: 'Version vendue sur Cardmarket, absente de la galerie officielle de Riot (rangée dans l\'onglet Extra de l\'accueil).',
@@ -111,7 +111,7 @@ const TEXT = {
   en: {
     v3d: { open: 'View the card in 3D', flip: 'Flip', reset: 'Face front', tip: 'Drag to rotate the card · double-tap to flip it' },
     listsTab: 'Lists', listsIntro: 'Themed lists: the cards of a region, a people, a champion or a type, across all sets.', listFavOn: 'List added to favourites', listFavOff: 'List removed from favourites', favList: 'Favourite list',
-    listGroups: { fav: 'Favourites', music: 'Music bands', collection: 'Collection', region: 'Regions', people: 'Peoples and creatures', champion: 'Champions' },
+    listGroups: { fav: 'Favourites', artist: 'Artists', music: 'Music bands', collection: 'Collection', region: 'Regions', people: 'Peoples and creatures', champion: 'Champions' },
     sealed: 'Sealed', setsTab: 'Sets', toggleView: 'Change view', extraTab: 'Extra',
     extraIntro: 'Versions sold on Cardmarket but missing from Riot\'s official gallery: signed versions, separate runes and tokens, overnumbered cards not published yet… Their picture is often that of another version, and their price sometimes rests on very few offers.',
     extraOne: 'Version sold on Cardmarket, missing from Riot\'s official gallery (listed in the Extra tab of the home screen).',
@@ -201,7 +201,7 @@ const TEXT = {
   zh: {
     v3d: { open: '3D 查看卡牌', flip: '翻面', reset: '回到正面', tip: '拖动旋转卡牌 · 双击翻面' },
     listsTab: '列表', listsIntro: '主题列表：同一地区、种族、英雄或类型的卡牌，跨越所有系列。', listFavOn: '已收藏列表', listFavOff: '已取消收藏列表', favList: '收藏列表',
-    listGroups: { fav: '收藏', music: '音乐组合', collection: '收藏类别', region: '地区', people: '种族与生物', champion: '英雄' },
+    listGroups: { fav: '收藏', artist: '画师', music: '音乐组合', collection: '收藏类别', region: '地区', people: '种族与生物', champion: '英雄' },
     sealed: '未拆封', setsTab: '系列', toggleView: '切换显示', extraTab: '其他',
     extraIntro: 'Cardmarket 上有售但 Riot 官方卡牌库中没有的版本：签名版、单独的符文和衍生物、尚未公布的超编号卡等。卡图常常是其他版本的，价格有时只基于极少的报价。',
     extraOne: 'Cardmarket 上有售、Riot 官方卡牌库中没有的版本（在首页的“其他”标签中）。',
@@ -364,7 +364,7 @@ let lastSig = colCanon(user.col);
 function save() {
   C.wish = [...wish]; C.fav = [...fav];
   const sig = colCanon(user.col);
-  if (sig !== lastSig) { lastSig = sig; cloudChanged(); }
+  if (sig !== lastSig) { lastSig = sig; cloudChanged(); if (catalog.cards.length) badgeCheck(); }
   try { localStorage.setItem(KEY, JSON.stringify(user)); } catch { /* stockage indisponible */ }
 }
 
@@ -650,7 +650,7 @@ function progressTile(s) {
 let homeQuery = '';
 function homeTopbar(withMode) {
   const mode = user.prefs.homeMode;
-  setTopbar(`<h1>${L.home}</h1>${withMode ? `<button class="icon-btn" data-action="home-mode" aria-label="${L.toggleView}">${mode === 'grid' ? I.listIcon : I.gridIcon}</button>` : ''}${globeBtn()}${accountBtn()}<button class="icon-btn" data-action="settings" aria-label="${L.settings}">${I.gear}</button>`);
+  setTopbar(`<h1>${L.home}</h1>${withMode ? `<button class="icon-btn" data-action="home-mode" aria-label="${L.toggleView}">${mode === 'grid' ? I.listIcon : I.gridIcon}</button>` : ''}${newsBtn()}${globeBtn()}${accountBtn()}<button class="icon-btn" data-action="settings" aria-label="${L.settings}">${I.gear}</button>`);
 }
 // 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
 const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
@@ -717,6 +717,7 @@ const LISTS = [
   { id: 'battlefield', group: 'collection', title: T3('Champs de bataille', 'Battlefields', '战场'), desc: T3('Les lieux où se déroulent les combats.', 'The places where the fights happen.', '战斗发生的地点。'), test: (c) => c.type === 'battlefield' },
   { id: 'rune', group: 'collection', title: T3('Runes', 'Runes', '符文'), desc: T3('Les runes de chaque domaine et leurs versions alternatives.', 'The runes of each domain and their alternate versions.', '各特性的符文及其异画。'), test: (c) => c.type === 'rune' },
   { id: 'token', group: 'collection', title: T3('Jetons', 'Tokens', '衍生物'), desc: T3('Les jetons et marqueurs (Mécas, Recrues, Bombes…).', 'Tokens and markers (Mechs, Recruits, Bombs…).', '衍生物与指示物。'), test: (c) => c.type === 'token' || /^T\d/.test(c.number ?? '') },
+  { id: 'banned', group: 'collection', title: T3('Cartes interdites', 'Banned cards', '禁卡'), desc: T3('Les cartes interdites en tournoi par Riot (Standard et 2v2).', 'Cards banned from tournaments by Riot (Standard and 2v2).', 'Riot 在赛事中禁用的卡牌。'), test: (c) => !!banInfo(c) },
   { id: 'promo', group: 'collection', title: T3('Promos', 'Promos', '宣传卡'), desc: T3('Les cartes promotionnelles : Nexus Nights, tournois, avant-premières…', 'Promotional cards: Nexus Nights, tournaments, pre-rifts…', '宣传卡：符文之夜、赛事、售前活动等。'), test: (c) => c.rarity === 'promo' },
   ...REGIONS.map(([tag, fr, en, zh, frOf]) => ({ id: `r-${tag.toLowerCase().replace(/\W+/g, '-')}`, group: 'region', title: T3(fr, en, zh), desc: T3(`Les cartes ${frOf}.`, `The cards of ${en}.`, `${zh}的卡牌。`), test: hasTag(tag) })),
   ...PEOPLES.map(([tag, fr, en, zh]) => ({ id: `p-${tag.toLowerCase()}`, group: 'people', title: T3(fr, en, zh), desc: T3(`Toutes les cartes ${fr}.`, `All the ${en} cards.`, `所有${zh}卡牌。`), test: hasTag(tag) })),
@@ -726,6 +727,7 @@ const listTitle = (d) => d.title[ui] ?? d.title.en;
 const listDesc = (d) => d.desc[ui] ?? d.desc.en;
 // listes de champions : un champion avec au moins 6 cartes dans l'édition (étiquette au nom du champion)
 let championLists = null;
+let artistLists = null;
 function allLists() {
   if (!championLists) {
     const known = new Set([...REGIONS, ...PEOPLES].map(([t]) => t).concat(['Equipment', 'Device', 'Elite', 'Recruit']));
@@ -734,7 +736,13 @@ function allLists() {
     championLists = [...count].filter(([, n]) => n >= 6).sort((a, b) => a[0].localeCompare(b[0]))
       .map(([t]) => ({ id: `c-${t.toLowerCase().replace(/\W+/g, '-')}`, group: 'champion', title: T3(t, t, t), desc: T3(`Toutes les cartes de ${t}.`, `All the ${t} cards.`, `${t} 的所有卡牌。`), test: hasTag(t) }));
   }
-  return [...LISTS, ...championLists];
+  if (!artistLists) {
+    const count = new Map();
+    for (const c of catalog.cards) for (const a of String(c.artist ?? '').split(/,\s*/)) if (a && a !== '-') count.set(a, (count.get(a) ?? 0) + 1);
+    artistLists = [...count].filter(([, n]) => n >= 8).sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([a]) => ({ id: `a-${a.toLowerCase().replace(/\W+/g, '-')}`, group: 'artist', title: T3(a, a, a), desc: T3(`Les cartes illustrées par ${a}.`, `Cards illustrated by ${a}.`, `${a} 绘制的卡牌。`), test: (c) => String(c.artist ?? '').split(/,\s*/).includes(a) }));
+  }
+  return [...LISTS, ...championLists, ...artistLists];
 }
 const setOrder = (c) => setOf(c.set)?.order ?? 999;
 const listCards = (d) => editionCards().filter((c) => (d.extras || !isExtraCard(c)) && d.test(c))
@@ -761,11 +769,11 @@ function listCard(d, cards) {
 function renderLists() {
   homeTopbar(false);
   const withCards = allLists().map((d) => [d, listCards(d)]).filter(([, cards]) => cards.length);
-  const groups = [['fav', withCards.filter(([d]) => fav.has(`list:${d.id}`))], ...['music', 'collection', 'region', 'people', 'champion'].map((g) => [g, withCards.filter(([d]) => d.group === g)])];
+  const groups = [['fav', withCards.filter(([d]) => fav.has(`list:${d.id}`))], ...['music', 'collection', 'region', 'people', 'champion', 'artist'].map((g) => [g, withCards.filter(([d]) => d.group === g)])];
   view.innerHTML = `<div class="stack">
     ${homeTabs('lists')}
     <p class="note">${L.listsIntro}</p>
-    ${groups.filter(([, l]) => l.length).map(([g, l]) => `<details class="block lists-block" ${g === 'champion' ? '' : 'open'}>
+    ${groups.filter(([, l]) => l.length).map(([g, l]) => `<details class="block lists-block" ${g === 'champion' || g === 'artist' ? '' : 'open'}>
       <summary>${esc(L.listGroups[g])} <small class="num">${l.length}</small>${I.chevron}</summary>
       <div class="list-grid">${l.map(([d, cards]) => listCard(d, cards)).join('')}</div>
     </details>`).join('')}
@@ -896,8 +904,10 @@ function renderCollection() {
   setTopbar(`<h1>${L.myCollection(lang)}</h1>${cloud.enabled ? `<a class="chip friends-chip" href="#friends">${L.fr.title}<span class="fbadge" data-friends-badge ${fr.requests.length ? '' : 'hidden'}>${fr.requests.length || ''}</span></a>` : ''}`);
   const owned = editionCards().filter((c) => qty(c.id) > 0);
   const ownedSealed = sealed().filter((s) => qty(s.id) > 0);
+  const colTab = colTabs().includes(user.prefs.colTab) ? user.prefs.colTab : 'cards';
+  if (colTab !== 'cards') { view.innerHTML = `<div class="stack">${colTabsSeg(colTab)}${colTabHtml(colTab)}</div>`; colTabMounted(colTab); return; }
   if (!owned.length && !ownedSealed.length) {
-    view.innerHTML = `<div class="empty"><strong>${L.emptyCol(lang)}</strong>${L.emptyColHint}<a class="btn-ghost" href="#home" style="text-decoration:none">${L.browseSets}</a></div>`;
+    view.innerHTML = `<div class="stack">${colTabsSeg(colTab)}<div class="empty"><strong>${L.emptyCol(lang)}</strong>${L.emptyColHint}<a class="btn-ghost" href="#home" style="text-decoration:none">${L.browseSets}</a></div></div>`;
     return;
   }
   const total = owned.reduce((a, c) => a + qty(c.id), 0);
@@ -907,16 +917,20 @@ function renderCollection() {
   const paidTot = withPaid.reduce((a, c) => a + qty(c.id) * paidOf(c.id), 0);
   const diffTot = withPaid.reduce((a, c) => a + (paidDiff(c.id)?.diff ?? 0), 0);
   const sets = visibleSets().sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).filter((s) => ownedIn(s.code) > 0);
-  const shown = colSet === '__sealed' ? [] : sortCards(owned.filter((c) => !colSet || c.set === colSet), 'price-desc');
+  const dups = dupCards();
+  if (colSet === '__dup' && !dups.length) colSet = '';
+  const shown = colSet === '__sealed' ? [] : colSet === '__dup' ? sortCards(dups, 'price-desc') : sortCards(owned.filter((c) => !colSet || c.set === colSet), 'price-desc');
   const sealedShown = !colSet || colSet === '__sealed' ? ownedSealed : [];
   view.innerHTML = `<div class="stack">
+    ${colTabsSeg(colTab)}
     <div class="kpis">
       <div class="stat"><small>${L.kCards}</small><b class="num">${total}</b></div>
       <div class="stat"><small>${L.kUnique}</small><b class="num">${owned.length}</b></div>
       <div class="stat"><small>${L.kValue}</small><b class="num">${eur(value)}</b></div>
     </div>
     ${withPaid.length ? `<p class="note num paid-sum">${L.paidSum(withPaid.length, eur(paidTot))} · ${diffHtml({ diff: diffTot, pct: paidTot ? diffTot / paidTot : null })}</p>` : ''}
-    <div class="chips"><button class="chip" data-colset=""" aria-pressed="${!colSet}">${L.all}</button>${ownedSealed.length ? `<button class="chip" data-colset="__sealed" aria-pressed="${colSet === '__sealed'}">${L.sealed} · ${sealedQty}</button>` : ''}${sets.map((s) => `<button class="chip" data-colset="${esc(s.code)}" aria-pressed="${colSet === s.code}">${esc(s.code)} · ${ownedIn(s.code)}</button>`).join('')}</div>
+    <div class="chips"><button class="chip" data-colset="" aria-pressed="${!colSet}">${L.all}</button>${dups.length ? `<button class="chip" data-colset="__dup" aria-pressed="${colSet === '__dup'}">${T().dupChip} · ${dups.length}</button>` : ''}${ownedSealed.length ? `<button class="chip" data-colset="__sealed" aria-pressed="${colSet === '__sealed'}">${L.sealed} · ${sealedQty}</button>` : ''}${sets.map((s) => `<button class="chip" data-colset="${esc(s.code)}" aria-pressed="${colSet === s.code}">${esc(s.code)} · ${ownedIn(s.code)}</button>`).join('')}</div>
+    ${colSet === '__dup' ? `<p class="note">${T().dupHint(dups.reduce((a, c) => a + qty(c.id) - 1, 0))}</p>` : ''}
     ${shown.length ? `${seg('setMode', user.prefs.setMode, [['cards', L.cards], ['list', L.list], ['grid', L.grid]])}${cardsBlock(shown, user.prefs.setMode)}` : ''}
     ${sealedShown.length ? `<h2 class="section-title">${L.sealed} · ${L.sealedCount(sealedQty)}</h2><div class="sealed-grid">${sealedShown.map(sealedTile).join('')}</div>` : ''}
   </div>`;
@@ -1162,6 +1176,7 @@ function openCard(id, keepNav) {
             : `<div class="sub">${esc(s ? setName(s) : c.set)}<br><span class="num"><b class="print">${esc(c.set)}</b> · ${esc(numLabel(c))}${s?.total && c.variant !== 'extra' ? `/${s.total}` : ''}</span>${c.variant && c.variant !== 'extra' ? ` <span class="variant">${esc(L.variant[c.variant] ?? c.variant)}</span>` : ''}</div>`}
           ${c.rarity ? `<span class="rarity" ${rarityStyle(c.rarity)}>${esc(rarityLabel(c.rarity))}${traits ? ` · ${esc(traits)}` : ''}</span>` : ''}
           ${stats ? `<span class="sub num">${stats}</span>` : ''}
+          ${banHtml(c)}
           ${enOnly && L.enOnly ? `<span class="sub">${L.enOnly}</span>` : ''}
           <div class="big-price num"><small>${L.trend}${p.foil ? ` · <span class="foil">${L.foil}</span>` : ''}</small>${p.trend != null ? eur(p.trend) : `<span style="font-size:18px;color:var(--muted)">${L.noPrice}</span>`}</div>
           ${ch != null ? `<span class="delta num ${ch >= 0 ? 'up' : 'down'}">${pct(ch)} ${L.over30}</span>` : ''}
@@ -1305,6 +1320,7 @@ function cloudChanged() {
 }
 function onCloudUser(u) {
   cloud.unsub?.(); cloud.unsub = null;
+  xOnUser(u);
   cloud.user = u ? { uid: u.uid, email: u.email, name: u.displayName } : null;
   cloud.confirmDelete = false;
   cloud.supporter = false; cloud.avatar = null;
@@ -1673,7 +1689,10 @@ async function renderFriend(uid) {
     trade: theirs.filter((c) => !qty(c.id)),                 // il l'a, pas moi
     give: wishCards.filter((c) => qty(c.id) > 0),             // il la cherche, je l'ai
     wish: wishCards,
+    hisDup: theirs.filter((c) => (theirCol.owned[c.id] ?? 0) >= 2 && !qty(c.id)),               // ses doubles qui me manquent
+    myDup: editionCards().filter((c) => qty(c.id) >= 2 && !(theirCol.owned[c.id] ?? 0)),       // mes doubles qui lui manquent
   };
+  const tradeVal = (l) => eur(l.reduce((a, c) => a + (price(c.id) ?? 0), 0));
   const shown = sortCards(lists[fr.filter] ?? theirs, 'price-desc');
   setTopbar(`<a class="icon-btn" href="#friends" aria-label="${L.back}">${I.back}</a>
     <h1 class="small friend-title">${v.avatar ? `<img src="${esc(v.avatar)}" alt="">` : `<span class="f-avatar">${esc(v.pseudo[0]?.toUpperCase() ?? '?')}</span>`}@${esc(v.pseudo)}</h1>`);
@@ -1683,7 +1702,8 @@ async function renderFriend(uid) {
       <div class="stat"><small>${L.kUnique}</small><b class="num">${theirs.length}</b></div>
       <div class="stat"><small>${L.kValue}</small><b class="num">${eur(value)}</b></div>
     </div>
-    <div class="chips">${[['all', L.fr.fAll(lang)], ['trade', L.fr.fTrade], ['give', L.fr.fGive], ['wish', L.fr.fWish]].map(([k, l]) => `<button class="chip" data-frf="${k}" aria-pressed="${fr.filter === k}">${l} · ${lists[k].length}</button>`).join('')}</div>
+    ${lists.hisDup.length && lists.myDup.length ? `<p class="note trade-box">${T().trade(lists.hisDup.length, tradeVal(lists.hisDup), lists.myDup.length, tradeVal(lists.myDup))}</p>` : ''}
+    <div class="chips">${[['all', L.fr.fAll(lang)], ['trade', L.fr.fTrade], ['give', L.fr.fGive], ['wish', L.fr.fWish], ['hisDup', T().fHisDup], ['myDup', T().fMyDup]].map(([k, l]) => `<button class="chip" data-frf="${k}" aria-pressed="${fr.filter === k}">${l} · ${lists[k].length}</button>`).join('')}</div>
     ${shown.length ? `<div class="cards">${shown.map((c) => friendTile(c, theirCol)).join('')}</div>` : `<div class="empty"><strong>${L.noCards}</strong>${L.fr.emptyFilter}</div>`}
   </div>`;
 }
@@ -2040,7 +2060,7 @@ document.addEventListener('click', async (e) => {
   else if (d.action === 'close') closeCard();
   else if (d.action === 'export') {
     C.wish = [...wish]; C.fav = [...fav];
-    const data = JSON.stringify({ app: 'RiftDex', version: 1, exportedAt: new Date().toISOString(), col: user.col, paid: user.paid });
+    const data = JSON.stringify({ app: 'RiftDex', version: 1, exportedAt: new Date().toISOString(), col: user.col, paid: user.paid, x: user.x });
     const box = document.getElementById('exportBox');
     box.hidden = false; box.value = data;
     try { await navigator.clipboard.writeText(data); toast(L.copied); } catch { box.select(); toast(L.selectCopy); }
@@ -2058,6 +2078,7 @@ document.addEventListener('change', async (e) => {
     if (data.app !== 'RiftDex' || !data.col) throw new Error();
     for (const l of LANGS) user.col[l] = { ...emptyCol(), ...(data.col[l] ?? {}) };
     if (data.paid && typeof data.paid === 'object') for (const l of LANGS) user.paid[l] = { ...(data.paid[l] ?? {}) };
+    if (data.x && typeof data.x === 'object') { user.x = { ...XDEF(), ...data.x }; user.xAt = Date.now(); xCloudChanged(); }
     useCollection(); save(); closeCard(); currentRender(); toast(L.imported);
   } catch { toast(L.badFile); }
 });
@@ -2196,6 +2217,243 @@ document.addEventListener('click', (e) => {
 
 // ---------- Navigation ----------
 let currentTab = 'home';
+// ======================================================================================================
+// Fonctions « collectionneur » : données perso synchronisées, doubles et échanges, statistiques, badges,
+// cartes interdites, actualités officielles et calendrier des sorties.
+// ======================================================================================================
+const TX = {
+  fr: {
+    colTabs: { cards: 'Cartes', binders: 'Classeurs', stats: 'Stats', graded: 'Gradées' },
+    dupChip: 'Doubles', dupHint: (n) => `${n} carte${n > 1 ? 's' : ''} en double : de quoi échanger avec tes amis.`,
+    fHisDup: 'Ses doubles qui te manquent', fMyDup: 'Tes doubles qui lui manquent',
+    trade: (a, va, b, vb) => `Échange possible : tu reçois <b>${a}</b> carte${a > 1 ? 's' : ''} (≈ ${va}), tu donnes <b>${b}</b> carte${b > 1 ? 's' : ''} (≈ ${vb}).`,
+    stats: { title: 'Statistiques', pct: 'Complétion', rarity: 'Par rareté', domain: 'Par domaine', sets: 'Par série', best: 'Tes plus belles cartes', risers: 'Ta plus forte hausse (30 j)', complete: 'Séries complètes', badges: 'Badges', none: 'Ajoute des cartes à ta collection pour voir tes statistiques.' },
+    badgeNew: (n) => `🏆 Badge débloqué : ${n}`, badgesOf: (a, b) => `${a} / ${b} débloqués`,
+    banned: (d, f, future) => `${future ? 'Interdite à partir du' : 'Interdite depuis le'} ${d} en ${f}`, banFormats: { standard: 'Standard', '2v2': '2v2' }, banSource: 'Annonce de Riot',
+    news: 'Actualités', newsTitle: 'Actualités officielles', newsNone: 'Pas encore d\'actualités : elles sont relevées chaque jour.', newsRead: 'Lire sur le site de Riot',
+    cal: 'Calendrier des sorties', calIn: (n) => (n === 0 ? 'aujourd\'hui' : n === 1 ? 'demain' : `dans ${n} jours`), calOut: 'sortie', calNext: 'Prochaine sortie',
+    rulesNeeded: 'Tes classeurs, decks et alertes restent sur cet appareil : publie les nouvelles règles Firestore (README) pour les synchroniser.',
+  },
+  en: {
+    colTabs: { cards: 'Cards', binders: 'Binders', stats: 'Stats', graded: 'Graded' },
+    dupChip: 'Duplicates', dupHint: (n) => `${n} duplicate card${n > 1 ? 's' : ''}: something to trade with your friends.`,
+    fHisDup: 'Their duplicates you lack', fMyDup: 'Your duplicates they lack',
+    trade: (a, va, b, vb) => `Possible trade: you get <b>${a}</b> card${a > 1 ? 's' : ''} (≈ ${va}), you give <b>${b}</b> card${b > 1 ? 's' : ''} (≈ ${vb}).`,
+    stats: { title: 'Statistics', pct: 'Completion', rarity: 'By rarity', domain: 'By domain', sets: 'By set', best: 'Your finest cards', risers: 'Your biggest risers (30 d)', complete: 'Complete sets', badges: 'Badges', none: 'Add cards to your collection to see your statistics.' },
+    badgeNew: (n) => `🏆 Badge unlocked: ${n}`, badgesOf: (a, b) => `${a} / ${b} unlocked`,
+    banned: (d, f, future) => `${future ? 'Banned from' : 'Banned since'} ${d} in ${f}`, banFormats: { standard: 'Standard', '2v2': '2v2' }, banSource: 'Riot announcement',
+    news: 'News', newsTitle: 'Official news', newsNone: 'No news yet: it is collected every day.', newsRead: 'Read on Riot\'s website',
+    cal: 'Release calendar', calIn: (n) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`), calOut: 'released', calNext: 'Next release',
+    rulesNeeded: 'Your binders, decks and alerts stay on this device: publish the new Firestore rules (README) to sync them.',
+  },
+  zh: {
+    colTabs: { cards: '卡牌', binders: '卡册', stats: '统计', graded: '评级卡' },
+    dupChip: '重复', dupHint: (n) => `${n} 张重复卡牌：可以和好友交换。`,
+    fHisDup: '他的重复卡（你缺少）', fMyDup: '你的重复卡（他缺少）',
+    trade: (a, va, b, vb) => `可以交换：你得到 <b>${a}</b> 张（≈ ${va}），你给出 <b>${b}</b> 张（≈ ${vb}）。`,
+    stats: { title: '统计', pct: '完成度', rarity: '按稀有度', domain: '按特性', sets: '按系列', best: '你最珍贵的卡牌', risers: '涨幅最大（30 天）', complete: '已集齐系列', badges: '徽章', none: '添加卡牌后即可查看统计。' },
+    badgeNew: (n) => `🏆 解锁徽章：${n}`, badgesOf: (a, b) => `已解锁 ${a} / ${b}`,
+    banned: (d, f, future) => `${future ? '自' : '自'} ${d} 起在 ${f} 中禁用`, banFormats: { standard: '标准', '2v2': '2v2' }, banSource: 'Riot 公告',
+    news: '资讯', newsTitle: '官方资讯', newsNone: '暂无资讯：每天更新。', newsRead: '在 Riot 官网阅读',
+    cal: '发售日历', calIn: (n) => (n === 0 ? '今天' : n === 1 ? '明天' : `${n} 天后`), calOut: '已发售', calNext: '下一次发售',
+    rulesNeeded: '卡册、卡组和提醒仅保存在此设备上：发布新的 Firestore 规则（见 README）即可同步。',
+  },
+};
+const T = () => TX[ui] ?? TX.en;
+const I2 = {
+  news: '<svg viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6.5a8 8 0 0 1 0 11"/></svg>',
+  trophy: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6"/></svg>',
+  ban: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/></svg>',
+};
+
+// ---------- Données perso des nouvelles fonctions : sur l'appareil, et sur le compte (document private/<uid>) ----------
+const XDEF = () => ({ binders: [], wl: [], alerts: {}, copies: {}, graded: [], decks: [], badges: [], badgesInit: false, newsSeen: '' });
+user.x = { ...XDEF(), ...(user.x && typeof user.x === 'object' ? user.x : {}) };
+const xc = { unsub: null, timer: 0, denied: false };
+function xSave() { user.xAt = Date.now(); save(); xCloudChanged(); }
+const xRef = () => cloud.api.fsM.doc(cloud.api.db, 'private', cloud.user.uid);
+function xCloudChanged() {
+  if (!cloud.user || xc.denied) return;
+  clearTimeout(xc.timer);
+  xc.timer = setTimeout(async () => {
+    try { await cloud.api.fsM.setDoc(xRef(), { blob: JSON.stringify({ x: user.x, at: user.xAt ?? 0 }), updatedAt: cloud.api.fsM.serverTimestamp() }); }
+    catch (e) { if (e?.code === 'permission-denied') xc.denied = true; }
+  }, 1500);
+}
+function xOnUser(u) {
+  xc.unsub?.(); xc.unsub = null; xc.denied = false;
+  if (!u) return;
+  let first = true;
+  xc.unsub = cloud.api.fsM.onSnapshot(xRef(), (snap) => {
+    if (snap.metadata.hasPendingWrites) return;
+    let remote = null;
+    try { remote = snap.exists() ? JSON.parse(snap.data().blob) : null; } catch { remote = null; }
+    if (remote && (remote.at ?? 0) > (user.xAt ?? 0)) {     // changement fait sur un autre appareil : il fait foi
+      user.x = { ...XDEF(), ...remote.x }; user.xAt = remote.at;
+      try { localStorage.setItem(KEY, JSON.stringify(user)); } catch { /* */ }
+      if (sheet.hidden) currentRender();
+    } else if (first && (user.xAt ?? 0) > (remote?.at ?? 0)) xCloudChanged(); // l'appareil est plus récent : on envoie
+    first = false;
+  }, (e) => { if (e?.code === 'permission-denied') xc.denied = true; });
+}
+
+// ---------- Doubles ----------
+const dupCards = () => editionCards().filter((c) => qty(c.id) >= 2);
+
+// ---------- Cartes interdites (annonces officielles, data/config.json → banlist) ----------
+let banMap = null;
+function banInfo(c) {
+  if (!banMap) {
+    banMap = new Map();
+    for (const b of config.banlist?.items ?? []) banMap.set(fold(b.name).replace(/[’']/g, "'"), b);
+  }
+  return isSealed(c) ? null : banMap.get(fold(c.nameEn ?? c.name).replace(/[’']/g, "'")) ?? null;
+}
+function banHtml(c) {
+  const b = banInfo(c);
+  if (!b) return '';
+  const future = b.from > new Date().toISOString().slice(0, 10);
+  const f = b.formats.map((x) => T().banFormats[x] ?? x).join(' / ');
+  return `<a class="ban-badge" href="${esc(b.url)}" target="_blank" rel="noopener" title="${esc(T().banSource)}">${I2.ban}<span>${esc(T().banned(fmt.date.format(parseDay(b.from)), f, future))}</span></a>`;
+}
+
+// ---------- Statistiques et badges (Collection → Stats) ----------
+function statBars(rows) {
+  const max = Math.max(1, ...rows.map((r) => r.total));
+  return `<div class="sbars">${rows.map((r) => `<div class="sbar"><span class="sbar-label">${r.label}</span>
+    <span class="sbar-track"><i style="width:${((r.own / max) * 100).toFixed(1)}%;--c:${r.color ?? 'var(--accent)'}"></i><s style="width:${((r.total / max) * 100).toFixed(1)}%"></s></span>
+    <span class="sbar-num num">${r.own}<small>/${r.total}</small></span></div>`).join('')}</div>`;
+}
+// badges : seuils de cartes et de valeur, séries complètes, listes complètes, raretés
+function badgeDefs() {
+  const cards = editionCards().filter((c) => !isExtraCard(c));
+  const owned = cards.filter((c) => qty(c.id) > 0);
+  const copies = cards.reduce((a, c) => a + qty(c.id), 0);
+  const value = allItems().reduce((a, c) => a + qty(c.id) * (price(c.id) ?? 0), 0);
+  const B = (id, icon, name, desc, got, prog) => ({ id, icon, name, desc, got, prog });
+  const tr = (fr, en, zh) => ({ fr, en, zh })[ui] ?? en;
+  const defs = [];
+  for (const n of [1, 10, 50, 100, 250, 500, 1000]) defs.push(B(`cards-${n}`, '🃏', tr(`${n} carte${n > 1 ? 's' : ''}`, `${n} card${n > 1 ? 's' : ''}`, `${n} 张卡牌`), tr(`Posséder ${n} carte${n > 1 ? 's' : ''}`, `Own ${n} card${n > 1 ? 's' : ''}`, `拥有 ${n} 张卡牌`), copies >= n, Math.min(1, copies / n)));
+  for (const n of [10, 100, 500, 1000, 5000]) defs.push(B(`value-${n}`, '💰', tr(`${n} € de cartes`, `€${n} of cards`, `${n} € 收藏`), tr(`Une collection qui vaut ${n} €`, `A collection worth €${n}`, `收藏价值达到 ${n} €`), value >= n, Math.min(1, value / n)));
+  const has = (f) => owned.some(f);
+  defs.push(B('first-alt', '🎨', tr('Première alternative', 'First alternate art', '首张异画'), tr('Posséder une illustration alternative', 'Own an alternate art', '拥有一张异画卡'), has((c) => c.variant === 'alt'), has((c) => c.variant === 'alt') ? 1 : 0));
+  defs.push(B('first-star', '✨', tr('Premier hors-série', 'First overnumbered', '首张超编'), tr('Posséder un hors-série', 'Own an overnumbered card', '拥有一张超编卡'), has((c) => c.variant === 'star'), has((c) => c.variant === 'star') ? 1 : 0));
+  defs.push(B('first-sig', '✍️', tr('Signature', 'Signature', '签名卡'), tr('Posséder une carte signée', 'Own a signed card', '拥有一张签名卡'), has((c) => c.variant === 'sig' || c.rarity === 'signature'), has((c) => c.variant === 'sig' || c.rarity === 'signature') ? 1 : 0));
+  const altN = owned.filter((c) => c.variant === 'alt').length;
+  defs.push(B('alt-10', '🖼️', tr('Galerie d\'art', 'Art gallery', '画廊'), tr('10 illustrations alternatives', '10 alternate arts', '10 张异画'), altN >= 10, Math.min(1, altN / 10)));
+  for (const s of visibleSets().filter((x) => x.block === 'main')) {
+    const tot = setTotal(s), own = ownedIn(s.code);
+    defs.push(B(`set-${s.code}`, '🏆', tr(`${setName(s)} complète`, `${setName(s)} complete`, `集齐${setName(s)}`), tr(`Toutes les cartes de ${setName(s)}`, `Every card of ${setName(s)}`, `${setName(s)} 的所有卡牌`), tot > 0 && own >= tot, tot ? own / tot : 0));
+  }
+  for (const id of ['kda', 'heartsteel', 'legend', 'rune']) {
+    const d = allLists().find((x) => x.id === id);
+    const lc = d ? listCards(d) : [];
+    if (!lc.length) continue;
+    const own = lc.filter((c) => qty(c.id) > 0).length;
+    defs.push(B(`list-${id}`, id === 'kda' || id === 'heartsteel' ? '🎤' : id === 'rune' ? '🔮' : '👑', listTitle(d), listDesc(d), own >= lc.length, own / lc.length));
+  }
+  defs.push(B('friend', '🤝', tr('Entre amis', 'With friends', '好友'), tr('Avoir un ami sur RiftDex', 'Have a friend on RiftDex', '在 RiftDex 上有一位好友'), fr.list.length > 0, fr.list.length ? 1 : 0));
+  defs.push(B('polyglot', '🌍', tr('Polyglotte', 'Polyglot', '多语言'), tr('Des cartes dans les trois éditions', 'Cards in all three editions', '三个版本都有卡牌'), LANGS.every((l) => Object.values(user.col[l].owned).some((q) => q > 0)), LANGS.filter((l) => Object.values(user.col[l].owned).some((q) => q > 0)).length / 3));
+  return defs;
+}
+// nouveau badge gagné : petite célébration (une fois par badge et par édition)
+let badgeTimer = 0;
+function badgeCheck() {
+  clearTimeout(badgeTimer);
+  badgeTimer = setTimeout(() => {
+    if (!catalog.cards.length) return;
+    const got = badgeDefs().filter((b) => b.got).map((b) => [`${lang}:${b.id}`, b]);
+    const seen = new Set(user.x.badges);
+    const fresh = got.filter(([k]) => !seen.has(k));
+    if (!fresh.length) return;
+    user.x.badges = [...seen, ...fresh.map(([k]) => k)];
+    const init = !user.x.badgesInit;
+    user.x.badgesInit = true;
+    xSave();
+    if (!init) celebrate(fresh[0][1]);
+  }, 400);
+}
+function celebrate(b) {
+  const el = document.createElement('div');
+  el.className = 'badge-pop';
+  el.innerHTML = `<span class="bp-icon">${b.icon}</span><span><small>${esc(T().badgeNew(''))}</small><b>${esc(b.name)}</b></span>${'<i></i>'.repeat(14)}`;
+  document.body.append(el);
+  setTimeout(() => el.remove(), 3600);
+}
+function renderStats() {
+  const cards = editionCards().filter((c) => !isExtraCard(c));
+  const owned = cards.filter((c) => qty(c.id) > 0);
+  if (!owned.length) return `<div class="empty"><strong>${T().stats.title}</strong>${T().stats.none}</div>`;
+  const rarRows = RARITIES.map((r) => ({ label: `<span class="rarity" ${rarityStyle(r)}>${esc(rarityLabel(r))}</span>`, own: owned.filter((c) => c.rarity === r).length, total: cards.filter((c) => c.rarity === r).length, color: `var(--r-${r})` })).filter((r) => r.total);
+  const doms = Object.keys(DOMAIN_HEX).map((d) => ({ label: esc(domainLabel(d)), own: owned.filter((c) => c.domains?.includes(d)).length, total: cards.filter((c) => c.domains?.includes(d)).length, color: DOMAIN_HEX[d] })).filter((r) => r.total);
+  const sets = visibleSets().sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).map((s) => ({ label: `<b class="print">${esc(s.code)}</b>`, own: ownedIn(s.code), total: setTotal(s) }));
+  const complete = sets.filter((s) => s.total && s.own >= s.total).length;
+  const best = sortCards(owned.filter((c) => price(c.id) != null), 'price-desc').slice(0, 6);
+  const risers = owned.map((c) => [c, change(c.id, 30)]).filter(([, v]) => v != null && v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const defs = badgeDefs();
+  const gotN = defs.filter((b) => b.got).length;
+  return `<div class="kpis">
+      <div class="stat"><small>${L.kUnique}</small><b class="num">${owned.length}<small>/${cards.length}</small></b></div>
+      <div class="stat"><small>${T().stats.pct}</small><b class="num">${Math.floor((owned.length / Math.max(1, cards.length)) * 100)} %</b></div>
+      <div class="stat"><small>${T().stats.complete}</small><b class="num">${complete}</b></div>
+    </div>
+    <section class="panel"><h3>${T().stats.rarity}</h3>${statBars(rarRows)}</section>
+    <section class="panel"><h3>${T().stats.domain}</h3>${statBars(doms)}</section>
+    <section class="panel"><h3>${T().stats.sets}</h3>${statBars(sets)}</section>
+    ${best.length ? `<h2 class="section-title">${T().stats.best}</h2><div class="cards">${best.map(cardTile).join('')}</div>` : ''}
+    ${risers.length ? `<h2 class="section-title">${T().stats.risers}</h2><div class="rows">${risers.map(([c]) => cardRow(c, 30)).join('')}</div>` : ''}
+    <h2 class="section-title">${T().stats.badges} <small class="num">${T().badgesOf(gotN, defs.length)}</small></h2>
+    <div class="badges">${defs.map((b) => `<div class="badge ${b.got ? 'got' : ''}" title="${esc(b.desc)}"><span class="b-icon">${b.icon}</span><b>${esc(b.name)}</b><small>${esc(b.desc)}</small>${b.got ? '' : `<span class="b-prog"><i style="width:${(b.prog * 100).toFixed(0)}%"></i></span>`}</div>`).join('')}</div>`;
+}
+
+// ---------- Actualités officielles et calendrier des sorties ----------
+let newsFile = null;
+async function newsLoad() {
+  if (newsFile) return newsFile;
+  try { newsFile = await fetch('data/news.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)); } catch { newsFile = null; }
+  return newsFile;
+}
+const newsItems = () => newsFile?.items?.[ui] ?? newsFile?.items?.en ?? [];
+const newsUnread = () => newsItems().filter((n) => n.date > (user.x.newsSeen || '')).length;
+const newsBtn = () => `<a class="icon-btn news-btn" href="#news" aria-label="${T().news}" title="${T().news}">${I2.news}${newsFile && user.x.newsSeen && newsUnread() ? `<span class="fbadge">${newsUnread()}</span>` : ''}</a>`;
+function calendarHtml() {
+  const today = new Date().toISOString().slice(0, 10);
+  const sets = catalog.sets.filter((s) => s.releaseDate && s.block !== 'cn').sort((a, b) => (a.releaseDate < b.releaseDate ? 1 : -1));
+  const next = [...sets].reverse().find((s) => s.releaseDate >= today);
+  const days = (d) => Math.round((parseDay(d) - parseDay(today)) / 864e5);
+  return `<section class="panel calendar"><h3>${T().cal}</h3>
+    ${next ? `<div class="cal-next" ${artStyle(next.code)}><small>${T().calNext}</small><b>${esc(setName(next))}</b><span class="num">${fmt.date.format(parseDay(next.releaseDate))} · ${T().calIn(days(next.releaseDate))}</span></div>` : ''}
+    <ol class="cal-list">${sets.map((s) => `<li class="${s.releaseDate > today ? 'future' : ''}"><span class="num">${fmt.date.format(parseDay(s.releaseDate))}</span><a href="#set-${esc(s.code)}"><b class="print">${esc(s.code)}</b> ${esc(setName(s))}</a><small>${s.releaseDate > today ? T().calIn(days(s.releaseDate)) : T().calOut}</small></li>`).join('')}</ol>
+  </section>`;
+}
+async function renderNews() {
+  setTopbar(`<a class="icon-btn" href="#home" aria-label="${L.back}">${I.back}</a><h1 class="small">${T().newsTitle}</h1>`);
+  view.innerHTML = `<div class="stack">${calendarHtml()}<div class="empty"><strong>…</strong></div></div>`;
+  await newsLoad();
+  if (currentRender !== renderNews) return;
+  const items = newsItems();
+  const seen = user.x.newsSeen || '';
+  view.innerHTML = `<div class="stack">
+    ${calendarHtml()}
+    <h2 class="section-title">${T().newsTitle}</h2>
+    ${items.length ? `<div class="news-list">${items.map((n) => `<a class="news-item ${n.date > seen && seen ? 'unread' : ''}" href="${esc(n.url)}" target="_blank" rel="noopener">
+      ${n.image ? `<img src="${esc(n.image)}" alt="" loading="lazy">` : '<span class="news-noimg"></span>'}
+      <span class="news-text"><small>${esc(n.category)} · ${n.date ? fmt.date.format(parseDay(n.date)) : ''}</small><b>${esc(n.title)}</b>${n.desc ? `<span>${esc(n.desc)}</span>` : ''}</span></a>`).join('')}</div>`
+      : `<div class="empty"><strong>${T().newsTitle}</strong>${T().newsNone}</div>`}
+  </div>`;
+  if (items[0]?.date && items[0].date > seen) { user.x.newsSeen = items[0].date; xSave(); }
+}
+
+// ---------- Collection : onglets Cartes, Classeurs, Stats, Gradées ----------
+const COL_TAB_RENDER = { stats: renderStats };   // les autres onglets s'ajoutent plus bas (classeurs, cartes gradées)
+const COL_TAB_MOUNT = {};
+const colTabs = () => ['cards', 'binders', 'stats', 'graded'].filter((t) => t === 'cards' || COL_TAB_RENDER[t]);
+const colTabsSeg = (tab) => seg('colTab', tab, colTabs().map((t) => [t, T().colTabs[t]]));
+const colTabHtml = (tab) => (COL_TAB_RENDER[tab] ? COL_TAB_RENDER[tab]() : '');
+const colTabMounted = (tab) => COL_TAB_MOUNT[tab]?.();
+
+// @@NEXT-FEATURES@@
+
 function markTabs() {
   const pc = isPC();
   for (const a of document.querySelectorAll('.tabbar a')) {
@@ -2215,6 +2473,7 @@ function route() {
   else if (h === 'sealed') { tab = 'sealed'; currentRender = renderSealed; }
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
   else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
+  else if (h === 'news') { tab = 'home'; currentRender = renderNews; }
   else if (h.startsWith('list-')) { tab = 'home'; currentRender = () => renderList(h.slice(5)); }
   else if (h === 'friends') { fr.view = null; fr.msg = ''; currentRender = renderFriends; }
   else if (h.startsWith('friend-')) { tab = 'friends'; const uid = h.slice(7); if (fr.view?.uid !== uid) fr.filter = 'all'; renderFriendCurrent = () => renderFriend(uid); currentRender = renderFriendCurrent; }
@@ -2238,6 +2497,11 @@ try {
   migrateIds();
   route();
   initCloud();
+  badgeCheck();
+  newsLoad().then(() => {
+    if (!user.x.newsSeen && newsItems()[0]) { user.x.newsSeen = newsItems()[0].date; save(); } // premier passage : pas de pastille
+    if (currentRender === renderHome || currentRender === renderSealed || currentRender === renderLists) currentRender();
+  });
 } catch (err) {
   view.innerHTML = `<div class="empty"><strong>${L.loadError}</strong>${L.loadErrorHint}</div>`;
   console.error(err);
