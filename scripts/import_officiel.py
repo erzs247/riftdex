@@ -210,6 +210,38 @@ TCG = 'https://tcgcsv.com/tcgplayer/89'  # copie publique du catalogue TCGplayer
 TCG_GROUPS = {'KDA': ['RXK/DA'], 'SGD': ['SGN'], 'T1W': ['T12025'], 'LGC': ['LGC'], 'W26': ['RWB'],
               'OGN': ['OGN'], 'OGS': ['OGS'], 'SFD': ['SFD'], 'UNL': ['UNL'], 'VEN': ['VEN'], 'RAD': ['RAD']}
 TCG_PROMO_GROUPS = ['PR', 'OPP', 'JDG', 'GRFT', 'RWB']
+TCG_STOP = {'riftbound', 'x', 'the', 'of', 'promos', 'promo', 'promotional', 'cards', 'collection', 'bundle', 'bundles', 'box', 'set', 'edition'}
+
+
+def tcg_auto_groups(sets_cfg, groups):
+    """Groupe TCGplayer d'une série qui n'est pas dans TCG_GROUPS (nouvelle série, nouveau coffret) : celui dont le nom
+    reprend le mieux les mots du nom anglais de la série (les années et numéros doivent correspondre ; à égalité, le nom
+    le plus court). Les groupes des séries principales ne servent jamais aux promos et coffrets (mauvais visuel)."""
+    words = lambda t: {w for w in re.findall(r'[a-z0-9]+', t.lower().replace('k/da', 'kda'))} - TCG_STOP
+    taken = {a for v in TCG_GROUPS.values() for a in v} | set(TCG_PROMO_GROUPS)
+    out = {}
+    order = sorted(((k, v) for k, v in sets_cfg.items() if isinstance(v, dict)), key=lambda kv: kv[1].get('block') != 'main')
+    for code, v in order:   # séries principales d'abord : leurs groupes sont ensuite réservés
+        if code in TCG_GROUPS or not v.get('en'):
+            continue
+        sw = words(v['en'])
+        if not sw:
+            continue
+        best = None
+        for abbr, name in groups.items():
+            if abbr in taken:
+                continue
+            gw = words(name)
+            if {w for w in sw if w.isdigit()} - gw:   # « Worlds 2026 » ne va pas avec « Worlds Bundle 2025 »
+                continue
+            score = (len(sw & gw) / len(sw), -len(gw - sw))
+            if score[0] >= 0.6 and (not best or score > best[0]):
+                best = (score, abbr)
+        if best:
+            out[code] = [best[1]]
+            taken.add(best[1])
+            print(f'  Série {code} « {v["en"]} » : images TCGplayer du groupe {best[1]} « {groups[best[1]]} »')
+    return out
 
 
 def tcg_base(name):
@@ -221,7 +253,9 @@ def tcg_images(cards, sources, sets_cfg):
     produit TCGplayer de même nom, dans le groupe correspondant à la série ; à plusieurs versions, dans l'ordre
     des identifiants. Les cartes des séries principales qui ont déjà une image officielle ne sont pas touchées."""
     try:
-        groups = {g['abbreviation']: g['groupId'] for g in get_json(f'{TCG}/groups')['results']}
+        res = get_json(f'{TCG}/groups')['results']
+        groups = {g['abbreviation']: g['groupId'] for g in res}
+        group_names = {g['abbreviation']: g['name'] for g in res}
     except Exception as e:
         print('  TCGplayer indisponible :', e)
         return
@@ -236,18 +270,19 @@ def tcg_images(cards, sources, sets_cfg):
                 res = []
             products[abbr] = [p for p in res if any(e['name'] == 'Number' for e in p.get('extendedData', []))]
         return products[abbr]
+    tcg_groups = {**tcg_auto_groups(sets_cfg, group_names), **TCG_GROUPS}   # séries connues + nouvelles séries
     need = defaultdict(list)
     for c in cards:
         if c.get('only'):  # exclusivité chinoise : pas de version anglaise
             continue
         promo = sets_cfg.get(c['set'], {}).get('block') == 'promo'
         # coffrets avec leur propre groupe TCGplayer (K/DA, T1, Secret Garden…) : TCGplayer d'abord, c'est leur visuel exact
-        if (promo and (c.get('artApprox') or c['set'] in TCG_GROUPS)) or not sources.get(c['id'], {}).get('en'):
+        if (promo and (c.get('artApprox') or c['set'] in tcg_groups)) or not sources.get(c['id'], {}).get('en'):
             need[(c['set'], norm(c['name']))].append(c)
     found = 0
     used = set()
     for (s, k), group_cards in need.items():
-        abbrs = TCG_GROUPS.get(s) or TCG_PROMO_GROUPS
+        abbrs = tcg_groups.get(s) or TCG_PROMO_GROUPS
         # jetons : TCGplayer les vend recto verso (« Mech // Gold ») ; l'image du produit montre le recto
         cands = sorted((p for a in abbrs for p in group_products(a) if k in (tcg_base(p['name']), tcg_base(p['name'].split(' // ')[0]))
                         and p['productId'] not in used and (' // ' not in p['name'] or p.get('imageCount'))),
