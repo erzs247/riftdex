@@ -652,7 +652,7 @@ function homeTopbar(withMode) {
   const mode = user.prefs.homeMode;
   setTopbar(`<h1>${L.home}</h1>${withMode ? `<button class="icon-btn" data-action="home-mode" aria-label="${L.toggleView}">${mode === 'grid' ? I.listIcon : I.gridIcon}</button>` : ''}${newsBtn()}${globeBtn()}${accountBtn()}<button class="icon-btn" data-action="settings" aria-label="${L.settings}">${I.gear}</button>`);
 }
-// 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
+// Bouton globe : langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
 const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
 const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ['lists', L.listsTab], ['decks', T().dk.tab], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
 const langNote = () => (L.langNote(lang) ? `<p class="lang-note">${L.langNote(lang)}</p>` : '');
@@ -1632,7 +1632,7 @@ function renderFriends() {
     return;
   }
   view.innerHTML = `<div class="stack friends">
-    <a class="cta lb-cta" href="#ranking">${T().lb.btn}</a>
+    <a class="cta lb-cta" href="#ranking">${ic('trophy')}${T().lb.btn}</a>
     <section class="panel">
       <h3>${L.fr.add}<small>${L.fr.yourPseudo} <b class="pseudo">@${esc(fr.me.pseudo)}</b></small></h3>
       <form class="inline-form" id="addFriendForm"><input class="search" id="friendInput" maxlength="21" autocomplete="off" placeholder="${L.fr.addPh}"><button class="cta" ${fr.busy ? 'disabled' : ''}>${L.fr.send}</button></form>
@@ -2216,7 +2216,7 @@ const TX = {
     fHisDup: 'Ses doubles qui te manquent', fMyDup: 'Tes doubles qui lui manquent',
     trade: (a, va, b, vb) => `Échange possible : tu reçois <b>${a}</b> carte${a > 1 ? 's' : ''} (≈ ${va}), tu donnes <b>${b}</b> carte${b > 1 ? 's' : ''} (≈ ${vb}).`,
     stats: { title: 'Statistiques', pct: 'Complétion', rarity: 'Par rareté', domain: 'Par domaine', sets: 'Par série', best: 'Tes plus belles cartes', risers: 'Ta plus forte hausse (30 j)', complete: 'Séries complètes', badges: 'Badges', none: 'Ajoute des cartes à ta collection pour voir tes statistiques.' },
-    badgeNew: (n) => `🏆 Badge débloqué : ${n}`, badgesOf: (a, b) => `${a} / ${b} débloqués`,
+    badgeNew: (n) => `Badge débloqué${n ? ` : ${n}` : ''}`, badgesOf: (a, b) => `${a} / ${b} débloqués`,
     banned: (d, f, future) => `${future ? 'Interdite à partir du' : 'Interdite depuis le'} ${d} en ${f}`, banFormats: { standard: 'Standard', '2v2': '2v2' }, banSource: 'Annonce de Riot',
     news: 'Actualités', newsTitle: 'Actualités officielles', newsNone: 'Pas encore d\'actualités : elles sont relevées chaque jour.', newsRead: 'Lire sur le site de Riot',
     cal: 'Calendrier des sorties', calIn: (n) => (n === 0 ? 'aujourd\'hui' : n === 1 ? 'demain' : `dans ${n} jours`), calOut: 'sortie', calNext: 'Prochaine sortie',
@@ -2228,7 +2228,7 @@ const TX = {
     fHisDup: 'Their duplicates you lack', fMyDup: 'Your duplicates they lack',
     trade: (a, va, b, vb) => `Possible trade: you get <b>${a}</b> card${a > 1 ? 's' : ''} (≈ ${va}), you give <b>${b}</b> card${b > 1 ? 's' : ''} (≈ ${vb}).`,
     stats: { title: 'Statistics', pct: 'Completion', rarity: 'By rarity', domain: 'By domain', sets: 'By set', best: 'Your finest cards', risers: 'Your biggest risers (30 d)', complete: 'Complete sets', badges: 'Badges', none: 'Add cards to your collection to see your statistics.' },
-    badgeNew: (n) => `🏆 Badge unlocked: ${n}`, badgesOf: (a, b) => `${a} / ${b} unlocked`,
+    badgeNew: (n) => `Badge unlocked${n ? `: ${n}` : ''}`, badgesOf: (a, b) => `${a} / ${b} unlocked`,
     banned: (d, f, future) => `${future ? 'Banned from' : 'Banned since'} ${d} in ${f}`, banFormats: { standard: 'Standard', '2v2': '2v2' }, banSource: 'Riot announcement',
     news: 'News', newsTitle: 'Official news', newsNone: 'No news yet: it is collected every day.', newsRead: 'Read on Riot\'s website',
     cal: 'Release calendar', calIn: (n) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`), calOut: 'released', calNext: 'Next release',
@@ -2240,7 +2240,7 @@ const TX = {
     fHisDup: '他的重复卡（你缺少）', fMyDup: '你的重复卡（他缺少）',
     trade: (a, va, b, vb) => `可以交换：你得到 <b>${a}</b> 张（≈ ${va}），你给出 <b>${b}</b> 张（≈ ${vb}）。`,
     stats: { title: '统计', pct: '完成度', rarity: '按稀有度', domain: '按特性', sets: '按系列', best: '你最珍贵的卡牌', risers: '涨幅最大（30 天）', complete: '已集齐系列', badges: '徽章', none: '添加卡牌后即可查看统计。' },
-    badgeNew: (n) => `🏆 解锁徽章：${n}`, badgesOf: (a, b) => `已解锁 ${a} / ${b}`,
+    badgeNew: (n) => `解锁徽章${n ? `：${n}` : ''}`, badgesOf: (a, b) => `已解锁 ${a} / ${b}`,
     banned: (d, f, future) => `${future ? '自' : '自'} ${d} 起在 ${f} 中禁用`, banFormats: { standard: '标准', '2v2': '2v2' }, banSource: 'Riot 公告',
     news: '资讯', newsTitle: '官方资讯', newsNone: '暂无资讯：每天更新。', newsRead: '在 Riot 官网阅读',
     cal: '发售日历', calIn: (n) => (n === 0 ? '今天' : n === 1 ? '明天' : `${n} 天后`), calOut: '已发售', calNext: '下一次发售',
@@ -2252,7 +2252,28 @@ const I2 = {
   news: '<svg viewBox="0 0 24 24"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6.5a8 8 0 0 1 0 11"/></svg>',
   trophy: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M9 20h6"/></svg>',
   ban: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/></svg>',
+  slab: '<svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M5 7.5h14"/><rect x="8" y="10" width="8" height="9" rx="1"/></svg>',
+  rules: '<svg viewBox="0 0 24 24"><path d="M6 3.5h9l4 4V20a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 20z"/><path d="M15 3.5V8h4M9 12h7M9 15.5h7"/></svg>',
+  cart: '<svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 8H6.2"/><circle cx="9.5" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>',
+  bell: '<svg viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
+  book: '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v18M12.5 8h3"/></svg>',
+  cards: '<svg viewBox="0 0 24 24"><rect x="8" y="3.5" width="11.5" height="16.5" rx="2"/><path d="M5 7v11.5a2 2 0 0 0 2 2h8"/></svg>',
+  coin: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/><path d="M5 11.5v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></svg>',
+  palette: '<svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.6-1 1-2-.7-1.2.1-2.5 1.5-2.5H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M18.5 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>',
+  pen: '<svg viewBox="0 0 24 24"><path d="M3.5 20c3-1 5-4 8-4 2 0 2 2 4 2s3-1 5-2.5"/><path d="M15 4l3 3-8.5 8.5-4 1 1-4z"/></svg>',
+  frame: '<svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="m4 17 5-5 4 4 3-3 4 4"/><circle cx="15.5" cy="9" r="1.5"/></svg>',
+  mic: '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/></svg>',
+  crown: '<svg viewBox="0 0 24 24"><path d="M4 8l4 4 4-6 4 6 4-4-2 10H6z"/><path d="M6 21h12"/></svg>',
+  rune: '<svg viewBox="0 0 24 24"><path d="M12 3l7 9-7 9-7-9z"/><path d="M12 8v8M9 12h6"/></svg>',
+  friends: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><circle cx="16.5" cy="9.5" r="2.6"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14.5 18.5a4.5 4.5 0 0 1 6.5-2"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  cross: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
 };
+// icône en ligne (même trait que les icônes de l'appli, comme NightDex)
+const ic = (k) => `<span class="ic">${I2[k] ?? I[k] ?? ''}</span>`;
+// fiche officielle de la carte (texte et règles à jour, errata compris) dans la galerie de Riot
+const officialUrl = (c) => (c?.gid ? `https://playriftbound.com/${{ fr: 'fr-fr', en: 'en-us', zh: 'zh-cn' }[ui] ?? 'en-us'}/card-gallery/#card-gallery--${encodeURIComponent(c.gid)}` : null);
 
 // ---------- Données perso des nouvelles fonctions : sur l'appareil, et sur le compte (document private/<uid>) ----------
 const XDEF = () => ({ binders: [], wl: [], alerts: {}, copies: {}, graded: [], decks: [], badges: [], badgesInit: false, newsSeen: '' });
@@ -2321,27 +2342,27 @@ function badgeDefs() {
   const B = (id, icon, name, desc, got, prog) => ({ id, icon, name, desc, got, prog });
   const tr = (fr, en, zh) => ({ fr, en, zh })[ui] ?? en;
   const defs = [];
-  for (const n of [1, 10, 50, 100, 250, 500, 1000]) defs.push(B(`cards-${n}`, '🃏', tr(`${n} carte${n > 1 ? 's' : ''}`, `${n} card${n > 1 ? 's' : ''}`, `${n} 张卡牌`), tr(`Posséder ${n} carte${n > 1 ? 's' : ''}`, `Own ${n} card${n > 1 ? 's' : ''}`, `拥有 ${n} 张卡牌`), copies >= n, Math.min(1, copies / n)));
-  for (const n of [10, 100, 500, 1000, 5000]) defs.push(B(`value-${n}`, '💰', tr(`${n} € de cartes`, `€${n} of cards`, `${n} € 收藏`), tr(`Une collection qui vaut ${n} €`, `A collection worth €${n}`, `收藏价值达到 ${n} €`), value >= n, Math.min(1, value / n)));
+  for (const n of [1, 10, 50, 100, 250, 500, 1000]) defs.push(B(`cards-${n}`, 'cards', tr(`${n} carte${n > 1 ? 's' : ''}`, `${n} card${n > 1 ? 's' : ''}`, `${n} 张卡牌`), tr(`Posséder ${n} carte${n > 1 ? 's' : ''}`, `Own ${n} card${n > 1 ? 's' : ''}`, `拥有 ${n} 张卡牌`), copies >= n, Math.min(1, copies / n)));
+  for (const n of [10, 100, 500, 1000, 5000]) defs.push(B(`value-${n}`, 'coin', tr(`${n} € de cartes`, `€${n} of cards`, `${n} € 收藏`), tr(`Une collection qui vaut ${n} €`, `A collection worth €${n}`, `收藏价值达到 ${n} €`), value >= n, Math.min(1, value / n)));
   const has = (f) => owned.some(f);
-  defs.push(B('first-alt', '🎨', tr('Première alternative', 'First alternate art', '首张异画'), tr('Posséder une illustration alternative', 'Own an alternate art', '拥有一张异画卡'), has((c) => c.variant === 'alt'), has((c) => c.variant === 'alt') ? 1 : 0));
-  defs.push(B('first-star', '✨', tr('Premier hors-série', 'First overnumbered', '首张超编'), tr('Posséder un hors-série', 'Own an overnumbered card', '拥有一张超编卡'), has((c) => c.variant === 'star'), has((c) => c.variant === 'star') ? 1 : 0));
-  defs.push(B('first-sig', '✍️', tr('Signature', 'Signature', '签名卡'), tr('Posséder une carte signée', 'Own a signed card', '拥有一张签名卡'), has((c) => c.variant === 'sig' || c.rarity === 'signature'), has((c) => c.variant === 'sig' || c.rarity === 'signature') ? 1 : 0));
+  defs.push(B('first-alt', 'palette', tr('Première alternative', 'First alternate art', '首张异画'), tr('Posséder une illustration alternative', 'Own an alternate art', '拥有一张异画卡'), has((c) => c.variant === 'alt'), has((c) => c.variant === 'alt') ? 1 : 0));
+  defs.push(B('first-star', 'sparkle', tr('Premier hors-série', 'First overnumbered', '首张超编'), tr('Posséder un hors-série', 'Own an overnumbered card', '拥有一张超编卡'), has((c) => c.variant === 'star'), has((c) => c.variant === 'star') ? 1 : 0));
+  defs.push(B('first-sig', 'pen', tr('Signature', 'Signature', '签名卡'), tr('Posséder une carte signée', 'Own a signed card', '拥有一张签名卡'), has((c) => c.variant === 'sig' || c.rarity === 'signature'), has((c) => c.variant === 'sig' || c.rarity === 'signature') ? 1 : 0));
   const altN = owned.filter((c) => c.variant === 'alt').length;
-  defs.push(B('alt-10', '🖼️', tr('Galerie d\'art', 'Art gallery', '画廊'), tr('10 illustrations alternatives', '10 alternate arts', '10 张异画'), altN >= 10, Math.min(1, altN / 10)));
+  defs.push(B('alt-10', 'frame', tr('Galerie d\'art', 'Art gallery', '画廊'), tr('10 illustrations alternatives', '10 alternate arts', '10 张异画'), altN >= 10, Math.min(1, altN / 10)));
   for (const s of visibleSets().filter((x) => x.block === 'main')) {
     const tot = setTotal(s), own = ownedIn(s.code);
-    defs.push(B(`set-${s.code}`, '🏆', tr(`${setName(s)} complète`, `${setName(s)} complete`, `集齐${setName(s)}`), tr(`Toutes les cartes de ${setName(s)}`, `Every card of ${setName(s)}`, `${setName(s)} 的所有卡牌`), tot > 0 && own >= tot, tot ? own / tot : 0));
+    defs.push(B(`set-${s.code}`, 'trophy', tr(`${setName(s)} complète`, `${setName(s)} complete`, `集齐${setName(s)}`), tr(`Toutes les cartes de ${setName(s)}`, `Every card of ${setName(s)}`, `${setName(s)} 的所有卡牌`), tot > 0 && own >= tot, tot ? own / tot : 0));
   }
   for (const id of ['kda', 'heartsteel', 'legend', 'rune']) {
     const d = allLists().find((x) => x.id === id);
     const lc = d ? listCards(d) : [];
     if (!lc.length) continue;
     const own = lc.filter((c) => qty(c.id) > 0).length;
-    defs.push(B(`list-${id}`, id === 'kda' || id === 'heartsteel' ? '🎤' : id === 'rune' ? '🔮' : '👑', listTitle(d), listDesc(d), own >= lc.length, own / lc.length));
+    defs.push(B(`list-${id}`, id === 'kda' || id === 'heartsteel' ? 'mic' : id === 'rune' ? 'rune' : 'crown', listTitle(d), listDesc(d), own >= lc.length, own / lc.length));
   }
-  defs.push(B('friend', '🤝', tr('Entre amis', 'With friends', '好友'), tr('Avoir un ami sur RiftDex', 'Have a friend on RiftDex', '在 RiftDex 上有一位好友'), fr.list.length > 0, fr.list.length ? 1 : 0));
-  defs.push(B('polyglot', '🌍', tr('Polyglotte', 'Polyglot', '多语言'), tr('Des cartes dans les trois éditions', 'Cards in all three editions', '三个版本都有卡牌'), LANGS.every((l) => Object.values(user.col[l].owned).some((q) => q > 0)), LANGS.filter((l) => Object.values(user.col[l].owned).some((q) => q > 0)).length / 3));
+  defs.push(B('friend', 'friends', tr('Entre amis', 'With friends', '好友'), tr('Avoir un ami sur RiftDex', 'Have a friend on RiftDex', '在 RiftDex 上有一位好友'), fr.list.length > 0, fr.list.length ? 1 : 0));
+  defs.push(B('polyglot', 'globe', tr('Polyglotte', 'Polyglot', '多语言'), tr('Des cartes dans les trois éditions', 'Cards in all three editions', '三个版本都有卡牌'), LANGS.every((l) => Object.values(user.col[l].owned).some((q) => q > 0)), LANGS.filter((l) => Object.values(user.col[l].owned).some((q) => q > 0)).length / 3));
   return defs;
 }
 // nouveau badge gagné : petite célébration (une fois par badge et par édition)
@@ -2364,7 +2385,7 @@ function badgeCheck() {
 function celebrate(b) {
   const el = document.createElement('div');
   el.className = 'badge-pop';
-  el.innerHTML = `<span class="bp-icon">${b.icon}</span><span><small>${esc(T().badgeNew(''))}</small><b>${esc(b.name)}</b></span>${'<i></i>'.repeat(14)}`;
+  el.innerHTML = `<span class="bp-icon">${ic(b.icon)}</span><span><small>${esc(T().badgeNew(''))}</small><b>${esc(b.name)}</b></span>${'<i></i>'.repeat(14)}`;
   document.body.append(el);
   setTimeout(() => el.remove(), 3600);
 }
@@ -2391,7 +2412,7 @@ function renderStats() {
     ${best.length ? `<h2 class="section-title">${T().stats.best}</h2><div class="cards">${best.map(cardTile).join('')}</div>` : ''}
     ${risers.length ? `<h2 class="section-title">${T().stats.risers}</h2><div class="rows">${risers.map(([c]) => cardRow(c, 30)).join('')}</div>` : ''}
     <h2 class="section-title">${T().stats.badges} <small class="num">${T().badgesOf(gotN, defs.length)}</small></h2>
-    <div class="badges">${defs.map((b) => `<div class="badge ${b.got ? 'got' : ''}" title="${esc(b.desc)}"><span class="b-icon">${b.icon}</span><b>${esc(b.name)}</b><small>${esc(b.desc)}</small>${b.got ? '' : `<span class="b-prog"><i style="width:${(b.prog * 100).toFixed(0)}%"></i></span>`}</div>`).join('')}</div>`;
+    <div class="badges">${defs.map((b) => `<div class="badge ${b.got ? 'got' : ''}" title="${esc(b.desc)}"><span class="b-icon">${ic(b.icon)}</span><b>${esc(b.name)}</b><small>${esc(b.desc)}</small>${b.got ? '' : `<span class="b-prog"><i style="width:${(b.prog * 100).toFixed(0)}%"></i></span>`}</div>`).join('')}</div>`;
 }
 
 // ---------- Actualités officielles et calendrier des sorties ----------
@@ -2513,9 +2534,9 @@ function renderBinders() {
       ${cloud.supporter ? '' : `<p class="note" style="margin:0">${T().bd.limit}</p>`}
     </section>` : `<section class="plus-card">
       <strong class="plus-logo">RIFT<i>DEX</i><span>+</span></strong>
-      <p><span class="plus-ic">📚</span>${T().bd.plusUnlimited}</p>
-      <p><span class="plus-ic">⭐</span>${T().bd.plusMore}</p>
-      ${supportUrl() ? `<a class="plus-btn" href="${esc(supportUrl())}" target="_blank" rel="noopener">🚀 ${T().bd.plusBtn}</a>` : ''}
+      <p><span class="plus-ic">${ic('book')}</span>${T().bd.plusUnlimited}</p>
+      <p><span class="plus-ic">${ic('star')}</span>${T().bd.plusMore}</p>
+      ${supportUrl() ? `<a class="plus-btn" href="${esc(supportUrl())}" target="_blank" rel="noopener">${ic('heart')}${T().bd.plusBtn}</a>` : ''}
       <small>${T().bd.plusHint}</small>
     </section>`;
   return `<h2 class="section-title">${T().bd.mine} <small class="num">${mine.length}</small></h2>
@@ -2755,17 +2776,17 @@ function renderWishlistX() {
     <span class="num">${cost > cur.budget ? T().wl.over(eur(cost - cur.budget)) : T().wl.budgetLeft(eur(cost), eur(cur.budget))}</span></div>` : '';
   const notifBtn = 'Notification' in window && Notification.permission === 'default' && alertIds.length ? `<button class="chip" data-wl="notif">${T().wl.notif}</button>` : '';
   view.innerHTML = `<div class="stack">
-    ${fired.length ? `<section class="panel alerts-fired"><h3>🔔 ${T().wl.fired}</h3><div class="rows">${fired.map((c) => cardRow(c, 7)).join('')}</div></section>` : ''}
+    ${fired.length ? `<section class="panel alerts-fired"><h3>${ic('bell')}${T().wl.fired}</h3><div class="rows">${fired.map((c) => cardRow(c, 7)).join('')}</div></section>` : ''}
     <div class="chips wl-chips"><button class="chip" data-wlf="" aria-pressed="${!wl.filter}">${T().wl.all} · ${all.length}</button>
       ${myWl().map((l) => `<button class="chip" data-wlf="${esc(l.id)}" aria-pressed="${wl.filter === l.id}">${esc(l.name)} · ${l.ids.filter((id) => wish.has(id)).length}</button>`).join('')}
       <button class="chip" data-wl="new">+ ${T().wl.new}</button></div>
     <form id="wlForm" class="wl-form" hidden><input class="search" id="wlName" maxlength="30" placeholder="${esc(T().wl.namePh)}" autocomplete="off"><input class="search" id="wlBudget" type="number" inputmode="decimal" min="0" step="1" placeholder="${esc(T().wl.budget)}"><button class="cta">${T().wl.create}</button></form>
     ${list.length ? `<div class="hero-value"><small>${L.wishBudget}</small><strong class="num">${eur(cost)}</strong><span class="note">${L.wishNote(missing.length, list.length)}</span>${budgetHtml}</div>
-      <div class="chips">${missing.length ? `<button class="chip" data-wl="buy">🛒 ${T().wl.buy}</button>` : ''}${notifBtn}${cur ? `<button class="chip ${wl.confirmDel ? 'danger' : ''}" data-wl="del">${wl.confirmDel ? T().wl.delConfirm : T().wl.del}</button>` : ''}</div>
+      <div class="chips">${missing.length ? `<button class="chip" data-wl="buy">${ic('cart')}${T().wl.buy}</button>` : ''}${notifBtn}${cur ? `<button class="chip ${wl.confirmDel ? 'danger' : ''}" data-wl="del">${wl.confirmDel ? T().wl.delConfirm : T().wl.del}</button>` : ''}</div>
       ${wl.buy ? buyListHtml(missing) : ''}
       <div class="rows">${list.map((c) => cardRow(c)).join('')}</div>`
     : `<div class="empty"><strong>${L.emptyWish}</strong>${L.emptyWishHint}</div>`}
-    ${alertIds.length ? `<h2 class="section-title">${T().wl.alerts}</h2><div class="rows">${alertIds.map((id) => { const c = cardsById.get(id); const a = alertOf(id); return `<div class="alert-item">${cardRow(c, 7)}<span class="alert-tag ${alertFired(id) ? 'fired' : ''}">${alertFired(id) ? '🔔 ' : ''}${T().wl.alertOn(eur(a.target))}</span></div>`; }).join('')}</div>` : ''}
+    ${alertIds.length ? `<h2 class="section-title">${T().wl.alerts}</h2><div class="rows">${alertIds.map((id) => { const c = cardsById.get(id); const a = alertOf(id); return `<div class="alert-item">${cardRow(c, 7)}<span class="alert-tag ${alertFired(id) ? 'fired' : ''}">${alertFired(id) ? ic('bell') : ''}${T().wl.alertOn(eur(a.target))}</span></div>`; }).join('')}</div>` : ''}
   </div>`;
 }
 function buyListHtml(missing) {
@@ -2783,7 +2804,7 @@ function wlDetailHtml(c) {
   const lists = myWl();
   return `<section class="panel wl-detail">
     ${wish.has(c.id) && lists.length ? `<div><small class="muted-label">${T().wl.inLists}</small><div class="chips">${lists.map((l) => `<button class="chip" data-wladd="${esc(l.id)}" aria-pressed="${l.ids.includes(c.id)}">${esc(l.name)}</button>`).join('')}</div></div>` : ''}
-    <div class="alert-line"><label for="alertInput">🔔 ${T().wl.alert}</label>
+    <div class="alert-line"><label for="alertInput">${ic('bell')}${T().wl.alert}</label>
       <input id="alertInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="${esc(T().wl.alertPh)}" value="${a ? a.target : ''}" data-alert-id="${esc(c.id)}">
       ${a ? `<button class="chip" data-wl="alertdel" data-id="${esc(c.id)}">${T().wl.alertDel}</button>` : `<small class="muted">${T().wl.alertHint}</small>`}</div>
   </section>`;
@@ -2891,7 +2912,7 @@ Object.assign(TX.fr, { gr: {
   photo: 'Photo du slab', photoAdd: 'Ajouter une photo', save: 'Enregistrer', del: 'Supprimer', delConfirm: 'Toucher encore pour supprimer',
   sales: 'Ventes relevées', saleAdd: 'Ajouter une vente', saleDate: 'Date', salePrice: 'Prix (€)', noSales: 'Ajoute les ventes réussies que tu vois (eBay, Cardmarket…) : la valeur estimée est la médiane des 3 dernières.',
   ebay: 'Voir les ventes réussies sur eBay', none: 'Aucune carte gradée pour l\'instant. Ajoute tes slabs PSA, BGS, CGC… pour suivre leur valeur.', total: (n, v) => `${n} slab${n > 1 ? 's' : ''} · ${v}`,
-  photoLocal: 'Les photos restent sur cet appareil.',
+  photoLocal: 'Les photos restent sur cet appareil.', official: 'Fiche officielle (texte et règles)',
 } });
 Object.assign(TX.en, { gr: {
   title: 'My graded cards', add: 'Add a graded card', addThis: 'Add a graded copy', youHave: (n) => `${n} graded`,
@@ -2899,7 +2920,7 @@ Object.assign(TX.en, { gr: {
   photo: 'Slab photo', photoAdd: 'Add a photo', save: 'Save', del: 'Delete', delConfirm: 'Tap again to delete',
   sales: 'Recorded sales', saleAdd: 'Add a sale', saleDate: 'Date', salePrice: 'Price (€)', noSales: 'Add the sold listings you see (eBay, Cardmarket…): the estimated value is the median of the last 3.',
   ebay: 'See sold listings on eBay', none: 'No graded card yet. Add your PSA, BGS, CGC… slabs to track their value.', total: (n, v) => `${n} slab${n > 1 ? 's' : ''} · ${v}`,
-  photoLocal: 'Photos stay on this device.',
+  photoLocal: 'Photos stay on this device.', official: 'Official card page (text and rules)',
 } });
 Object.assign(TX.zh, { gr: {
   title: '我的评级卡', add: '添加评级卡', addThis: '添加评级版本', youHave: (n) => `${n} 张评级卡`,
@@ -2907,7 +2928,7 @@ Object.assign(TX.zh, { gr: {
   photo: '评级卡照片', photoAdd: '添加照片', save: '保存', del: '删除', delConfirm: '再点一次删除',
   sales: '成交记录', saleAdd: '添加成交', saleDate: '日期', salePrice: '价格（€）', noSales: '添加你看到的成交价（eBay、Cardmarket…）：估值为最近 3 次的中位数。',
   ebay: '在 eBay 查看成交记录', none: '暂无评级卡。添加你的 PSA、BGS、CGC 评级卡以跟踪价值。', total: (n, v) => `${n} 张 · ${v}`,
-  photoLocal: '照片仅保存在此设备上。',
+  photoLocal: '照片仅保存在此设备上。', official: '官方卡牌页面（文本与规则）',
 } });
 const GRADERS = ['PSA', 'BGS', 'CGC', 'PCA', 'Collect Aura', 'SGC', 'TAG', 'ACE'];
 const GRADES = ['10', '9.5', '9', '8.5', '8', '7.5', '7', '6', '5', '4', '3', '2', '1'];
@@ -2963,7 +2984,7 @@ function renderGraded() {
   const total = list.reduce((a, g) => a + (gValue(g) ?? g.paid ?? 0), 0);
   return `<div class="toolbar num"><span>${T().gr.total(list.length, eur(total))}</span><span class="grow"></span><button class="chip" data-gr="new">+ ${T().gr.add}</button></div>
     ${gr.form ? gFormHtml() : ''}
-    ${list.length ? `<div class="slab-grid">${list.map((g) => slabHtml(g)).join('')}</div>` : gr.form ? '' : `<div class="empty"><strong>${T().gr.title}</strong>${T().gr.none}<button class="cta" style="width:auto;padding:14px 26px" data-gr="new">🏅 ${T().gr.add}</button></div>`}`;
+    ${list.length ? `<div class="slab-grid">${list.map((g) => slabHtml(g)).join('')}</div>` : gr.form ? '' : `<div class="empty"><strong>${T().gr.title}</strong>${T().gr.none}<button class="cta" style="width:auto;padding:14px 26px" data-gr="new">${ic('slab')}${T().gr.add}</button></div>`}`;
 }
 COL_TAB_RENDER.graded = renderGraded;
 COL_TAB_MOUNT.graded = gHydrate;
@@ -2975,7 +2996,7 @@ function gFormHtml() {
       <label>${T().gr.grade}<select id="gGrade">${GRADES.map((x) => `<option ${f.grade === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label></div>
     <div class="gform-row"><label>${T().gr.cert}<input id="gCert" class="search" maxlength="20" value="${esc(f.cert ?? '')}" autocomplete="off"></label>
       <label>${T().gr.paid}<input id="gPaid" class="search" type="number" inputmode="decimal" min="0" step="0.01" value="${f.paid ?? ''}"></label></div>
-    <label class="btn-ghost g-photo">${I.camera}<span id="gFormPhotoLabel">${f.photo ? '✔ ' : ''}${T().gr.photoAdd}</span><input type="file" accept="image/*" id="gFormPhoto" hidden></label>
+    <label class="btn-ghost g-photo">${I.camera}<span id="gFormPhotoLabel">${f.photo ? ic('check') : ''}${T().gr.photoAdd}</span><input type="file" accept="image/*" id="gFormPhoto" hidden></label>
     <button class="cta" data-gr="save" ${c ? '' : 'disabled'}>${T().gr.save}</button>
   </section>`;
 }
@@ -3067,13 +3088,16 @@ document.addEventListener('change', async (e) => {
 function gradedDetailBtn(c) {
   if (isSealed(c)) return '';
   const n = myGraded().filter((g) => g.id === c.id).length;
-  return `<button class="btn-ghost g-add" data-gr="new">🏅 <span>${T().gr.addThis}${n ? ` · ${T().gr.youHave(n)}` : ''}</span></button>`;
+  const off = officialUrl(c);
+  return `<button class="btn-ghost g-add" data-gr="new">${I2.slab}<span>${T().gr.addThis}${n ? ` · ${T().gr.youHave(n)}` : ''}</span></button>
+    ${off ? `<a class="btn-ghost g-add official-link" href="${esc(off)}" target="_blank" rel="noopener">${I2.rules}<span>${T().gr.official}</span></a>` : ''}`;
 }
 
 // ---------- Créateur de decks (règles Riftbound) et decks de tournoi ----------
 // Deck : 1 Légende, 1 champion choisi (unité du champion de la Légende), 40 cartes au deck principal champion compris,
 // 12 runes, 3 champs de bataille, réserve facultative ; 3 exemplaires maximum par nom ; couleurs de la Légende.
 Object.assign(TX.fr, { dk: {
+  rulesTitle: 'Règles de construction', rules: ['<b>1 Légende</b> : elle fixe les deux couleurs (domaines) du deck.', '<b>1 champion choisi</b> : une unité du champion de ta Légende (touche l\'étoile).', '<b>40 cartes</b> au deck principal, champion compris, toutes des couleurs de la Légende.', '<b>3 exemplaires maximum</b> d\'une même carte, toutes versions confondues.', '<b>12 runes</b> des couleurs de la Légende et <b>3 champs de bataille</b> différents.', 'En tournoi : une <b>réserve</b> et la liste des cartes interdites.'],
   tab: 'Decks', mine: 'Mes decks', new: 'Nouveau deck', newName: 'Nouveau deck', tourney: 'Decks de tournoi', tourneyHint: 'Listes gagnantes des derniers tournois, relevées chaque lundi sur Riftbound France (source riftdecks.com).',
   legend: 'Légende', champion: 'Champion choisi', main: 'Deck principal', rune: 'Runes', battlefield: 'Champs de bataille', side: 'Réserve',
   add: 'Ajouter une carte', chooseLegend: 'Choisir la Légende', setChamp: 'Champion choisi', copyDeck: 'Copier dans mes decks', copied: 'Deck copié dans tes decks',
@@ -3081,12 +3105,13 @@ Object.assign(TX.fr, { dk: {
   copyList: 'Copier la liste', listCopied: 'Liste copiée', toWish: 'Manquantes → souhaits', wished: (n) => `${n} carte${n > 1 ? 's' : ''} ajoutée${n > 1 ? 's' : ''} aux souhaits`,
   rename: 'Renommer', del: 'Supprimer le deck', delConfirm: 'Toucher encore pour supprimer', none: 'Crée un deck ou copie un deck de tournoi pour voir ce qu\'il te manque.',
   ok: 'Deck valide', warn: {
-    legend: 'Choisis une Légende.', champ: 'Choisis ton champion (une unité de ton champion, touche ★).', main: (n) => `Deck principal : ${n}/40 cartes (champion compris).`,
+    legend: 'Choisis une Légende.', champ: 'Choisis ton champion (une unité de ton champion, touche l\'étoile).', main: (n) => `Deck principal : ${n}/40 cartes (champion compris).`,
     rune: (n) => `Runes : ${n}/12.`, bf: (n) => `Champs de bataille : ${n}/3.`, copies: (x) => `Plus de 3 exemplaires : ${x}.`, domain: (x) => `Hors des couleurs de la Légende : ${x}.`, banned: (x) => `Interdites en Standard : ${x}.`,
   },
   event: (e, p, d) => [p, String(e ?? '').replace(/\s*\(\d{4}-\d{2}-\d{2}\)/, ''), d].filter(Boolean).join(' · '), source: 'Voir le deck sur Riftbound France',
 } });
 Object.assign(TX.en, { dk: {
+  rulesTitle: 'Deck-building rules', rules: ['<b>1 Legend</b>: it sets the deck\'s two colours (domains).', '<b>1 chosen champion</b>: a unit of your Legend\'s champion (tap the star).', '<b>40 cards</b> in the main deck, champion included, all in the Legend\'s colours.', '<b>Max 3 copies</b> of the same card, all printings combined.', '<b>12 runes</b> in the Legend\'s colours and <b>3 different battlefields</b>.', 'In tournaments: a <b>sideboard</b> and the banned list.'],
   tab: 'Decks', mine: 'My decks', new: 'New deck', newName: 'New deck', tourney: 'Tournament decks', tourneyHint: 'Winning lists from recent tournaments, collected every Monday from Riftbound France (source riftdecks.com).',
   legend: 'Legend', champion: 'Chosen champion', main: 'Main deck', rune: 'Runes', battlefield: 'Battlefields', side: 'Sideboard',
   add: 'Add a card', chooseLegend: 'Choose the Legend', setChamp: 'Chosen champion', copyDeck: 'Copy to my decks', copied: 'Deck copied to your decks',
@@ -3094,12 +3119,13 @@ Object.assign(TX.en, { dk: {
   copyList: 'Copy the list', listCopied: 'List copied', toWish: 'Missing → wishlist', wished: (n) => `${n} card${n > 1 ? 's' : ''} added to the wishlist`,
   rename: 'Rename', del: 'Delete the deck', delConfirm: 'Tap again to delete', none: 'Create a deck or copy a tournament deck to see what you are missing.',
   ok: 'Valid deck', warn: {
-    legend: 'Choose a Legend.', champ: 'Choose your champion (a unit of your champion, tap ★).', main: (n) => `Main deck: ${n}/40 cards (champion included).`,
+    legend: 'Choose a Legend.', champ: 'Choose your champion (a unit of your champion, tap the star).', main: (n) => `Main deck: ${n}/40 cards (champion included).`,
     rune: (n) => `Runes: ${n}/12.`, bf: (n) => `Battlefields: ${n}/3.`, copies: (x) => `More than 3 copies: ${x}.`, domain: (x) => `Outside the Legend's colours: ${x}.`, banned: (x) => `Banned in Standard: ${x}.`,
   },
   event: (e, p, d) => [p, String(e ?? '').replace(/\s*\(\d{4}-\d{2}-\d{2}\)/, ''), d].filter(Boolean).join(' · '), source: 'See the deck on Riftbound France',
 } });
 Object.assign(TX.zh, { dk: {
+  rulesTitle: '构筑规则', rules: ['<b>1 张传奇</b>：决定卡组的两种颜色（特性）。', '<b>1 个选定英雄</b>：你的传奇英雄的单位卡（点星标）。', '主卡组 <b>40 张</b>，含英雄，均为传奇的颜色。', '同名卡<b>最多 3 张</b>，所有版本合计。', '<b>12 张符文</b>（传奇的颜色）和 <b>3 张不同战场</b>。', '赛事中：<b>备牌</b>和禁卡表。'],
   tab: '卡组', mine: '我的卡组', new: '新建卡组', newName: '新卡组', tourney: '赛事卡组', tourneyHint: '近期赛事的获胜卡组，每周一从 Riftbound France 收集（来源 riftdecks.com）。',
   legend: '传奇', champion: '选定英雄', main: '主卡组', rune: '符文', battlefield: '战场', side: '备牌',
   add: '添加卡牌', chooseLegend: '选择传奇', setChamp: '选定英雄', copyDeck: '复制到我的卡组', copied: '已复制到你的卡组',
@@ -3107,7 +3133,7 @@ Object.assign(TX.zh, { dk: {
   copyList: '复制清单', listCopied: '已复制清单', toWish: '缺少的 → 心愿单', wished: (n) => `已将 ${n} 张加入心愿单`,
   rename: '重命名', del: '删除卡组', delConfirm: '再点一次删除', none: '新建卡组或复制赛事卡组，查看你还缺哪些卡牌。',
   ok: '卡组合法', warn: {
-    legend: '请选择传奇。', champ: '请选择英雄（你的英雄的单位卡，点 ★）。', main: (n) => `主卡组：${n}/40 张（含英雄）。`,
+    legend: '请选择传奇。', champ: '请选择英雄（你的英雄的单位卡，点星标）。', main: (n) => `主卡组：${n}/40 张（含英雄）。`,
     rune: (n) => `符文：${n}/12。`, bf: (n) => `战场：${n}/3。`, copies: (x) => `超过 3 张：${x}。`, domain: (x) => `不属于传奇的颜色：${x}。`, banned: (x) => `标准赛制禁用：${x}。`,
   },
   event: (e, p, d) => [p, String(e ?? '').replace(/\s*\(\d{4}-\d{2}-\d{2}\)/, ''), d].filter(Boolean).join(' · '), source: '在 Riftbound France 查看卡组',
@@ -3228,8 +3254,8 @@ function deckRow(d, name, q, sec, ro) {
   const isChampCand = sec === 'main' && c?.type === 'unit' && d.legend && champOf(c.name) === champOf(d.legend) && d.champion !== name;
   return `<div class="deck-row ${own >= q ? 'have' : 'need'}">
     ${c ? `<button class="dr-img" data-open="${esc(c.id)}">${cardImg(c)}</button>` : '<span class="dr-img"></span>'}
-    <span class="dr-name"><b>${esc(c ? cardName(c) : name)}</b><small class="num">${own >= q ? '✔' : '✖'} ${T().dk.owned(Math.min(own, q), q)} · ${eur(priceByName(name))}</small></span>
-    ${ro ? `<span class="dr-q num">×${q}</span>` : `<span class="dr-ctl">${isChampCand ? `<button class="icon-btn" data-dkchamp="${esc(name)}" title="${T().dk.setChamp}">★</button>` : ''}<button data-dkq="-1" data-sec="${sec}" data-name="${esc(name)}">−</button><output class="num">${q}</output><button data-dkq="1" data-sec="${sec}" data-name="${esc(name)}">+</button></span>`}
+    <span class="dr-name"><b>${esc(c ? cardName(c) : name)}</b><small class="num">${own >= q ? ic('check') : ic('cross')}${T().dk.owned(Math.min(own, q), q)} · ${eur(priceByName(name))}</small></span>
+    ${ro ? `<span class="dr-q num">×${q}</span>` : `<span class="dr-ctl">${isChampCand ? `<button class="icon-btn" data-dkchamp="${esc(name)}" title="${T().dk.setChamp}" aria-label="${T().dk.setChamp}">${I.star}</button>` : ''}<button data-dkq="-1" data-sec="${sec}" data-name="${esc(name)}">−</button><output class="num">${q}</output><button data-dkq="1" data-sec="${sec}" data-name="${esc(name)}">+</button></span>`}
   </div>`;
 }
 function deckSection(d, sec, ro) {
@@ -3253,7 +3279,7 @@ async function renderDeck(id) {
     <div class="deck-head" ${leg && imageOf(leg) ? `style="--art:url('${esc(imageOf(leg))}')"` : ''}>
       <div class="dh-cards">
         ${leg ? `<button class="dh-card" data-open="${esc(leg.id)}"><small>${T().dk.legend}</small>${cardImg(leg)}</button>` : `<button class="dh-card empty" data-dk="legend">+ ${T().dk.chooseLegend}</button>`}
-        ${champ ? `<button class="dh-card" data-open="${esc(champ.id)}"><small>${T().dk.champion}</small>${cardImg(champ)}</button>` : leg ? `<span class="dh-card empty">${T().dk.champion}<br>★</span>` : ''}
+        ${champ ? `<button class="dh-card" data-open="${esc(champ.id)}"><small>${T().dk.champion}</small>${cardImg(champ)}</button>` : leg ? `<span class="dh-card empty">${T().dk.champion}${I.star}</span>` : ''}
       </div>
       <div class="dh-info">
         ${tourney ? `<span class="dt-event">${esc(T().dk.event(d.tourney.event, d.tourney.place, d.tourney.date ? fmt.date.format(parseDay(d.tourney.date)) : ''))}</span>` : ''}
@@ -3262,7 +3288,8 @@ async function renderDeck(id) {
         ${leg ? `<span class="dh-doms">${(leg.domains ?? []).map((x) => `<i style="--c:${DOMAIN_HEX[x] ?? '#888'}">${esc(domainLabel(x))}</i>`).join('')}</span>` : ''}
       </div>
     </div>
-    ${warns.length ? `<ul class="deck-warn">${warns.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p class="deck-ok">✔ ${T().dk.ok}</p>`}
+    ${warns.length ? `<ul class="deck-warn">${warns.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : `<p class="deck-ok">${ic('check')}${T().dk.ok}</p>`}
+    <details class="panel deck-rules"><summary><h3>${T().dk.rulesTitle}</h3>${I.chevron}</summary><ul>${T().dk.rules.map((r) => `<li>${r}</li>`).join('')}</ul></details>
     <div class="chips">
       ${ro ? `<button class="chip" data-dk="copy">${T().dk.copyDeck}</button>` : `<button class="chip" data-dk="add">+ ${T().dk.add}</button>${!leg ? '' : `<button class="chip" data-dk="legend">${T().dk.legend}</button>`}`}
       <button class="chip" data-dk="list">${T().dk.copyList}</button>
@@ -3334,19 +3361,19 @@ document.addEventListener('click', async (e) => {
 // Amis : calculé à partir des collections que les amis partagent déjà (users/<uid>).
 // Monde : sur inscription, document leaderboard/<uid> { pseudo, value, cards, unique, sets } (totaux seulement).
 Object.assign(TX.fr, { lb: {
-  title: 'Classement', btn: '🏆 Classement', friends: 'Amis', world: 'Monde', value: 'Valeur', cards: 'Cartes', sets: 'Séries complètes',
+  title: 'Classement', btn: 'Classement', friends: 'Amis', world: 'Monde', value: 'Valeur', cards: 'Cartes', sets: 'Séries complètes',
   you: 'toi', join: 'Apparaître dans le classement mondial', joinHint: 'Seuls ton pseudo et tes totaux (valeur, cartes, séries complètes) sont publiés.', leave: 'Quitter le classement mondial',
   gate: 'Connecte-toi et choisis un pseudo (onglet Amis) pour voir le classement.', loading: 'Chargement du classement…', empty: 'Personne dans ce classement pour l\'instant.',
   rules: 'Classement mondial indisponible : publie les nouvelles règles Firestore (README).', all: 'toutes éditions',
 } });
 Object.assign(TX.en, { lb: {
-  title: 'Leaderboard', btn: '🏆 Leaderboard', friends: 'Friends', world: 'World', value: 'Value', cards: 'Cards', sets: 'Complete sets',
+  title: 'Leaderboard', btn: 'Leaderboard', friends: 'Friends', world: 'World', value: 'Value', cards: 'Cards', sets: 'Complete sets',
   you: 'you', join: 'Appear in the world leaderboard', joinHint: 'Only your username and totals (value, cards, complete sets) are published.', leave: 'Leave the world leaderboard',
   gate: 'Sign in and choose a username (Friends tab) to see the leaderboard.', loading: 'Loading the leaderboard…', empty: 'Nobody in this leaderboard yet.',
   rules: 'World leaderboard unavailable: publish the new Firestore rules (README).', all: 'all editions',
 } });
 Object.assign(TX.zh, { lb: {
-  title: '排行榜', btn: '🏆 排行榜', friends: '好友', world: '全球', value: '价值', cards: '卡牌', sets: '集齐系列',
+  title: '排行榜', btn: '排行榜', friends: '好友', world: '全球', value: '价值', cards: '卡牌', sets: '集齐系列',
   you: '你', join: '加入全球排行榜', joinHint: '仅公开你的昵称和总数（价值、卡牌数、集齐系列数）。', leave: '退出全球排行榜',
   gate: '登录并设置昵称（好友页）即可查看排行榜。', loading: '正在加载排行榜…', empty: '此排行榜暂无数据。',
   rules: '全球排行榜不可用：请发布新的 Firestore 规则（见 README）。', all: '所有版本',
@@ -3406,7 +3433,7 @@ function renderRanking(loaded) {
     ${lbControls()}
     ${lb.err ? `<p class="form-err">${esc(lb.err)}</p>` : ''}
     ${rows.length ? `<ol class="lb-list">${rows.map((r, i) => `<li class="${r.me ? 'me' : ''} ${i < 3 ? `top top${i + 1}` : ''}">
-      <span class="lb-rank num">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
+      <span class="lb-rank num">${i + 1}</span>
       ${r.me ? `<span class="lb-name">@${esc(r.pseudo)} <small>(${T().lb.you})</small></span>` : r.uid && lb.scope === 'friends' ? `<a class="lb-name" href="#friend-${esc(r.uid)}">@${esc(r.pseudo)}</a>` : `<span class="lb-name">@${esc(r.pseudo)}</span>`}
       <span class="lb-sub num">${r.cards} ${T().lb.cards.toLowerCase()} · ${r.sets} ${T().lb.sets.toLowerCase()}</span>
       <b class="lb-val num">${fmtM(r)}</b></li>`).join('')}</ol>` : `<div class="empty"><strong>${T().lb.empty}</strong></div>`}

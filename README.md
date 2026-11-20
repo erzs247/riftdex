@@ -35,7 +35,7 @@ sur le modèle de NightDex :
   alertes de prix (notification du navigateur), liste d'achat Cardmarket des cartes manquantes (copie au format « 1 Nom (Série) »).
 - **Decks** (accueil) : créateur de decks selon les règles de Riftbound (Légende, champion choisi, 40 cartes, 12 runes, 3 champs de bataille,
   3 exemplaires, couleurs, cartes interdites), cartes manquantes et leur coût, et **decks de tournoi** (Riftbound France, source riftdecks.com).
-- **Actualités officielles** (bouton 📣 de l'accueil, FR / EN / 中文) et **calendrier des sorties**.
+- **Actualités officielles** (bouton haut-parleur de l'accueil, FR / EN / 中文) et **calendrier des sorties**.
 - **Amis** : échanges (ses doubles qui te manquent, tes doubles qui lui manquent) et **classement** amis / monde (valeur, cartes, séries complètes ;
   le classement mondial est sur inscription et ne publie que le pseudo et les totaux).
 - **Scanner de cartes** (onglet Recherche → Scan) : la caméra reconnaît la carte, sur le téléphone, sans rien envoyer.

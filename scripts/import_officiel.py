@@ -496,6 +496,7 @@ def main():
             'artist': ', '.join(v['label'] for v in x.get('illustrator', {}).get('values', [])) or None,
             'variant': variant, 'landscape': x.get('orientation') == 'landscape',
             'tags': (x.get('tags') or {}).get('tags') or None,  # régions, peuples, champions (listes thématiques de l'appli)
+            'gid': x['id'],  # identifiant dans la galerie officielle : lien vers la fiche officielle (texte, règles)
             '_tier': TIER.get(x['rarity']['value']['id'], 2) + (2 if variant == 'star' else 0),
         })
     known = {c['id'] for c in cards}
@@ -651,16 +652,23 @@ def main():
                      'langs': langs, 'total': totals.get(code), 'cardmarket': {'idExpansion': v.get('idExpansion')}})
 
     # étiquettes de la galerie reportées sur les autres versions de même nom (signatures, promos, rééditions, variantes)
-    tags_by_name = {}
+    tags_by_name, gid_by_name = {}, {}
     for c in cards:
         if c.get('tags'):
             tags_by_name.setdefault(norm(c['name']), c['tags'])
+        if c.get('gid') and not c.get('variant'):
+            gid_by_name.setdefault(norm(c['name']), c['gid'])
     for c in cards:
         t = c.get('tags') or tags_by_name.get(norm(c['name']))
         if t:
             c['tags'] = t
         else:
             c.pop('tags', None)
+        g = c.get('gid') or gid_by_name.get(norm(c['name']))   # promos, rééditions, variantes : fiche de la version de base
+        if g:
+            c['gid'] = g
+        else:
+            c.pop('gid', None)
 
     add_cardmarket_paths(cards, singles, sets_cfg, config['cardmarket'].get('paths'))
     tcg_images(cards, sources, sets_cfg)
