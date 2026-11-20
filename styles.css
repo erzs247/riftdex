@@ -765,3 +765,40 @@ body {
 .set-row::before { background-size: 135% auto; background-position: 50% 26%; }
 .set-tile::before { background-size: 130% auto; background-position: 50% 20%; }
 .set-hero::before { background-size: max(118%, 520px) auto; background-position: 50% 24%; }
+/* dos par type de carte (en attendant les photos des vrais dos, config.cardBacks) */
+.c3d.back-rune .c3d-back-default { background: radial-gradient(circle at 50% 45%, #ffffff 0%, #e9e4d6 55%, #cfc6ae 100%); box-shadow: inset 0 0 0 10px #f6f1e4, inset 0 0 0 13px var(--accent), inset 0 0 0 16px #f6f1e4, inset 0 0 0 17px color-mix(in srgb, var(--accent) 45%, transparent); }
+.c3d.back-rune .c3d-back-default svg { fill: var(--accent); filter: none; }
+.c3d.back-rune .c3d-back-default b { color: #6b5428; } .c3d.back-rune .c3d-back-default b i { color: #2a2a2a; }
+.c3d.back-legend .c3d-back-default { background: radial-gradient(circle at 50% 45%, #2a2410 0%, #0d0c08 60%, #050505 100%); box-shadow: inset 0 0 0 10px #050505, inset 0 0 0 13px #f5c542, inset 0 0 0 16px #050505, inset 0 0 0 17px #f5c54266; }
+.c3d.back-legend .c3d-back-default svg { fill: #ffe08a; filter: drop-shadow(0 0 14px #f5c542); }
+.c3d.back-legend .c3d-back-default b { color: #f5c542; }
+
+/* ---------- Listes thématiques ---------- */
+.lists-block > summary small { margin-left: 8px; color: var(--muted); font: 600 13px var(--font-body); }
+.list-grid { display: grid; gap: 10px; padding: 0 12px 12px; }
+@media (min-width: 640px) { .list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+:root[data-device="pc"] .list-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.list-card {
+  position: relative; isolation: isolate; overflow: hidden; display: grid; gap: 8px; padding: 16px 16px 14px;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2); transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+.list-card::before { content: ""; position: absolute; z-index: -2; inset: 0 0 0 auto; width: 58%; background: var(--art, none) 50% 24% / 135% auto no-repeat; opacity: .55;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 75%); mask-image: linear-gradient(90deg, transparent, #000 75%); transition: transform .5s, opacity .3s; }
+.list-card::after { content: ""; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, var(--surface-2) 35%, color-mix(in srgb, var(--surface-2) 45%, transparent) 80%, transparent); }
+.list-link { position: absolute; inset: 0; z-index: 0; border-radius: inherit; }
+.list-top { display: flex; align-items: center; gap: 10px; }
+.list-top h3 { flex: 1; margin: 0; font: 700 19px/1.2 var(--font-body); text-shadow: 0 1px 8px #000; }
+.list-star { position: relative; z-index: 1; width: 38px; height: 38px; color: var(--muted); }
+.list-star svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.list-star.on { color: var(--accent-2); } .list-star.on svg { fill: currentColor; }
+.list-desc { margin: 0; color: color-mix(in srgb, var(--fg) 80%, var(--muted)); font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 78%; text-shadow: 0 1px 6px #000; }
+.list-prog { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; text-shadow: 0 1px 8px #000; }
+.list-prog b { font-size: 20px; } .list-prog small { color: var(--muted); font-size: 14px; }
+.list-prog span { margin-left: 10px; padding-left: 10px; border-left: 2px solid var(--line); font-weight: 700; font-size: 18px; }
+.list-card .bar { background: color-mix(in srgb, #000 45%, transparent); }
+.list-card.done { border-color: color-mix(in srgb, var(--accent) 70%, transparent); box-shadow: 0 0 22px -8px var(--accent); }
+@media (hover: hover) {
+  .list-card:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); transform: translateY(-2px); box-shadow: 0 14px 30px -18px #000; }
+  .list-card:hover::before { transform: scale(1.06); opacity: .75; }
+}
+@media (prefers-reduced-motion: reduce) { .list-card, .list-card::before { transition: none; } .list-card:hover { transform: none; } }

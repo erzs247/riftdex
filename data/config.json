@@ -183,5 +183,11 @@
   },
   "admins": [
     "dRrWSLm9dtOcGxwZWghdAaXAF4T2"
-  ]
+  ],
+  "cardBacks": {
+    "_aide": "Photos des dos des cartes (chemins d'images, ex. icons/backs/main.webp) : main = deck principal (bleu), rune = runes (blanc), legend = légendes et champs de bataille (noir). Vide : dos RiftDex de la même couleur.",
+    "main": null,
+    "rune": null,
+    "legend": null
+  }
 }

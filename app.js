@@ -20,6 +20,8 @@ const plural = (n, one, many) => (n > 1 ? many : one);
 const TEXT = {
   fr: {
     v3d: { open: 'Voir la carte en 3D', flip: 'Retourner', reset: 'Remettre de face', tip: 'Glisse pour tourner la carte · double-touche pour la retourner' },
+    listsTab: 'Listes', listsIntro: 'Listes thématiques : les cartes d\'une région, d\'un peuple, d\'un champion ou d\'un type, toutes séries confondues.', listFavOn: 'Liste ajoutée aux favoris', listFavOff: 'Liste retirée des favoris', favList: 'Liste favorite',
+    listGroups: { fav: 'Favoris', music: 'Groupes de musique', collection: 'Collection', region: 'Régions', people: 'Peuples et créatures', champion: 'Champions' },
     sealed: 'Scellé', setsTab: 'Séries', toggleView: 'Changer l\'affichage', extraTab: 'Extra',
     extraIntro: 'Versions vendues sur Cardmarket mais absentes de la galerie officielle de Riot : versions signées, runes et jetons à part, hors-séries pas encore publiés… Leur visuel est souvent celui d\'une autre version, et leur prix repose parfois sur très peu d\'offres.',
     extraOne: 'Version vendue sur Cardmarket, absente de la galerie officielle de Riot (rangée dans l\'onglet Extra de l\'accueil).',
@@ -108,6 +110,8 @@ const TEXT = {
   },
   en: {
     v3d: { open: 'View the card in 3D', flip: 'Flip', reset: 'Face front', tip: 'Drag to rotate the card · double-tap to flip it' },
+    listsTab: 'Lists', listsIntro: 'Themed lists: the cards of a region, a people, a champion or a type, across all sets.', listFavOn: 'List added to favourites', listFavOff: 'List removed from favourites', favList: 'Favourite list',
+    listGroups: { fav: 'Favourites', music: 'Music bands', collection: 'Collection', region: 'Regions', people: 'Peoples and creatures', champion: 'Champions' },
     sealed: 'Sealed', setsTab: 'Sets', toggleView: 'Change view', extraTab: 'Extra',
     extraIntro: 'Versions sold on Cardmarket but missing from Riot\'s official gallery: signed versions, separate runes and tokens, overnumbered cards not published yet… Their picture is often that of another version, and their price sometimes rests on very few offers.',
     extraOne: 'Version sold on Cardmarket, missing from Riot\'s official gallery (listed in the Extra tab of the home screen).',
@@ -196,6 +200,8 @@ const TEXT = {
   },
   zh: {
     v3d: { open: '3D 查看卡牌', flip: '翻面', reset: '回到正面', tip: '拖动旋转卡牌 · 双击翻面' },
+    listsTab: '列表', listsIntro: '主题列表：同一地区、种族、英雄或类型的卡牌，跨越所有系列。', listFavOn: '已收藏列表', listFavOff: '已取消收藏列表', favList: '收藏列表',
+    listGroups: { fav: '收藏', music: '音乐组合', collection: '收藏类别', region: '地区', people: '种族与生物', champion: '英雄' },
     sealed: '未拆封', setsTab: '系列', toggleView: '切换显示', extraTab: '其他',
     extraIntro: 'Cardmarket 上有售但 Riot 官方卡牌库中没有的版本：签名版、单独的符文和衍生物、尚未公布的超编号卡等。卡图常常是其他版本的，价格有时只基于极少的报价。',
     extraOne: 'Cardmarket 上有售、Riot 官方卡牌库中没有的版本（在首页的“其他”标签中）。',
@@ -648,7 +654,7 @@ function homeTopbar(withMode) {
 }
 // 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
 const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
-const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
+const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ['lists', L.listsTab], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
 const langNote = () => (L.langNote(lang) ? `<p class="lang-note">${L.langNote(lang)}</p>` : '');
 function renderSealed() {
   homeTopbar(false);
@@ -671,6 +677,122 @@ function renderExtra() {
     ${homeTabs('extra')}
     <p class="note">${L.extraIntro}</p>
     ${[...bySet].sort((a, b) => order(a[0]) - order(b[0])).map(([code, cards]) => `<h2 class="section-title"><b class="print">${esc(code)}</b> ${esc(setOf(code) ? setName(setOf(code)) : code)}</h2><div class="cards">${sortCards(cards, 'name').map(cardTile).join('')}</div>`).join('') || `<div class="empty"><strong>${L.noSet}</strong></div>`}
+  </div>`;
+}
+// ---------- Listes thématiques (comme les « Listes » de Pokécardex) : cartes d'une région, d'un peuple, d'un champion… ----------
+// Les régions, peuples et champions viennent des étiquettes de la galerie officielle (tags du catalogue).
+const REGIONS = [
+  ['Bandle City', 'Bandle', 'Bandle City', '班德尔城', 'de Bandle, la ville des Yordles'], ['Bilgewater', 'Bilgewater', 'Bilgewater', '比尔吉沃特', 'de Bilgewater'],
+  ['Demacia', 'Demacia', 'Demacia', '德玛西亚', 'de Demacia'], ['Freljord', 'Freljord', 'Freljord', '弗雷尔卓德', 'du Freljord'], ['Icathia', 'Icathia', 'Icathia', '艾卡西亚', 'd\'Icathia'],
+  ['Ionia', 'Ionia', 'Ionia', '艾欧尼亚', 'd\'Ionia'], ['Ixtal', 'Ixtal', 'Ixtal', '以绪塔尔', 'd\'Ixtal'], ['Mount Targon', 'Mont Targon', 'Mount Targon', '巨神峰', 'du Mont Targon'],
+  ['Noxus', 'Noxus', 'Noxus', '诺克萨斯', 'de Noxus'], ['Piltover', 'Piltover', 'Piltover', '皮尔特沃夫', 'de Piltover'], ['Shadow Isles', 'Îles obscures', 'Shadow Isles', '暗影岛', 'des Îles obscures'],
+  ['Shurima', 'Shurima', 'Shurima', '恕瑞玛', 'de Shurima'], ['The Void', 'Le Néant', 'The Void', '虚空', 'du Néant'], ['Zaun', 'Zaun', 'Zaun', '祖安', 'de Zaun'],
+];
+const PEOPLES = [
+  ['Yordle', 'Yordles', 'Yordles', '约德尔人'], ['Poro', 'Poros', 'Poros', '魄罗'], ['Dragon', 'Dragons', 'Dragons', '龙'], ['Mech', 'Mécas', 'Mechs', '机械'],
+  ['Fae', 'Fées', 'Fae', '精灵'], ['Spirit', 'Esprits', 'Spirits', '灵体'], ['Demon', 'Démons', 'Demons', '恶魔'], ['Pirate', 'Pirates', 'Pirates', '海盗'],
+  ['Dog', 'Chiens', 'Dogs', '犬'], ['Cat', 'Chats', 'Cats', '猫'], ['Bird', 'Oiseaux', 'Birds', '鸟'], ['Spider', 'Araignées', 'Spiders', '蜘蛛'],
+  ['Trifarian', 'Trifariens', 'Trifarians', '三相'], ['Sentinel', 'Sentinelles', 'Sentinels', '哨兵'],
+];
+const T3 = (fr, en, zh) => ({ fr, en, zh });
+// cartes des groupes de musique (identifiants du catalogue ; une variante renommée ensuite suit catalog.renamed)
+const MUSIC_CARDS = {
+  kda: ['RAD-SP1', 'RAD-SP2', 'RAD-SP3', 'RAD-SP4', 'RAD-SP5'],
+  heartsteel: ['RAD-X917660', 'RAD-X917661', 'RAD-X917662', 'RAD-X917663', 'RAD-X917664', 'RAD-X917665'],
+};
+let musicSets = null;
+function inMusic(k, c) {
+  if (!musicSets) musicSets = Object.fromEntries(Object.entries(MUSIC_CARDS).map(([g, ids]) => [g, new Set(ids.map((id) => catalog.renamed?.[id] ?? id))]));
+  return musicSets[k].has(c.id);
+}
+const hasTag = (t) => (c) => !!c.tags?.includes(t);
+const LISTS = [
+  // groupes de musique de Riot : cartes reconnues à leur illustration (liste à compléter dans MUSIC_CARDS)
+  { id: 'kda', group: 'music', title: T3('K/DA', 'K/DA', 'K/DA'), desc: T3('Le groupe pop K/DA : Ahri, Akali, Evelynn, Kai\'Sa et Seraphine, du coffret Couture Collection aux cartes spéciales de Radiance.', 'The K/DA pop group: Ahri, Akali, Evelynn, Kai\'Sa and Seraphine, from the Couture Collection box to the Radiance specials.', 'K/DA 女团：阿狸、阿卡丽、伊芙琳、卡莎和萨勒芬妮。'), test: (c) => c.set === 'KDA' || inMusic('kda', c), extras: true },
+  { id: 'heartsteel', group: 'music', title: T3('HEARTSTEEL', 'HEARTSTEEL', 'HEARTSTEEL'), desc: T3('Le boys band HEARTSTEEL : K\'Sante, Aphelios, Ezreal, Yone, Kayn et Sett, en hors-séries de Radiance.', 'The HEARTSTEEL boy band: K\'Sante, Aphelios, Ezreal, Yone, Kayn and Sett, as Radiance overnumbered cards.', 'HEARTSTEEL 男团：奎桑提、厄斐琉斯、伊泽瑞尔、永恩、凯隐和瑟提。'), test: (c) => inMusic('heartsteel', c), extras: true },
+  { id: 'alt', group: 'collection', title: T3('Illustrations alternatives', 'Alternate arts', '异画'), desc: T3('Les versions showcase avec une autre illustration (skins), foil et symbole hexagonal.', 'Showcase versions with another artwork (skins), foil with a hexagonal gem.', '采用其他插画（皮肤）的闪卡版本。'), test: (c) => c.variant === 'alt' },
+  { id: 'star', group: 'collection', title: T3('Hors-séries', 'Overnumbered', '超编'), desc: T3('Les cartes numérotées au-delà de la série (ex. 303/298), dessinées par les artistes de Riot.', 'Cards numbered beyond the set (e.g. 303/298), drawn by Riot artists.', '编号超出系列总数的卡牌（如 303/298）。'), test: (c) => c.variant === 'star' },
+  { id: 'sig', group: 'collection', title: T3('Signatures', 'Signatures', '签名'), desc: T3('Les hors-séries signés par l\'artiste, environ un sur dix.', 'Overnumbered cards signed by the artist, about one in ten.', '带有画师签名的超编卡，约十张中一张。'), test: (c) => c.variant === 'sig' || c.rarity === 'signature' },
+  { id: 'legend', group: 'collection', title: T3('Légendes', 'Legends', '传奇'), desc: T3('Les cartes Légende, qui définissent les couleurs d\'un deck.', 'Legend cards, which set the colours of a deck.', '决定卡组颜色的传奇卡。'), test: (c) => c.type === 'legend' },
+  { id: 'battlefield', group: 'collection', title: T3('Champs de bataille', 'Battlefields', '战场'), desc: T3('Les lieux où se déroulent les combats.', 'The places where the fights happen.', '战斗发生的地点。'), test: (c) => c.type === 'battlefield' },
+  { id: 'rune', group: 'collection', title: T3('Runes', 'Runes', '符文'), desc: T3('Les runes de chaque domaine et leurs versions alternatives.', 'The runes of each domain and their alternate versions.', '各特性的符文及其异画。'), test: (c) => c.type === 'rune' },
+  { id: 'token', group: 'collection', title: T3('Jetons', 'Tokens', '衍生物'), desc: T3('Les jetons et marqueurs (Mécas, Recrues, Bombes…).', 'Tokens and markers (Mechs, Recruits, Bombs…).', '衍生物与指示物。'), test: (c) => c.type === 'token' || /^T\d/.test(c.number ?? '') },
+  { id: 'promo', group: 'collection', title: T3('Promos', 'Promos', '宣传卡'), desc: T3('Les cartes promotionnelles : Nexus Nights, tournois, avant-premières…', 'Promotional cards: Nexus Nights, tournaments, pre-rifts…', '宣传卡：符文之夜、赛事、售前活动等。'), test: (c) => c.rarity === 'promo' },
+  ...REGIONS.map(([tag, fr, en, zh, frOf]) => ({ id: `r-${tag.toLowerCase().replace(/\W+/g, '-')}`, group: 'region', title: T3(fr, en, zh), desc: T3(`Les cartes ${frOf}.`, `The cards of ${en}.`, `${zh}的卡牌。`), test: hasTag(tag) })),
+  ...PEOPLES.map(([tag, fr, en, zh]) => ({ id: `p-${tag.toLowerCase()}`, group: 'people', title: T3(fr, en, zh), desc: T3(`Toutes les cartes ${fr}.`, `All the ${en} cards.`, `所有${zh}卡牌。`), test: hasTag(tag) })),
+];
+// titres et descriptions des listes : textes de l'appli, dans la langue du site
+const listTitle = (d) => d.title[ui] ?? d.title.en;
+const listDesc = (d) => d.desc[ui] ?? d.desc.en;
+// listes de champions : un champion avec au moins 6 cartes dans l'édition (étiquette au nom du champion)
+let championLists = null;
+function allLists() {
+  if (!championLists) {
+    const known = new Set([...REGIONS, ...PEOPLES].map(([t]) => t).concat(['Equipment', 'Device', 'Elite', 'Recruit']));
+    const count = new Map();
+    for (const c of catalog.cards) for (const t of c.tags ?? []) if (!known.has(t)) count.set(t, (count.get(t) ?? 0) + 1);
+    championLists = [...count].filter(([, n]) => n >= 6).sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([t]) => ({ id: `c-${t.toLowerCase().replace(/\W+/g, '-')}`, group: 'champion', title: T3(t, t, t), desc: T3(`Toutes les cartes de ${t}.`, `All the ${t} cards.`, `${t} 的所有卡牌。`), test: hasTag(t) }));
+  }
+  return [...LISTS, ...championLists];
+}
+const setOrder = (c) => setOf(c.set)?.order ?? 999;
+const listCards = (d) => editionCards().filter((c) => (d.extras || !isExtraCard(c)) && d.test(c))
+  .sort((a, b) => setOrder(a) - setOrder(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true }));
+function bestArt(cards) {
+  const rank = (c) => (c.variant === 'alt' ? 3 : c.rarity === 'showcase' ? 2 : c.rarity === 'epic' || c.type === 'legend' ? 1 : 0);
+  const best = cards.filter((c) => imageOf(c) && !c.landscape && c.variant !== 'star' && c.variant !== 'sig')
+    .sort((a, b) => rank(b) - rank(a) || (price(b.id) ?? 0) - (price(a.id) ?? 0))[0] ?? cards.find((c) => imageOf(c));
+  return best ? imageOf(best) : null;
+}
+function listCard(d, cards) {
+  const own = cards.filter((c) => qty(c.id) > 0).length, total = cards.length, p = total ? own / total : 0;
+  const art = bestArt(cards);
+  const key = `list:${d.id}`;
+  return `<div class="list-card ${p >= 1 ? 'done' : ''}" ${art ? `style="--art:url('${esc(art)}')"` : ''}>
+    <a class="list-link" href="#list-${esc(d.id)}" aria-label="${esc(listTitle(d))}"></a>
+    <div class="list-top"><h3>${esc(listTitle(d))}</h3>
+      <button class="icon-btn list-star ${fav.has(key) ? 'on' : ''}" data-fav="${esc(key)}" aria-pressed="${fav.has(key)}" aria-label="${L.favList}">${I.star}</button></div>
+    <p class="list-desc">${esc(listDesc(d))}</p>
+    <div class="list-prog num"><b>${own}</b><small>/${total}</small><span>${Math.floor(p * 100)} %</span></div>
+    <div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>
+  </div>`;
+}
+function renderLists() {
+  homeTopbar(false);
+  const withCards = allLists().map((d) => [d, listCards(d)]).filter(([, cards]) => cards.length);
+  const groups = [['fav', withCards.filter(([d]) => fav.has(`list:${d.id}`))], ...['music', 'collection', 'region', 'people', 'champion'].map((g) => [g, withCards.filter(([d]) => d.group === g)])];
+  view.innerHTML = `<div class="stack">
+    ${homeTabs('lists')}
+    <p class="note">${L.listsIntro}</p>
+    ${groups.filter(([, l]) => l.length).map(([g, l]) => `<details class="block lists-block" ${g === 'champion' ? '' : 'open'}>
+      <summary>${esc(L.listGroups[g])} <small class="num">${l.length}</small>${I.chevron}</summary>
+      <div class="list-grid">${l.map(([d, cards]) => listCard(d, cards)).join('')}</div>
+    </details>`).join('')}
+  </div>`;
+}
+function renderList(id) {
+  const d = allLists().find((x) => x.id === id);
+  if (!d) { location.hash = '#lists'; return; }
+  const all = listCards(d);
+  const list = sortCards(filterCards(all), user.prefs.sort === 'num' ? 'num' : user.prefs.sort);
+  const own = all.filter((c) => qty(c.id) > 0).length, p = all.length ? own / all.length : 0;
+  const value = all.reduce((a, c) => a + qty(c.id) * (price(c.id) ?? 0), 0);
+  const art = bestArt(all);
+  const key = `list:${d.id}`;
+  setTopbar(`<a class="icon-btn" href="#lists" aria-label="${L.back}">${I.back}</a>
+    <h1 class="small">${esc(listTitle(d))}</h1>
+    <button class="icon-btn ${fav.has(key) ? 'on' : ''}" data-fav="${esc(key)}" aria-pressed="${fav.has(key)}" aria-label="${L.favList}">${I.star}</button>
+    <button class="icon-btn" data-action="cycle-sort" aria-label="${L.changeSort}">${I.sort}</button>`);
+  view.innerHTML = `<div class="stack">
+    <div class="set-hero" ${art ? `style="--art:url('${esc(art)}')"` : ''}>
+      <div class="set-hero-text"><span class="set-code">${esc(L.listGroups[d.group])}</span><h2>${esc(listTitle(d))}</h2><small>${esc(listDesc(d))}</small></div>
+      <div class="set-hero-prog num"><b>${Math.floor(p * 100)} %</b><span>${own}/${all.length}</span></div>
+      <div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>
+    </div>
+    ${seg('setMode', user.prefs.setMode, [['cards', L.cards], ['list', L.list], ['grid', L.grid]])}
+    <div class="toolbar num"><span>${L.owned(own, all.length)}</span><span class="grow"></span>${hasPrices() ? `<span>${L.myValue} : <b style="color:var(--fg)">${eur(value)}</b></span>` : ''}</div>
+    ${cardsBlock(list, user.prefs.setMode)}
   </div>`;
 }
 function renderHome() {
@@ -1826,7 +1948,7 @@ document.addEventListener('click', async (e) => {
   else if (d.seg === 'ui') setUi(d.value);
   else if (d.seg) { user.prefs[d.seg] = d.value; save(); currentRender(); }
   else if (d.pref) { user.prefs[d.pref] = d.value || null; if (d.pref === 'own' && !d.value) user.prefs.own = 'all'; save(); currentRender(); }
-  else if (d.fav) { fav.has(d.fav) ? fav.delete(d.fav) : fav.add(d.fav); save(); currentRender(); toast(fav.has(d.fav) ? L.favOn : L.favOff); }
+  else if (d.fav) { fav.has(d.fav) ? fav.delete(d.fav) : fav.add(d.fav); save(); currentRender(); const isList = d.fav.startsWith('list:'); toast(fav.has(d.fav) ? (isList ? L.listFavOn : L.favOn) : (isList ? L.listFavOff : L.favOff)); }
   else if (d.colset !== undefined) { colSet = d.colset; currentRender(); }
   else if (d.qty && openId) {
     const id = openId;
@@ -1930,8 +2052,11 @@ sheet.addEventListener('click', (e) => { if (e.target.matches('.sheet-backdrop')
 // ---------- Vue 3D d'une carte (comme NightDex) : la tourner dans tous les sens, la retourner, reflet holographique ----------
 let v3d = null;
 const v3 = { rx: 0, ry: 0, vx: 0, vy: 0, drag: null, raf: 0, lastTap: 0, idle: 0, spin: null };
-// cartes brillantes (showcase, épiques, signées, hors-séries, promos) : reflet holographique ; les autres : simple éclat
-const isShiny = (c) => !!c && !isSealed(c) && (['showcase', 'epic', 'signature', 'promo'].includes(c.rarity) || ['alt', 'star', 'sig'].includes(c.variant));
+// cartes imprimées en foil (Riot : « every Rare and Epic will always be foil », showcase, hors-séries et signées aussi ;
+// Proving Grounds est entièrement non foil) : seules elles brillent en 3D, les autres n'ont aucun reflet
+const isShiny = (c) => !!c && !isSealed(c) && c.set !== 'OGS' && (['rare', 'epic', 'showcase', 'signature'].includes(c.rarity) || ['alt', 'star', 'sig'].includes(c.variant));
+// dos des cartes : bleu (deck principal), blanc (runes), noir (légendes et champs de bataille) ; photos dans config.cardBacks
+const backKind = (c) => (c.type === 'rune' ? 'rune' : c.type === 'legend' || c.type === 'battlefield' ? 'legend' : 'main');
 function v3dRender() {
   const card = v3d.querySelector('.c3d');
   card.style.transform = `rotateX(${v3.rx.toFixed(2)}deg) rotateY(${v3.ry.toFixed(2)}deg)`;
@@ -2002,11 +2127,13 @@ function zoomOpen(c) {
   }
   const src = imageOf(c) || placeholderArt(c);
   const sealedItem = isSealed(c);
-  const glare = isShiny(c) ? '<span class="c3d-glare c3d-holo"></span><span class="c3d-glare c3d-sparkle"></span><span class="c3d-glare c3d-shine"></span>' : '<span class="c3d-glare c3d-shine soft"></span>';
+  const glare = isShiny(c) ? '<span class="c3d-glare c3d-holo"></span><span class="c3d-glare c3d-sparkle"></span><span class="c3d-glare c3d-shine"></span>' : '';
+  const kind = backKind(c);
+  const backImg = config.cardBacks?.[kind];
   v3d.innerHTML = `<div class="v3d-stage">
-      <div class="c3d ${sealedItem ? 'is-sealed' : ''} ${c.landscape ? '' : ''}" style="--rc:${RARITY_HEX[c.rarity] ?? 'var(--accent)'}">
+      <div class="c3d ${sealedItem ? 'is-sealed' : ''} back-${kind}" style="--rc:${RARITY_HEX[c.rarity] ?? 'var(--accent)'}">
         <div class="c3d-face c3d-front"><img src="${esc(src)}" alt="${esc(cardName(c))}" draggable="false">${sealedItem ? '' : glare}</div>
-        <div class="c3d-face c3d-back">${sealedItem ? '' : `<span class="c3d-back-default"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M262 74 L238 168 L276 214 L230 300 L268 344 L246 446 L300 330 L262 290 L306 206 L270 160 Z"/></svg><b>RIFT<i>DEX</i></b></span>`}</div>
+        <div class="c3d-face c3d-back">${sealedItem ? '' : backImg ? `<img src="${esc(backImg)}" alt="" draggable="false">` : `<span class="c3d-back-default"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M262 74 L238 168 L276 214 L230 300 L268 344 L246 446 L300 330 L262 290 L306 206 L270 160 Z"/></svg><b>RIFT<i>DEX</i></b></span>`}</div>
       </div>
     </div>
     <div class="v3d-bar">
@@ -2048,6 +2175,8 @@ function route() {
   else if (h === 'values') currentRender = renderValues;
   else if (h === 'sealed') { tab = 'sealed'; currentRender = renderSealed; }
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
+  else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
+  else if (h.startsWith('list-')) { tab = 'home'; currentRender = () => renderList(h.slice(5)); }
   else if (h === 'friends') { fr.view = null; fr.msg = ''; currentRender = renderFriends; }
   else if (h.startsWith('friend-')) { tab = 'friends'; const uid = h.slice(7); if (fr.view?.uid !== uid) fr.filter = 'all'; renderFriendCurrent = () => renderFriend(uid); currentRender = renderFriendCurrent; }
   else { tab = 'home'; currentRender = renderHome; }
