@@ -248,8 +248,10 @@ def tcg_images(cards, sources, sets_cfg):
     used = set()
     for (s, k), group_cards in need.items():
         abbrs = TCG_GROUPS.get(s) or TCG_PROMO_GROUPS
-        cands = sorted((p for a in abbrs for p in group_products(a) if tcg_base(p['name']) == k and p['productId'] not in used),
-                       key=lambda p: p['productId'])
+        # jetons : TCGplayer les vend recto verso (« Mech // Gold ») ; l'image du produit montre le recto
+        cands = sorted((p for a in abbrs for p in group_products(a) if k in (tcg_base(p['name']), tcg_base(p['name'].split(' // ')[0]))
+                        and p['productId'] not in used and (' // ' not in p['name'] or p.get('imageCount'))),
+                       key=lambda p: (' // ' in p['name'], p['productId']))
         if not cands:
             continue
         group_cards.sort(key=lambda c: (c.get('cardmarket') or {}).get('idProduct', 0))
@@ -263,6 +265,16 @@ def tcg_images(cards, sources, sets_cfg):
                 c.pop('artApprox', None)
             else:
                 c['artApprox'] = True
+            found += 1
+    # jetons et variantes encore sans image anglaise : celle du même jeton dans une autre série (visuel approché)
+    by_name = {}
+    for c in cards:
+        if sources.get(c['id'], {}).get('en'):
+            by_name.setdefault(norm(c['name']), sources[c['id']]['en'])
+    for c in cards:
+        if c.get('variant') == 'extra' and not c.get('only') and not sources.get(c['id'], {}).get('en') and norm(c['name']) in by_name:
+            sources.setdefault(c['id'], {})['en'] = by_name[norm(c['name'])]
+            c['artApprox'] = True
             found += 1
     print(f'  {found} images TCGplayer pour les promos et les cartes sans image officielle')
 
@@ -473,7 +485,8 @@ def main():
     # elle garde son identifiant et son produit Cardmarket, donc sa place dans les collections
     for oc in old['cards']:
         # (les « variantes » sans numéro sont recréées à chaque passage, avec le même identifiant, à partir des produits restants)
-        if oc['id'] not in known and oc['set'] in sets_cfg and sets_cfg[oc['set']].get('block') != 'promo' and oc.get('variant') != 'extra':
+        # (les exclusivités chinoises, sans produit Cardmarket, sont reprises après l'édition chinoise : voir plus bas)
+        if oc['id'] not in known and oc['set'] in sets_cfg and sets_cfg[oc['set']].get('block') != 'promo' and oc.get('variant') != 'extra' and not oc.get('only'):
             known.add(oc['id'])
             sources[oc['id']] = {}
             cards.append({**oc, '_tier': 9})
@@ -564,6 +577,20 @@ def main():
     # --- édition chinoise : scans chinois officiels et cartes imprimées seulement en chinois ---
     print('Cartes chinoises officielles…')
     add_chinese(cards, sources, chinese_cards(), sets_cfg)
+    present = {c['id'] for c in cards}
+    for oc in old['cards']:  # exclusivité chinoise disparue de la source : elle reste dans l'appli
+        if oc.get('only') and oc['id'] not in present:
+            sources[oc['id']] = {}
+            cards.append({**oc, '_tier': 9})
+
+    # carte qui a changé d'identifiant (variante Cardmarket désormais publiée par Riot, ex. RAD-X917662 -> RAD-180*) :
+    # l'appli reporte les exemplaires, souhaits et favoris sur le nouvel identifiant
+    new_by_product = {c['cardmarket']['idProduct']: c['id'] for c in cards if (c.get('cardmarket') or {}).get('idProduct')}
+    renamed = dict(old.get('renamed', {}))
+    for oc in old['cards']:
+        pid = (oc.get('cardmarket') or {}).get('idProduct')
+        if pid and oc['id'] not in present and new_by_product.get(pid, oc['id']) != oc['id']:
+            renamed[oc['id']] = new_by_product[pid]
 
     # --- langues imprimées : français si la série est dans la galerie française de Riot (ou si Cardmarket vend du scellé
     # français), chinois si elle a des scans chinois (ou du scellé chinois) ---
@@ -597,7 +624,7 @@ def main():
     added = [c['id'] for c in cards if c['id'] not in old_cards]
     config['sets'] = {'_aide': config['sets'].get('_aide', '')} | {k: v for k, v in sets_cfg.items()}
     (DATA / 'config.json').write_text(__import__('json').dumps(config, ensure_ascii=False, indent=2), encoding='utf8')
-    write_json(DATA / 'catalog.json', {'source': 'playriftbound.com + cartes chinoises officielles + Riftcodex + Cardmarket', 'sets': sets, 'cards': cards})
+    write_json(DATA / 'catalog.json', {'source': 'playriftbound.com + cartes chinoises officielles + Riftcodex + Cardmarket', 'sets': sets, 'cards': cards, 'renamed': renamed})
     print(f'{len(cards)} cartes dans {len(sets)} séries ; {len(added)} nouvelles{(" : " + ", ".join(added[:20])) if added else ""}{" …" if len(added) > 20 else ""}')
 
 

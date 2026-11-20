@@ -43,11 +43,12 @@ Les cartes imprimées seulement en chinois (illustrations « b », versions « P
 `only: ["zh"]` dans `data/catalog.json` ; celles des coffrets chinois sont dans la série « Exclusivités Chine » (`CN`), sans prix Cardmarket.
 Les prix Cardmarket ne distinguent pas les langues : une carte a le même prix dans les trois éditions.
 
-**Liens Cardmarket** : le bouton de la fiche ouvre la page exacte de la carte (`Products/Singles/<extension>/<Nom>`),
-filtrée sur la langue de l'édition. Pour une carte en plusieurs versions, Cardmarket numérote les versions dans l'ordre
-de ses identifiants (V1 normale, V2 illustration alternative, V3 hors-série…) et ajoute la rareté (`Nom-V2-Showcase`) ;
-comme cette rareté ne se déduit pas toujours, un second lien ouvre la page de toutes les versions de la carte.
-Le nom de chaque extension dans les adresses Cardmarket est `cmSlug` dans `data/config.json`.
+**Liens Cardmarket** : le bouton de la fiche ouvre la page exacte du produit grâce à la redirection officielle de Cardmarket
+par numéro de produit (`Products?idProduct=<n>`, numéro du catalogue public de Cardmarket), filtrée sur la langue de l'édition.
+Aucune adresse n'est devinée, donc toutes les versions (illustrations alternatives, hors-séries, signées, jetons) ouvrent la bonne
+page. Le scellé utilise le même lien. Les exclusivités chinoises, absentes de Cardmarket, n'ont pas de bouton.
+Quand une variante Cardmarket change d'identifiant (publiée ensuite par Riot), `renamed` dans `data/catalog.json` permet à
+l'appli de reporter les exemplaires sur la nouvelle carte.
 
 ## Mise en ligne et mises à jour automatiques (GitHub Pages)
 
