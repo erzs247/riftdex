@@ -364,7 +364,7 @@ let lastSig = colCanon(user.col);
 function save() {
   C.wish = [...wish]; C.fav = [...fav];
   const sig = colCanon(user.col);
-  if (sig !== lastSig) { lastSig = sig; cloudChanged(); if (catalog.cards.length) badgeCheck(); }
+  if (sig !== lastSig) { lastSig = sig; cloudChanged(); if (catalog.cards.length) { badgeCheck(); if (user.prefs.lbWorld) lbPush(); } }
   try { localStorage.setItem(KEY, JSON.stringify(user)); } catch { /* stockage indisponible */ }
 }
 
@@ -1632,6 +1632,7 @@ function renderFriends() {
     return;
   }
   view.innerHTML = `<div class="stack friends">
+    <a class="cta lb-cta" href="#ranking">${T().lb.btn}</a>
     <section class="panel">
       <h3>${L.fr.add}<small>${L.fr.yourPseudo} <b class="pseudo">@${esc(fr.me.pseudo)}</b></small></h3>
       <form class="inline-form" id="addFriendForm"><input class="search" id="friendInput" maxlength="21" autocomplete="off" placeholder="${L.fr.addPh}"><button class="cta" ${fr.busy ? 'disabled' : ''}>${L.fr.send}</button></form>
@@ -3322,6 +3323,104 @@ document.addEventListener('click', async (e) => {
   }
 });
 
+// ---------- Classement amis / monde (comme NightDex) ----------
+// Amis : calculé à partir des collections que les amis partagent déjà (users/<uid>).
+// Monde : sur inscription, document leaderboard/<uid> { pseudo, value, cards, unique, sets } (totaux seulement).
+Object.assign(TX.fr, { lb: {
+  title: 'Classement', btn: '🏆 Classement', friends: 'Amis', world: 'Monde', value: 'Valeur', cards: 'Cartes', sets: 'Séries complètes',
+  you: 'toi', join: 'Apparaître dans le classement mondial', joinHint: 'Seuls ton pseudo et tes totaux (valeur, cartes, séries complètes) sont publiés.', leave: 'Quitter le classement mondial',
+  gate: 'Connecte-toi et choisis un pseudo (onglet Amis) pour voir le classement.', loading: 'Chargement du classement…', empty: 'Personne dans ce classement pour l\'instant.',
+  rules: 'Classement mondial indisponible : publie les nouvelles règles Firestore (README).', all: 'toutes éditions',
+} });
+Object.assign(TX.en, { lb: {
+  title: 'Leaderboard', btn: '🏆 Leaderboard', friends: 'Friends', world: 'World', value: 'Value', cards: 'Cards', sets: 'Complete sets',
+  you: 'you', join: 'Appear in the world leaderboard', joinHint: 'Only your username and totals (value, cards, complete sets) are published.', leave: 'Leave the world leaderboard',
+  gate: 'Sign in and choose a username (Friends tab) to see the leaderboard.', loading: 'Loading the leaderboard…', empty: 'Nobody in this leaderboard yet.',
+  rules: 'World leaderboard unavailable: publish the new Firestore rules (README).', all: 'all editions',
+} });
+Object.assign(TX.zh, { lb: {
+  title: '排行榜', btn: '🏆 排行榜', friends: '好友', world: '全球', value: '价值', cards: '卡牌', sets: '集齐系列',
+  you: '你', join: '加入全球排行榜', joinHint: '仅公开你的昵称和总数（价值、卡牌数、集齐系列数）。', leave: '退出全球排行榜',
+  gate: '登录并设置昵称（好友页）即可查看排行榜。', loading: '正在加载排行榜…', empty: '此排行榜暂无数据。',
+  rules: '全球排行榜不可用：请发布新的 Firestore 规则（见 README）。', all: '所有版本',
+} });
+const lb = { scope: 'friends', metric: 'value', rows: null, err: '', timer: 0 };
+// cartes de chaque série par édition (séries principales, sans les variantes Cardmarket)
+let setByEd = null;
+function inEditionL(c, l) { return !!setOf(c.set)?.langs.includes(l) && (!c.only || c.only.includes(l)) && (l !== 'zh' || !!c.imageZh); }
+function colStats(col) {
+  if (!setByEd) {
+    setByEd = {};
+    for (const l of LANGS) for (const s of catalog.sets.filter((x) => x.block === 'main' && x.langs.includes(l))) setByEd[`${l}:${s.code}`] = catalog.cards.filter((c) => c.set === s.code && !isExtraCard(c) && inEditionL(c, l)).map((c) => c.id);
+  }
+  let value = 0, cards = 0, unique = 0, sets = 0;
+  for (const l of LANGS) {
+    const owned = col?.[l]?.owned ?? {};
+    for (const [id, q] of Object.entries(owned)) { if (!(q > 0)) continue; cards += q; unique++; value += q * (price(id) ?? 0); }
+    for (const [k, ids] of Object.entries(setByEd)) if (k.startsWith(`${l}:`) && ids.length && ids.every((id) => (owned[id] ?? 0) > 0)) sets++;
+  }
+  return { value: Math.round(value * 100) / 100, cards, unique, sets };
+}
+const lbRef = (uid) => dref('leaderboard', uid);
+// envoi de mes totaux (si inscrit), au plus une fois toutes les 5 s
+function lbPush() {
+  if (!cloud.user || !user.prefs.lbWorld || !fr.me?.pseudo) return;
+  clearTimeout(lb.timer);
+  lb.timer = setTimeout(async () => {
+    try { await fsx().setDoc(lbRef(cloud.user.uid), { pseudo: fr.me.pseudo, ...colStats(user.col), updatedAt: fsx().serverTimestamp() }); }
+    catch (e) { if (e?.code === 'permission-denied') lb.err = T().lb.rules; }
+  }, 5000);
+}
+async function lbLoad() {
+  lb.rows = null; lb.err = '';
+  const me = { uid: cloud.user.uid, pseudo: fr.me?.pseudo ?? T().lb.you, me: true, ...colStats(user.col) };
+  try {
+    if (lb.scope === 'friends') {
+      const rows = await Promise.all(fr.list.map(async (f) => {
+        try { const s = await fsx().getDoc(dref('users', f.uid)); return { uid: f.uid, pseudo: f.pseudo, ...colStats(s.exists() ? s.data().col : {}) }; } catch { return null; }
+      }));
+      lb.rows = [me, ...rows.filter(Boolean)];
+    } else {
+      const { query, collection, orderBy, limit, getDocs } = fsx();
+      const snap = await getDocs(query(collection(cloud.api.db, 'leaderboard'), orderBy(lb.metric, 'desc'), limit(50)));
+      lb.rows = snap.docs.map((d) => ({ uid: d.id, ...d.data(), me: d.id === cloud.user.uid }));
+      if (!lb.rows.some((r) => r.me) && user.prefs.lbWorld) lb.rows.push(me);
+    }
+  } catch (e) { lb.rows = []; lb.err = e?.code === 'permission-denied' ? T().lb.rules : String(e?.message ?? e); }
+  if (currentRender === renderRanking) renderRanking(true);
+}
+function renderRanking(loaded) {
+  setTopbar(`<a class="icon-btn" href="#friends" aria-label="${L.back}">${I.back}</a><h1 class="small">${T().lb.title}</h1>`);
+  if (!cloud.user || !fr.me?.pseudo) { view.innerHTML = `<div class="empty"><strong>${T().lb.title}</strong>${T().lb.gate}<a class="btn-ghost" href="#friends" style="text-decoration:none">${L.fr.title}</a></div>`; return; }
+  if (!loaded) { view.innerHTML = `<div class="stack">${lbControls()}<div class="empty"><strong>${T().lb.loading}</strong></div></div>`; lbLoad(); return; }
+  const fmtM = (r) => (lb.metric === 'value' ? eur(r.value) : lb.metric === 'cards' ? String(r.cards) : String(r.sets));
+  const rows = [...(lb.rows ?? [])].sort((a, b) => (b[lb.metric] ?? 0) - (a[lb.metric] ?? 0));
+  view.innerHTML = `<div class="stack">
+    ${lbControls()}
+    ${lb.err ? `<p class="form-err">${esc(lb.err)}</p>` : ''}
+    ${rows.length ? `<ol class="lb-list">${rows.map((r, i) => `<li class="${r.me ? 'me' : ''} ${i < 3 ? `top top${i + 1}` : ''}">
+      <span class="lb-rank num">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
+      ${r.me ? `<span class="lb-name">@${esc(r.pseudo)} <small>(${T().lb.you})</small></span>` : r.uid && lb.scope === 'friends' ? `<a class="lb-name" href="#friend-${esc(r.uid)}">@${esc(r.pseudo)}</a>` : `<span class="lb-name">@${esc(r.pseudo)}</span>`}
+      <span class="lb-sub num">${r.cards} ${T().lb.cards.toLowerCase()} · ${r.sets} ${T().lb.sets.toLowerCase()}</span>
+      <b class="lb-val num">${fmtM(r)}</b></li>`).join('')}</ol>` : `<div class="empty"><strong>${T().lb.empty}</strong></div>`}
+    ${lb.scope === 'world' ? `<section class="panel"><label class="lb-join"><input type="checkbox" id="lbJoin" ${user.prefs.lbWorld ? 'checked' : ''}><span>${T().lb.join}</span></label><p class="note" style="margin:0">${T().lb.joinHint}</p></section>` : ''}
+    <p class="note">${T().lb.value} : ${T().lb.all}.</p>
+  </div>`;
+}
+const lbControls = () => `${seg('lbScope', lb.scope, [['friends', T().lb.friends], ['world', T().lb.world]])}${seg('lbMetric', lb.metric, [['value', T().lb.value], ['cards', T().lb.cards], ['sets', T().lb.sets]])}`;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-seg="lbScope"],[data-seg="lbMetric"]');
+  if (!b) return;
+  e.stopPropagation();
+  if (b.dataset.seg === 'lbScope') { lb.scope = b.dataset.value; renderRanking(false); } else { lb.metric = b.dataset.value; if (lb.scope === 'world') renderRanking(false); else renderRanking(true); }
+}, true);
+document.addEventListener('change', async (e) => {
+  if (e.target.id !== 'lbJoin') return;
+  user.prefs.lbWorld = e.target.checked; save();
+  if (user.prefs.lbWorld) { lbPush(); setTimeout(() => renderRanking(false), 5600); }
+  else { try { await fsx().deleteDoc(lbRef(cloud.user.uid)); } catch { /* */ } renderRanking(false); }
+});
+
 // @@NEXT-FEATURES@@
 
 function markTabs() {
@@ -3344,6 +3443,7 @@ function route() {
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
   else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
   else if (h === 'news') { tab = 'home'; currentRender = renderNews; }
+  else if (h === 'ranking') { tab = 'friends'; currentRender = () => renderRanking(false); }
   else if (h === 'decks') { tab = 'home'; currentRender = renderDecks; }
   else if (h.startsWith('tdeck-')) { tab = 'home'; const id = `t${h.slice(6)}`; currentRender = () => renderDeck(id); }
   else if (h.startsWith('deck-')) { tab = 'home'; dk.confirmDel = false; const id = h.slice(5); currentRender = () => renderDeck(id); }

@@ -75,6 +75,16 @@ service cloud.firestore {
         && request.resource.data.blob.size() < 900000;
     }
 
+    // classement mondial (sur inscription) : pseudo et totaux seulement, lisibles par les comptes connectés
+    match /leaderboard/{uid} {
+      allow read: if signedIn();
+      allow delete: if isMe(uid);
+      allow create, update: if isMe(uid)
+        && request.resource.data.keys().hasOnly(['pseudo', 'value', 'cards', 'unique', 'sets', 'updatedAt'])
+        && request.resource.data.pseudo == get(/databases/$(database)/documents/publicProfiles/$(uid)).data.pseudo
+        && request.resource.data.value is number && request.resource.data.cards is int && request.resource.data.sets is int;
+    }
+
     // amitiés : créées des deux côtés par celui qui accepte une demande existante
     match /friends/{owner}/list/{friend} {
       allow read, delete: if isMe(owner) || isMe(friend);

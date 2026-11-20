@@ -1079,3 +1079,15 @@ body {
 .dr-ctl .icon-btn { color: var(--accent-2); font-size: 18px; }
 .dr-ctl output { min-width: 20px; text-align: center; font-weight: 700; }
 .dr-q { font-weight: 700; color: var(--muted); }
+
+/* ---------- Classement ---------- */
+.lb-cta { text-align: center; text-decoration: none; }
+.lb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lb-list li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.lb-rank { grid-row: 1 / 3; font-size: 20px; font-weight: 800; text-align: center; color: var(--muted); }
+.lb-name { font-weight: 700; text-decoration: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .lb-name small { color: var(--muted); font-weight: 500; }
+.lb-sub { grid-column: 2; color: var(--muted); font-size: 12.5px; }
+.lb-val { grid-column: 3; grid-row: 1 / 3; font-size: 17px; color: var(--accent-2); }
+.lb-list li.me { border-color: color-mix(in srgb, var(--cyan) 60%, transparent); background: color-mix(in srgb, var(--cyan) 8%, var(--surface)); }
+.lb-list li.top1 { border-color: #f5c542aa; box-shadow: 0 0 22px -10px #f5c542; } .lb-list li.top2 { border-color: #c9d1dfaa; } .lb-list li.top3 { border-color: #d08a4eaa; }
+.lb-join { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; } .lb-join input { width: 20px; height: 20px; accent-color: var(--accent); }
