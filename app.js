@@ -19,6 +19,9 @@ applyDevice();
 const plural = (n, one, many) => (n > 1 ? many : one);
 const TEXT = {
   fr: {
+    v3d: { open: 'Voir la carte en 3D', flip: 'Retourner', reset: 'Remettre de face', tip: 'Glisse pour tourner la carte · double-touche pour la retourner' },
+    listsTab: 'Listes', listsIntro: 'Listes thématiques : les cartes d\'une région, d\'un peuple, d\'un champion ou d\'un type, toutes séries confondues.', listFavOn: 'Liste ajoutée aux favoris', listFavOff: 'Liste retirée des favoris', favList: 'Liste favorite',
+    listGroups: { fav: 'Favoris', music: 'Groupes de musique', collection: 'Collection', region: 'Régions', people: 'Peuples et créatures', champion: 'Champions' },
     sealed: 'Scellé', setsTab: 'Séries', toggleView: 'Changer l\'affichage', extraTab: 'Extra',
     extraIntro: 'Versions vendues sur Cardmarket mais absentes de la galerie officielle de Riot : versions signées, runes et jetons à part, hors-séries pas encore publiés… Leur visuel est souvent celui d\'une autre version, et leur prix repose parfois sur très peu d\'offres.',
     extraOne: 'Version vendue sur Cardmarket, absente de la galerie officielle de Riot (rangée dans l\'onglet Extra de l\'accueil).',
@@ -52,6 +55,8 @@ const TEXT = {
     curve: 'Courbe de prix', seeded: 'Les premiers points sont les moyennes 30 j, 7 j et 1 j de Cardmarket ; ensuite un relevé par jour.',
     cmSearch: 'Rechercher sur Cardmarket', cmView: 'Voir sur Cardmarket', cmVersions: 'Voir les versions sur Cardmarket', cmAll: 'Pas la bonne version ? Toutes les versions sur Cardmarket', art: (a) => `Illustration : ${a}`, artApprox: 'Visuel de la version standard (pas d\'image officielle de cette version).', enArt: 'Visuel de la version anglaise.', sealedEnArt: 'Visuel de la version anglaise du produit.', sealedArt: 'Pas de photo de ce produit : montage de cartes de la série.', enOnly: 'Carte imprimée en anglais.',
     worth: (q, v) => (q > 1 ? `Vos ${q} exemplaires valent ${v}` : `Votre exemplaire vaut ${v}`),
+    paidLabel: 'Prix d\'achat / ex.', paidHint: 'Plus-value par rapport à la cote', paidVs: 'Plus-value :', boughtFor: (v) => `achetés ${v}`,
+    paidSum: (n, v) => `Prix d'achat noté pour ${n} carte${n > 1 ? 's' : ''} ou produit${n > 1 ? 's' : ''} : ${v}`, paidPrivate: 'Gardé seulement sur cet appareil (et dans l\'export).',
     energy: 'Énergie', might: 'Puissance', power: 'Rune', dayShort: 'j',
     chartWait: 'Pas encore assez d\'historique pour tracer une courbe. Le prix est relevé chaque jour.', chartNone: 'Pas de prix Cardmarket pour cette carte pour l\'instant.',
     ranges: ['7 J', '1 M', '3 M', '1 A', 'Tout'], chartAria: (a, b, c, d) => `Courbe du prix du ${a} au ${b}, de ${c} à ${d}`,
@@ -104,6 +109,9 @@ const TEXT = {
     variant: { alt: 'Illustration alternative', star: 'Hors-série', sig: 'Signature', extra: 'Variante', cn: 'Exclusivité chinoise' },
   },
   en: {
+    v3d: { open: 'View the card in 3D', flip: 'Flip', reset: 'Face front', tip: 'Drag to rotate the card · double-tap to flip it' },
+    listsTab: 'Lists', listsIntro: 'Themed lists: the cards of a region, a people, a champion or a type, across all sets.', listFavOn: 'List added to favourites', listFavOff: 'List removed from favourites', favList: 'Favourite list',
+    listGroups: { fav: 'Favourites', music: 'Music bands', collection: 'Collection', region: 'Regions', people: 'Peoples and creatures', champion: 'Champions' },
     sealed: 'Sealed', setsTab: 'Sets', toggleView: 'Change view', extraTab: 'Extra',
     extraIntro: 'Versions sold on Cardmarket but missing from Riot\'s official gallery: signed versions, separate runes and tokens, overnumbered cards not published yet… Their picture is often that of another version, and their price sometimes rests on very few offers.',
     extraOne: 'Version sold on Cardmarket, missing from Riot\'s official gallery (listed in the Extra tab of the home screen).',
@@ -137,6 +145,8 @@ const TEXT = {
     curve: 'Price history', seeded: 'The first points are Cardmarket\'s 30-day, 7-day and 1-day averages; after that, one reading per day.',
     cmSearch: 'Search on Cardmarket', cmView: 'View on Cardmarket', cmVersions: 'See the versions on Cardmarket', cmAll: 'Not the right version? All versions on Cardmarket', art: (a) => `Art: ${a}`, artApprox: 'Standard version artwork (no official image of this version).', enArt: '', sealedEnArt: '', sealedArt: 'No picture of this product: collage of cards from the set.', enOnly: '',
     worth: (q, v) => (q > 1 ? `Your ${q} copies are worth ${v}` : `Your copy is worth ${v}`),
+    paidLabel: 'Bought at / copy', paidHint: 'Gain compared with the price', paidVs: 'Gain:', boughtFor: (v) => `bought for ${v}`,
+    paidSum: (n, v) => `Purchase price logged for ${n} card${n > 1 ? 's' : ''} or product${n > 1 ? 's' : ''}: ${v}`, paidPrivate: 'Kept on this device only (and in the export).',
     energy: 'Energy', might: 'Might', power: 'Power', dayShort: 'd',
     chartWait: 'Not enough history to draw a curve yet. Prices are recorded every day.', chartNone: 'No Cardmarket price for this card yet.',
     ranges: ['7D', '1M', '3M', '1Y', 'All'], chartAria: (a, b, c, d) => `Price from ${a} to ${b}, from ${c} to ${d}`,
@@ -189,6 +199,9 @@ const TEXT = {
     variant: { alt: 'Alternate art', star: 'Overnumbered', sig: 'Signature', extra: 'Variant', cn: 'China exclusive' },
   },
   zh: {
+    v3d: { open: '3D 查看卡牌', flip: '翻面', reset: '回到正面', tip: '拖动旋转卡牌 · 双击翻面' },
+    listsTab: '列表', listsIntro: '主题列表：同一地区、种族、英雄或类型的卡牌，跨越所有系列。', listFavOn: '已收藏列表', listFavOff: '已取消收藏列表', favList: '收藏列表',
+    listGroups: { fav: '收藏', music: '音乐组合', collection: '收藏类别', region: '地区', people: '种族与生物', champion: '英雄' },
     sealed: '未拆封', setsTab: '系列', toggleView: '切换显示', extraTab: '其他',
     extraIntro: 'Cardmarket 上有售但 Riot 官方卡牌库中没有的版本：签名版、单独的符文和衍生物、尚未公布的超编号卡等。卡图常常是其他版本的，价格有时只基于极少的报价。',
     extraOne: 'Cardmarket 上有售、Riot 官方卡牌库中没有的版本（在首页的“其他”标签中）。',
@@ -222,6 +235,8 @@ const TEXT = {
     curve: '价格走势', seeded: '最初几个点为 Cardmarket 的 30 日、7 日和 1 日均价，之后每天记录一次。',
     cmSearch: '在 Cardmarket 上搜索', cmView: '在 Cardmarket 上查看', cmVersions: '在 Cardmarket 上查看所有版本', cmAll: '版本不对？查看 Cardmarket 上的所有版本', art: (a) => `画师：${a}`, artApprox: '显示的是标准版卡图（该版本暂无官方图片）。', enArt: '暂无中文卡图，显示英文版。', sealedEnArt: '显示的是英文版商品图片。', sealedArt: '暂无该商品图片：显示该系列的卡牌拼图。', enOnly: '该卡仅有英文版。',
     worth: (q, v) => (q > 1 ? `你的 ${q} 张价值 ${v}` : `你的这张价值 ${v}`),
+    paidLabel: '买入价 / 张', paidHint: '与行情价相比的盈亏', paidVs: '盈亏：', boughtFor: (v) => `买入 ${v}`,
+    paidSum: (n, v) => `已记录 ${n} 张卡牌或商品的买入价：${v}`, paidPrivate: '仅保存在此设备上（以及导出文件中）。',
     energy: '能量', might: '战力', power: '符能', dayShort: '天',
     chartWait: '历史数据不足，暂时无法绘制走势。价格每天记录一次。', chartNone: '这张卡暂无 Cardmarket 价格。',
     ranges: ['7天', '1月', '3月', '1年', '全部'], chartAria: (a, b, c, d) => `${a} 至 ${b} 的价格，从 ${c} 到 ${d}`,
@@ -293,6 +308,7 @@ const I = {
   listIcon: '<svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
   gridIcon: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
   chevron: '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
+  flip: '<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.5"/><path d="M20 4v4.5h-4.5"/><path d="M20 12a8 8 0 0 1-13.7 5.7L4 15.5"/><path d="M4 20v-4.5h4.5"/></svg>',
   ext: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>',
 };
 
@@ -329,6 +345,19 @@ function useCollection() {
   fav = new Set(C.fav);
 }
 useCollection();
+// prix d'achat unitaire par édition : paid[édition][id] = prix. Gardé sur l'appareil seulement (la collection en ligne
+// est lisible par les amis) ; compris dans l'export.
+if (!user.paid || typeof user.paid !== 'object') user.paid = {};
+for (const l of LANGS) if (!user.paid[l] || typeof user.paid[l] !== 'object') user.paid[l] = {};
+const paidOf = (id) => user.paid[lang][id] ?? null;
+// plus-value de tous les exemplaires par rapport à la tendance Cardmarket (null sans prix d'achat ou sans cote)
+function paidDiff(id) {
+  const pp = paidOf(id), t = price(id), q = qty(id);
+  if (pp == null || t == null || !q) return null;
+  return { diff: (t - pp) * q, pct: pp ? (t - pp) / pp : null };
+}
+const diffHtml = (r) => (r ? `<b class="${r.diff >= 0 ? 'up' : 'down'}">${r.diff >= 0 ? '+' : '−'}${eur(Math.abs(r.diff))}${r.pct != null ? ` (${pct(r.pct)})` : ''}</b>` : '');
+const paidDiffHtml = (id) => (paidOf(id) != null ? (price(id) != null ? `${L.paidVs} ${diffHtml(paidDiff(id))}` : L.noPrice) : `<span class="muted">${L.paidHint}</span>`);
 // signature de ce qui est synchronisé avec le compte (les trois éditions ; pas les préférences d'affichage)
 const colCanon = (col) => JSON.stringify(LANGS.map((l) => [Object.entries(col?.[l]?.owned ?? {}).filter(([, q]) => q > 0).sort(), [...(col?.[l]?.wish ?? [])].sort(), [...(col?.[l]?.fav ?? [])].sort()]));
 let lastSig = colCanon(user.col);
@@ -571,10 +600,36 @@ function setTopbar(html) { topbar.innerHTML = html; }
 function seg(name, value, options) {
   return `<div class="seg" role="group">${options.map(([v, label]) => `<button data-seg="${name}" data-value="${v}" aria-pressed="${value === v}">${label}</button>`).join('')}</div>`;
 }
+// illustration d'une série : sa carte la plus prestigieuse (illustration alternative ou showcase, sinon épique), la plus chère
+const artCacheSet = new Map();
+function setArt(code) {
+  const k = `${code}|${lang}`;
+  if (artCacheSet.has(k)) return artCacheSet.get(k);
+  const rank = (c) => (c.variant === 'alt' ? 3 : c.rarity === 'showcase' ? 2 : c.rarity === 'epic' || c.type === 'legend' ? 1 : 0);
+  const best = setCards(code).filter((c) => imageOf(c) && !c.landscape && c.variant !== 'star' && c.variant !== 'sig')
+    .sort((a, b) => rank(b) - rank(a) || (price(b.id) ?? 0) - (price(a.id) ?? 0))[0];
+  const url = best ? imageOf(best) : null;
+  artCacheSet.set(k, url);
+  return url;
+}
+const artStyle = (code) => { const u = setArt(code); return u ? `style="--art:url('${esc(u)}')"` : ''; };
+function setHero(s) {
+  const total = setTotal(s); const own = ownedIn(s.code);
+  const p = total ? own / total : 0;
+  return `<div class="set-hero" ${artStyle(s.code)}>
+    <div class="set-hero-text">
+      <span class="set-code">${esc(s.code)}</span>
+      <h2>${esc(setName(s))}</h2>
+      ${s.releaseDate ? `<small>${fmt.date.format(parseDay(s.releaseDate))}</small>` : ''}
+    </div>
+    <div class="set-hero-prog num"><b>${Math.floor(p * 100)} %</b><span>${own}/${total}</span></div>
+    <div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>
+  </div>`;
+}
 function progressRow(s) {
   const total = setTotal(s); const own = ownedIn(s.code);
   const p = total ? own / total : 0;
-  return `<a class="set-row" href="#set-${esc(s.code)}">
+  return `<a class="set-row ${p >= 1 ? 'done' : ''}" href="#set-${esc(s.code)}" ${artStyle(s.code)}>
     <div class="set-head"><span class="set-code">${esc(s.code)}</span><span class="set-name">${esc(setName(s))}</span>
     <span class="set-count num">${own}<small>/${total}</small><b>${Math.floor(p * 100)} %</b></span></div>
     <div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>
@@ -583,7 +638,7 @@ function progressRow(s) {
 function progressTile(s) {
   const total = setTotal(s); const own = ownedIn(s.code);
   const p = total ? own / total : 0;
-  return `<a class="set-tile" href="#set-${esc(s.code)}">
+  return `<a class="set-tile ${p >= 1 ? 'done' : ''}" href="#set-${esc(s.code)}" ${artStyle(s.code)}>
     <div class="set-head"><span class="set-code">${esc(s.code)}</span></div>
     <span class="set-name">${esc(setName(s))}</span>
     <span class="big num">${Math.floor(p * 100)} %</span>
@@ -599,7 +654,7 @@ function homeTopbar(withMode) {
 }
 // 🌐 langue du site (comme NightDex) : ouvre les Réglages sur le choix de la langue, sans toucher à l'édition des cartes
 const globeBtn = () => `<button class="icon-btn" data-action="language" aria-label="${L.language}" title="${L.language}">${I.globe}</button>`;
-const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
+const homeTabs = (active) => `<div class="seg" role="tablist">${[['home', L.setsTab], ['sealed', L.sealed], ['lists', L.listsTab], ...(extraCards().length ? [['extra', L.extraTab]] : [])].map(([h, l]) => `<button data-nav="${h}" aria-pressed="${active === h}">${l}</button>`).join('')}</div>`;
 const langNote = () => (L.langNote(lang) ? `<p class="lang-note">${L.langNote(lang)}</p>` : '');
 function renderSealed() {
   homeTopbar(false);
@@ -622,6 +677,122 @@ function renderExtra() {
     ${homeTabs('extra')}
     <p class="note">${L.extraIntro}</p>
     ${[...bySet].sort((a, b) => order(a[0]) - order(b[0])).map(([code, cards]) => `<h2 class="section-title"><b class="print">${esc(code)}</b> ${esc(setOf(code) ? setName(setOf(code)) : code)}</h2><div class="cards">${sortCards(cards, 'name').map(cardTile).join('')}</div>`).join('') || `<div class="empty"><strong>${L.noSet}</strong></div>`}
+  </div>`;
+}
+// ---------- Listes thématiques (comme les « Listes » de Pokécardex) : cartes d'une région, d'un peuple, d'un champion… ----------
+// Les régions, peuples et champions viennent des étiquettes de la galerie officielle (tags du catalogue).
+const REGIONS = [
+  ['Bandle City', 'Bandle', 'Bandle City', '班德尔城', 'de Bandle, la ville des Yordles'], ['Bilgewater', 'Bilgewater', 'Bilgewater', '比尔吉沃特', 'de Bilgewater'],
+  ['Demacia', 'Demacia', 'Demacia', '德玛西亚', 'de Demacia'], ['Freljord', 'Freljord', 'Freljord', '弗雷尔卓德', 'du Freljord'], ['Icathia', 'Icathia', 'Icathia', '艾卡西亚', 'd\'Icathia'],
+  ['Ionia', 'Ionia', 'Ionia', '艾欧尼亚', 'd\'Ionia'], ['Ixtal', 'Ixtal', 'Ixtal', '以绪塔尔', 'd\'Ixtal'], ['Mount Targon', 'Mont Targon', 'Mount Targon', '巨神峰', 'du Mont Targon'],
+  ['Noxus', 'Noxus', 'Noxus', '诺克萨斯', 'de Noxus'], ['Piltover', 'Piltover', 'Piltover', '皮尔特沃夫', 'de Piltover'], ['Shadow Isles', 'Îles obscures', 'Shadow Isles', '暗影岛', 'des Îles obscures'],
+  ['Shurima', 'Shurima', 'Shurima', '恕瑞玛', 'de Shurima'], ['The Void', 'Le Néant', 'The Void', '虚空', 'du Néant'], ['Zaun', 'Zaun', 'Zaun', '祖安', 'de Zaun'],
+];
+const PEOPLES = [
+  ['Yordle', 'Yordles', 'Yordles', '约德尔人'], ['Poro', 'Poros', 'Poros', '魄罗'], ['Dragon', 'Dragons', 'Dragons', '龙'], ['Mech', 'Mécas', 'Mechs', '机械'],
+  ['Fae', 'Fées', 'Fae', '精灵'], ['Spirit', 'Esprits', 'Spirits', '灵体'], ['Demon', 'Démons', 'Demons', '恶魔'], ['Pirate', 'Pirates', 'Pirates', '海盗'],
+  ['Dog', 'Chiens', 'Dogs', '犬'], ['Cat', 'Chats', 'Cats', '猫'], ['Bird', 'Oiseaux', 'Birds', '鸟'], ['Spider', 'Araignées', 'Spiders', '蜘蛛'],
+  ['Trifarian', 'Trifariens', 'Trifarians', '三相'], ['Sentinel', 'Sentinelles', 'Sentinels', '哨兵'],
+];
+const T3 = (fr, en, zh) => ({ fr, en, zh });
+// cartes des groupes de musique (identifiants du catalogue ; une variante renommée ensuite suit catalog.renamed)
+const MUSIC_CARDS = {
+  kda: ['RAD-SP1', 'RAD-SP2', 'RAD-SP3', 'RAD-SP4', 'RAD-SP5'],
+  heartsteel: ['RAD-X917660', 'RAD-X917661', 'RAD-X917662', 'RAD-X917663', 'RAD-X917664', 'RAD-X917665'],
+};
+let musicSets = null;
+function inMusic(k, c) {
+  if (!musicSets) musicSets = Object.fromEntries(Object.entries(MUSIC_CARDS).map(([g, ids]) => [g, new Set(ids.map((id) => catalog.renamed?.[id] ?? id))]));
+  return musicSets[k].has(c.id);
+}
+const hasTag = (t) => (c) => !!c.tags?.includes(t);
+const LISTS = [
+  // groupes de musique de Riot : cartes reconnues à leur illustration (liste à compléter dans MUSIC_CARDS)
+  { id: 'kda', group: 'music', title: T3('K/DA', 'K/DA', 'K/DA'), desc: T3('Le groupe pop K/DA : Ahri, Akali, Evelynn, Kai\'Sa et Seraphine, du coffret Couture Collection aux cartes spéciales de Radiance.', 'The K/DA pop group: Ahri, Akali, Evelynn, Kai\'Sa and Seraphine, from the Couture Collection box to the Radiance specials.', 'K/DA 女团：阿狸、阿卡丽、伊芙琳、卡莎和萨勒芬妮。'), test: (c) => c.set === 'KDA' || inMusic('kda', c), extras: true },
+  { id: 'heartsteel', group: 'music', title: T3('HEARTSTEEL', 'HEARTSTEEL', 'HEARTSTEEL'), desc: T3('Le boys band HEARTSTEEL : K\'Sante, Aphelios, Ezreal, Yone, Kayn et Sett, en hors-séries de Radiance.', 'The HEARTSTEEL boy band: K\'Sante, Aphelios, Ezreal, Yone, Kayn and Sett, as Radiance overnumbered cards.', 'HEARTSTEEL 男团：奎桑提、厄斐琉斯、伊泽瑞尔、永恩、凯隐和瑟提。'), test: (c) => inMusic('heartsteel', c), extras: true },
+  { id: 'alt', group: 'collection', title: T3('Illustrations alternatives', 'Alternate arts', '异画'), desc: T3('Les versions showcase avec une autre illustration (skins), foil et symbole hexagonal.', 'Showcase versions with another artwork (skins), foil with a hexagonal gem.', '采用其他插画（皮肤）的闪卡版本。'), test: (c) => c.variant === 'alt' },
+  { id: 'star', group: 'collection', title: T3('Hors-séries', 'Overnumbered', '超编'), desc: T3('Les cartes numérotées au-delà de la série (ex. 303/298), dessinées par les artistes de Riot.', 'Cards numbered beyond the set (e.g. 303/298), drawn by Riot artists.', '编号超出系列总数的卡牌（如 303/298）。'), test: (c) => c.variant === 'star' },
+  { id: 'sig', group: 'collection', title: T3('Signatures', 'Signatures', '签名'), desc: T3('Les hors-séries signés par l\'artiste, environ un sur dix.', 'Overnumbered cards signed by the artist, about one in ten.', '带有画师签名的超编卡，约十张中一张。'), test: (c) => c.variant === 'sig' || c.rarity === 'signature' },
+  { id: 'legend', group: 'collection', title: T3('Légendes', 'Legends', '传奇'), desc: T3('Les cartes Légende, qui définissent les couleurs d\'un deck.', 'Legend cards, which set the colours of a deck.', '决定卡组颜色的传奇卡。'), test: (c) => c.type === 'legend' },
+  { id: 'battlefield', group: 'collection', title: T3('Champs de bataille', 'Battlefields', '战场'), desc: T3('Les lieux où se déroulent les combats.', 'The places where the fights happen.', '战斗发生的地点。'), test: (c) => c.type === 'battlefield' },
+  { id: 'rune', group: 'collection', title: T3('Runes', 'Runes', '符文'), desc: T3('Les runes de chaque domaine et leurs versions alternatives.', 'The runes of each domain and their alternate versions.', '各特性的符文及其异画。'), test: (c) => c.type === 'rune' },
+  { id: 'token', group: 'collection', title: T3('Jetons', 'Tokens', '衍生物'), desc: T3('Les jetons et marqueurs (Mécas, Recrues, Bombes…).', 'Tokens and markers (Mechs, Recruits, Bombs…).', '衍生物与指示物。'), test: (c) => c.type === 'token' || /^T\d/.test(c.number ?? '') },
+  { id: 'promo', group: 'collection', title: T3('Promos', 'Promos', '宣传卡'), desc: T3('Les cartes promotionnelles : Nexus Nights, tournois, avant-premières…', 'Promotional cards: Nexus Nights, tournaments, pre-rifts…', '宣传卡：符文之夜、赛事、售前活动等。'), test: (c) => c.rarity === 'promo' },
+  ...REGIONS.map(([tag, fr, en, zh, frOf]) => ({ id: `r-${tag.toLowerCase().replace(/\W+/g, '-')}`, group: 'region', title: T3(fr, en, zh), desc: T3(`Les cartes ${frOf}.`, `The cards of ${en}.`, `${zh}的卡牌。`), test: hasTag(tag) })),
+  ...PEOPLES.map(([tag, fr, en, zh]) => ({ id: `p-${tag.toLowerCase()}`, group: 'people', title: T3(fr, en, zh), desc: T3(`Toutes les cartes ${fr}.`, `All the ${en} cards.`, `所有${zh}卡牌。`), test: hasTag(tag) })),
+];
+// titres et descriptions des listes : textes de l'appli, dans la langue du site
+const listTitle = (d) => d.title[ui] ?? d.title.en;
+const listDesc = (d) => d.desc[ui] ?? d.desc.en;
+// listes de champions : un champion avec au moins 6 cartes dans l'édition (étiquette au nom du champion)
+let championLists = null;
+function allLists() {
+  if (!championLists) {
+    const known = new Set([...REGIONS, ...PEOPLES].map(([t]) => t).concat(['Equipment', 'Device', 'Elite', 'Recruit']));
+    const count = new Map();
+    for (const c of catalog.cards) for (const t of c.tags ?? []) if (!known.has(t)) count.set(t, (count.get(t) ?? 0) + 1);
+    championLists = [...count].filter(([, n]) => n >= 6).sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([t]) => ({ id: `c-${t.toLowerCase().replace(/\W+/g, '-')}`, group: 'champion', title: T3(t, t, t), desc: T3(`Toutes les cartes de ${t}.`, `All the ${t} cards.`, `${t} 的所有卡牌。`), test: hasTag(t) }));
+  }
+  return [...LISTS, ...championLists];
+}
+const setOrder = (c) => setOf(c.set)?.order ?? 999;
+const listCards = (d) => editionCards().filter((c) => (d.extras || !isExtraCard(c)) && d.test(c))
+  .sort((a, b) => setOrder(a) - setOrder(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true }));
+function bestArt(cards) {
+  const rank = (c) => (c.variant === 'alt' ? 3 : c.rarity === 'showcase' ? 2 : c.rarity === 'epic' || c.type === 'legend' ? 1 : 0);
+  const best = cards.filter((c) => imageOf(c) && !c.landscape && c.variant !== 'star' && c.variant !== 'sig')
+    .sort((a, b) => rank(b) - rank(a) || (price(b.id) ?? 0) - (price(a.id) ?? 0))[0] ?? cards.find((c) => imageOf(c));
+  return best ? imageOf(best) : null;
+}
+function listCard(d, cards) {
+  const own = cards.filter((c) => qty(c.id) > 0).length, total = cards.length, p = total ? own / total : 0;
+  const art = bestArt(cards);
+  const key = `list:${d.id}`;
+  return `<div class="list-card ${p >= 1 ? 'done' : ''}" ${art ? `style="--art:url('${esc(art)}')"` : ''}>
+    <a class="list-link" href="#list-${esc(d.id)}" aria-label="${esc(listTitle(d))}"></a>
+    <div class="list-top"><h3>${esc(listTitle(d))}</h3>
+      <button class="icon-btn list-star ${fav.has(key) ? 'on' : ''}" data-fav="${esc(key)}" aria-pressed="${fav.has(key)}" aria-label="${L.favList}">${I.star}</button></div>
+    <p class="list-desc">${esc(listDesc(d))}</p>
+    <div class="list-prog num"><b>${own}</b><small>/${total}</small><span>${Math.floor(p * 100)} %</span></div>
+    <div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>
+  </div>`;
+}
+function renderLists() {
+  homeTopbar(false);
+  const withCards = allLists().map((d) => [d, listCards(d)]).filter(([, cards]) => cards.length);
+  const groups = [['fav', withCards.filter(([d]) => fav.has(`list:${d.id}`))], ...['music', 'collection', 'region', 'people', 'champion'].map((g) => [g, withCards.filter(([d]) => d.group === g)])];
+  view.innerHTML = `<div class="stack">
+    ${homeTabs('lists')}
+    <p class="note">${L.listsIntro}</p>
+    ${groups.filter(([, l]) => l.length).map(([g, l]) => `<details class="block lists-block" ${g === 'champion' ? '' : 'open'}>
+      <summary>${esc(L.listGroups[g])} <small class="num">${l.length}</small>${I.chevron}</summary>
+      <div class="list-grid">${l.map(([d, cards]) => listCard(d, cards)).join('')}</div>
+    </details>`).join('')}
+  </div>`;
+}
+function renderList(id) {
+  const d = allLists().find((x) => x.id === id);
+  if (!d) { location.hash = '#lists'; return; }
+  const all = listCards(d);
+  const list = sortCards(filterCards(all), user.prefs.sort === 'num' ? 'num' : user.prefs.sort);
+  const own = all.filter((c) => qty(c.id) > 0).length, p = all.length ? own / all.length : 0;
+  const value = all.reduce((a, c) => a + qty(c.id) * (price(c.id) ?? 0), 0);
+  const art = bestArt(all);
+  const key = `list:${d.id}`;
+  setTopbar(`<a class="icon-btn" href="#lists" aria-label="${L.back}">${I.back}</a>
+    <h1 class="small">${esc(listTitle(d))}</h1>
+    <button class="icon-btn ${fav.has(key) ? 'on' : ''}" data-fav="${esc(key)}" aria-pressed="${fav.has(key)}" aria-label="${L.favList}">${I.star}</button>
+    <button class="icon-btn" data-action="cycle-sort" aria-label="${L.changeSort}">${I.sort}</button>`);
+  view.innerHTML = `<div class="stack">
+    <div class="set-hero" ${art ? `style="--art:url('${esc(art)}')"` : ''}>
+      <div class="set-hero-text"><span class="set-code">${esc(L.listGroups[d.group])}</span><h2>${esc(listTitle(d))}</h2><small>${esc(listDesc(d))}</small></div>
+      <div class="set-hero-prog num"><b>${Math.floor(p * 100)} %</b><span>${own}/${all.length}</span></div>
+      <div class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></div>
+    </div>
+    ${seg('setMode', user.prefs.setMode, [['cards', L.cards], ['list', L.list], ['grid', L.grid]])}
+    <div class="toolbar num"><span>${L.owned(own, all.length)}</span><span class="grow"></span>${hasPrices() ? `<span>${L.myValue} : <b style="color:var(--fg)">${eur(value)}</b></span>` : ''}</div>
+    ${cardsBlock(list, user.prefs.setMode)}
   </div>`;
 }
 function renderHome() {
@@ -707,6 +878,7 @@ function renderSet(code) {
     <button class="icon-btn" data-action="cycle-sort" aria-label="${L.changeSort}">${I.sort}</button>
     <button class="icon-btn ${showFilters || isFiltered ? 'on' : ''}" data-action="filters" aria-label="${L.filters}" aria-expanded="${showFilters}">${I.filter}</button>`);
   view.innerHTML = `<div class="stack">
+    ${setHero(s)}
     ${seg('setMode', user.prefs.setMode, [['cards', L.cards], ['list', L.list], ['grid', L.grid]])}
     ${showFilters ? filtersPanel(all) : ''}
     <input class="search" id="setCardSearch" type="search" placeholder="${L.searchInSet}" value="${esc(setQuery)}" autocomplete="off" enterkeyhint="search">
@@ -731,6 +903,9 @@ function renderCollection() {
   const total = owned.reduce((a, c) => a + qty(c.id), 0);
   const value = [...owned, ...ownedSealed].reduce((a, c) => a + qty(c.id) * (price(c.id) ?? 0), 0);
   const sealedQty = ownedSealed.reduce((a, s) => a + qty(s.id), 0);
+  const withPaid = [...owned, ...ownedSealed].filter((c) => paidOf(c.id) != null);
+  const paidTot = withPaid.reduce((a, c) => a + qty(c.id) * paidOf(c.id), 0);
+  const diffTot = withPaid.reduce((a, c) => a + (paidDiff(c.id)?.diff ?? 0), 0);
   const sets = visibleSets().sort((a, b) => (a.order ?? 999) - (b.order ?? 999)).filter((s) => ownedIn(s.code) > 0);
   const shown = colSet === '__sealed' ? [] : sortCards(owned.filter((c) => !colSet || c.set === colSet), 'price-desc');
   const sealedShown = !colSet || colSet === '__sealed' ? ownedSealed : [];
@@ -740,7 +915,8 @@ function renderCollection() {
       <div class="stat"><small>${L.kUnique}</small><b class="num">${owned.length}</b></div>
       <div class="stat"><small>${L.kValue}</small><b class="num">${eur(value)}</b></div>
     </div>
-    <div class="chips"><button class="chip" data-colset="" aria-pressed="${!colSet}">${L.all}</button>${ownedSealed.length ? `<button class="chip" data-colset="__sealed" aria-pressed="${colSet === '__sealed'}">${L.sealed} · ${sealedQty}</button>` : ''}${sets.map((s) => `<button class="chip" data-colset="${esc(s.code)}" aria-pressed="${colSet === s.code}">${esc(s.code)} · ${ownedIn(s.code)}</button>`).join('')}</div>
+    ${withPaid.length ? `<p class="note num paid-sum">${L.paidSum(withPaid.length, eur(paidTot))} · ${diffHtml({ diff: diffTot, pct: paidTot ? diffTot / paidTot : null })}</p>` : ''}
+    <div class="chips"><button class="chip" data-colset=""" aria-pressed="${!colSet}">${L.all}</button>${ownedSealed.length ? `<button class="chip" data-colset="__sealed" aria-pressed="${colSet === '__sealed'}">${L.sealed} · ${sealedQty}</button>` : ''}${sets.map((s) => `<button class="chip" data-colset="${esc(s.code)}" aria-pressed="${colSet === s.code}">${esc(s.code)} · ${ownedIn(s.code)}</button>`).join('')}</div>
     ${shown.length ? `${seg('setMode', user.prefs.setMode, [['cards', L.cards], ['list', L.list], ['grid', L.grid]])}${cardsBlock(shown, user.prefs.setMode)}` : ''}
     ${sealedShown.length ? `<h2 class="section-title">${L.sealed} · ${L.sealedCount(sealedQty)}</h2><div class="sealed-grid">${sealedShown.map(sealedTile).join('')}</div>` : ''}
   </div>`;
@@ -864,7 +1040,10 @@ function drawChart(el, pts, hasData) {
   const line = pts.map((_, i) => `${i ? 'L' : 'M'}${X(xs[i]).toFixed(1)},${Y(ys[i]).toFixed(1)}`).join('');
   const area = `${line}L${X(t1).toFixed(1)},${Y(y0).toFixed(1)}L${X(t0).toFixed(1)},${Y(y0).toFixed(1)}Z`;
   const gid = `ga${++chartSeq}`;
-  const xLabels = [0, Math.floor((pts.length - 1) / 2), pts.length - 1].filter((v, i, a) => a.indexOf(v) === i);
+  // dates de l'axe : début, fin et le point le plus proche du milieu dans le temps, sans chevauchement (≥ 80 px d'écart)
+  const mid = xs.reduce((best, t, i) => (Math.abs(t - (t0 + t1) / 2) < Math.abs(xs[best] - (t0 + t1) / 2) ? i : best), 0);
+  const xLabels = [0, mid, pts.length - 1].filter((v, i, a) => a.indexOf(v) === i)
+    .filter((v, k, a) => k === 0 || k === a.length - 1 || (X(xs[v]) - X(xs[a[0]]) >= 80 && X(xs[a[a.length - 1]]) - X(xs[v]) >= 80));
   const tickFmt = new Intl.NumberFormat(fmt.loc, { style: 'currency', currency: 'EUR', maximumFractionDigits: y1 - y0 < 5 ? 2 : 0 });
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(L.chartAria(fmt.date.format(t0), fmt.date.format(t1), eur(ys[0]), eur(ys[ys.length - 1])))}">
     <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".32"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
@@ -936,7 +1115,7 @@ function openCard(id, keepNav) {
   sheetPanel.innerHTML = `${sheetTop(navList.length > 1)}
     <div class="stack detail">
       <div class="detail-top ${sealedItem ? 'is-sealed' : ''}" ${rarityStyle(c.rarity)}>
-        <div class="card-img">${cardImg(c, true)}</div>
+        <button class="card-img" data-zoom aria-label="${esc(L.v3d.open)}" title="${esc(L.v3d.open)}">${cardImg(c, true)}<span class="zoom-hint" aria-hidden="true">3D</span></button>
         <div class="detail-info">
           <h2 id="sheetTitle">${esc(cardName(c))}</h2>
           ${sealedItem
@@ -958,6 +1137,11 @@ function openCard(id, keepNav) {
           </div>
         </div>
       </div>
+      ${q > 0 ? `<div class="paid-line">
+        <label for="cardPaid">${L.paidLabel}</label>
+        <input id="cardPaid" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" value="${paidOf(id) ?? ''}" data-paid-id="${esc(id)}" title="${esc(L.paidPrivate)}">
+        <span class="paid-diff num" id="paidDiff">${paidDiffHtml(id)}</span>
+      </div>` : ''}
       ${p.trend != null ? `<div class="stats">
         <div class="stat"><small>${L.from}</small><b class="num">${eur(p.low)}</b></div>
         <div class="stat"><small>${L.avg7}</small><b class="num">${eur(p.avg7)}</b></div>
@@ -971,7 +1155,7 @@ function openCard(id, keepNav) {
       </section>
       ${cm ? `<a class="cta" href="${esc(cm.url)}" target="_blank" rel="noopener">${cm.label} ${I.ext}</a>` : ''}
       ${cm?.all ? `<a class="link-btn cm-all" href="${esc(cm.all)}" target="_blank" rel="noopener">${L.cmAll}</a>` : ''}
-      ${q > 0 && p.trend ? `<p class="note num" style="text-align:center">${L.worth(q, eur(q * p.trend))}</p>` : ''}
+      ${q > 0 && p.trend ? `<p class="note num" style="text-align:center">${L.worth(q, eur(q * p.trend))}${paidOf(id) != null ? ` · ${L.boughtFor(eur(q * paidOf(id)))}` : ''}</p>` : ''}
       ${artNote ? `<p class="note" style="text-align:center">${esc(artNote)}</p>` : ''}
       ${c.artist ? `<p class="note" style="text-align:center">${esc(L.art(c.artist))}</p>` : ''}
     </div>`;
@@ -1764,7 +1948,7 @@ document.addEventListener('click', async (e) => {
   else if (d.seg === 'ui') setUi(d.value);
   else if (d.seg) { user.prefs[d.seg] = d.value; save(); currentRender(); }
   else if (d.pref) { user.prefs[d.pref] = d.value || null; if (d.pref === 'own' && !d.value) user.prefs.own = 'all'; save(); currentRender(); }
-  else if (d.fav) { fav.has(d.fav) ? fav.delete(d.fav) : fav.add(d.fav); save(); currentRender(); toast(fav.has(d.fav) ? L.favOn : L.favOff); }
+  else if (d.fav) { fav.has(d.fav) ? fav.delete(d.fav) : fav.add(d.fav); save(); currentRender(); const isList = d.fav.startsWith('list:'); toast(fav.has(d.fav) ? (isList ? L.listFavOn : L.favOn) : (isList ? L.listFavOff : L.favOff)); }
   else if (d.colset !== undefined) { colSet = d.colset; currentRender(); }
   else if (d.qty && openId) {
     const id = openId;
@@ -1817,7 +2001,7 @@ document.addEventListener('click', async (e) => {
   else if (d.action === 'close') closeCard();
   else if (d.action === 'export') {
     C.wish = [...wish]; C.fav = [...fav];
-    const data = JSON.stringify({ app: 'RiftDex', version: 1, exportedAt: new Date().toISOString(), col: user.col });
+    const data = JSON.stringify({ app: 'RiftDex', version: 1, exportedAt: new Date().toISOString(), col: user.col, paid: user.paid });
     const box = document.getElementById('exportBox');
     box.hidden = false; box.value = data;
     try { await navigator.clipboard.writeText(data); toast(L.copied); } catch { box.select(); toast(L.selectCopy); }
@@ -1834,9 +2018,21 @@ document.addEventListener('change', async (e) => {
     const data = JSON.parse(await f.text());
     if (data.app !== 'RiftDex' || !data.col) throw new Error();
     for (const l of LANGS) user.col[l] = { ...emptyCol(), ...(data.col[l] ?? {}) };
+    if (data.paid && typeof data.paid === 'object') for (const l of LANGS) user.paid[l] = { ...(data.paid[l] ?? {}) };
     useCollection(); save(); closeCard(); currentRender(); toast(L.imported);
   } catch { toast(L.badFile); }
 });
+function paidInput(el, commit) {
+  const id = el.dataset.paidId;
+  const v = el.value.trim() === '' ? null : Math.round(Number(el.value) * 100) / 100;
+  if (v != null && !(v >= 0)) return;
+  if (v == null) delete user.paid[lang][id]; else user.paid[lang][id] = v;
+  const box = document.getElementById('paidDiff');
+  if (box) box.innerHTML = paidDiffHtml(id);
+  if (commit) { save(); if (currentRender === renderCollection) currentRender(); }
+}
+document.addEventListener('input', (e) => { if (e.target.id === 'cardPaid') paidInput(e.target, false); });
+document.addEventListener('change', (e) => { if (e.target.id === 'cardPaid') paidInput(e.target, true); });
 document.addEventListener('input', (e) => {
   const map = { setSearch: [(v) => { homeQuery = v; }, renderHome], cardSearch: [(v) => { searchQuery = v; }, renderSearch], setCardSearch: [(v) => { setQuery = v; }, () => currentRender()] };
   const m = map[e.target.id];
@@ -1847,11 +2043,117 @@ document.addEventListener('input', (e) => {
   const el = document.getElementById(e.target.id); el.focus(); el.setSelectionRange(pos, pos);
 });
 document.addEventListener('keydown', (e) => {
+  if (v3d && !v3d.hidden) { if (e.key === 'Escape') zoomClose(); return; }
   if (sheet.hidden) return;
   if (e.key === 'Escape') closeCard();
   else if (openId && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !e.target.closest('input, textarea')) { e.preventDefault(); navStep(e.key === 'ArrowRight' ? 1 : -1); }
 });
 sheet.addEventListener('click', (e) => { if (e.target.matches('.sheet-backdrop')) closeCard(); });
+// ---------- Vue 3D d'une carte (comme NightDex) : la tourner dans tous les sens, la retourner, reflet holographique ----------
+let v3d = null;
+const v3 = { rx: 0, ry: 0, vx: 0, vy: 0, drag: null, raf: 0, lastTap: 0, idle: 0, spin: null };
+// cartes imprimées en foil (Riot : « every Rare and Epic will always be foil », showcase, hors-séries et signées aussi ;
+// Proving Grounds est entièrement non foil) : seules elles brillent en 3D, les autres n'ont aucun reflet
+const isShiny = (c) => !!c && !isSealed(c) && c.set !== 'OGS' && (['rare', 'epic', 'showcase', 'signature'].includes(c.rarity) || ['alt', 'star', 'sig'].includes(c.variant));
+// dos des cartes : bleu (deck principal), blanc (runes), noir (légendes et champs de bataille) ; photos dans config.cardBacks
+const backKind = (c) => (c.type === 'rune' ? 'rune' : c.type === 'legend' || c.type === 'battlefield' ? 'legend' : 'main');
+function v3dRender() {
+  const card = v3d.querySelector('.c3d');
+  card.style.transform = `rotateX(${v3.rx.toFixed(2)}deg) rotateY(${v3.ry.toFixed(2)}deg)`;
+  const ny = ((v3.ry % 360) + 540) % 360 - 180, nx = ((v3.rx % 360) + 540) % 360 - 180;
+  const gx = 50 + Math.sin((ny * Math.PI) / 180) * 45, gy = 50 - Math.sin((nx * Math.PI) / 180) * 45;
+  const hx = 50 + ny * 0.9, hy = 50 + nx * 0.9;
+  const ga = Math.min(1, (Math.abs(Math.sin((ny * Math.PI) / 180)) + Math.abs(Math.sin((nx * Math.PI) / 180))) * 0.9 + 0.15);
+  for (const g of v3d.querySelectorAll('.c3d-glare')) { g.style.setProperty('--hx', `${hx}%`); g.style.setProperty('--hy', `${hy}%`); g.style.setProperty('--gx', `${gx}%`); g.style.setProperty('--gy', `${gy}%`); g.style.setProperty('--ga', String(ga)); }
+}
+function v3dLoop() {
+  cancelAnimationFrame(v3.raf);
+  const step = () => {
+    if (v3d.hidden) return;
+    if (v3.spin) {
+      const t = Math.min(1, (performance.now() - v3.spin.t0) / v3.spin.ms), e = 1 - (1 - t) ** 3;
+      v3.rx = v3.spin.fx + (v3.spin.tx - v3.spin.fx) * e; v3.ry = v3.spin.fy + (v3.spin.ty - v3.spin.fy) * e;
+      if (t >= 1) v3.spin = null;
+    } else if (!v3.drag) {
+      if (Math.abs(v3.vx) + Math.abs(v3.vy) > 0.02) { v3.rx += v3.vx; v3.ry += v3.vy; v3.vx *= 0.95; v3.vy *= 0.95; v3.idle = performance.now(); }
+      else if (performance.now() - v3.idle > 2500 && !matchMedia('(prefers-reduced-motion: reduce)').matches) { // au repos : léger flottement
+        const k = (performance.now() - v3.idle - 2500) / 1000;
+        v3.rx += (Math.sin(k * 0.9) * 6 - (v3.rx - Math.round(v3.rx / 180) * 180)) * 0.02;
+        v3.ry += (Math.sin(k * 0.6) * 10 - (v3.ry - Math.round(v3.ry / 180) * 180)) * 0.02;
+      }
+    }
+    v3dRender();
+    v3.raf = requestAnimationFrame(step);
+  };
+  v3.raf = requestAnimationFrame(step);
+}
+const v3dSpinTo = (tx, ty, ms = 650) => { v3.spin = { fx: v3.rx, fy: v3.ry, tx, ty, ms, t0: performance.now() }; v3.vx = 0; v3.vy = 0; v3.idle = performance.now(); };
+const v3dFlip = () => v3dSpinTo(Math.round(v3.rx / 180) * 180, Math.round((v3.ry + 180) / 180) * 180);
+function zoomOpen(c) {
+  if (!v3d) {
+    v3d = document.createElement('div');
+    v3d.className = 'v3d'; v3d.hidden = true;
+    v3d.setAttribute('role', 'dialog'); v3d.setAttribute('aria-modal', 'true');
+    document.body.append(v3d);
+    v3d.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      v3d.setPointerCapture?.(e.pointerId);
+      v3.drag = { x: e.clientX, y: e.clientY, t: performance.now(), moved: false };
+      v3.spin = null; v3.vx = 0; v3.vy = 0;
+    });
+    v3d.addEventListener('pointermove', (e) => {
+      if (!v3.drag) return;
+      const dx = e.clientX - v3.drag.x, dy = e.clientY - v3.drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) v3.drag.moved = true;
+      const k = 0.45;
+      v3.ry += dx * k; v3.rx -= dy * k;
+      const dt = Math.max(8, performance.now() - v3.drag.t);
+      v3.vy = (dx * k * 16) / dt; v3.vx = (-dy * k * 16) / dt;
+      Object.assign(v3.drag, { x: e.clientX, y: e.clientY, t: performance.now() });
+      v3.idle = performance.now();
+    });
+    const up = (e) => {
+      if (!v3.drag) return;
+      const tap = !v3.drag.moved;
+      v3.drag = null; v3.idle = performance.now();
+      if (!tap || e.type !== 'pointerup') return;
+      const now = Date.now();
+      if (now - v3.lastTap < 320) { v3.lastTap = 0; v3dFlip(); return; } // double-touche : retourner
+      v3.lastTap = now;
+      if (!e.target.closest('.c3d')) setTimeout(() => { if (v3.lastTap === now) zoomClose(); }, 320); // toucher à côté : fermer
+    };
+    for (const t of ['pointerup', 'pointercancel']) v3d.addEventListener(t, up);
+    v3d.addEventListener('click', (e) => { const b = e.target.closest('[data-v3d]'); if (!b) return; if (b.dataset.v3d === 'close') zoomClose(); else if (b.dataset.v3d === 'flip') v3dFlip(); else if (b.dataset.v3d === 'reset') v3dSpinTo(0, 0); });
+  }
+  const src = imageOf(c) || placeholderArt(c);
+  const sealedItem = isSealed(c);
+  const glare = isShiny(c) ? '<span class="c3d-glare c3d-holo"></span><span class="c3d-glare c3d-sparkle"></span><span class="c3d-glare c3d-shine"></span>' : '';
+  const kind = backKind(c);
+  const backImg = config.cardBacks?.[kind];
+  v3d.innerHTML = `<div class="v3d-stage">
+      <div class="c3d ${sealedItem ? 'is-sealed' : ''} back-${kind}" style="--rc:${RARITY_HEX[c.rarity] ?? 'var(--accent)'}">
+        <div class="c3d-face c3d-front"><img src="${esc(src)}" alt="${esc(cardName(c))}" draggable="false">${sealedItem ? '' : glare}</div>
+        <div class="c3d-face c3d-back">${sealedItem ? '' : backImg ? `<img src="${esc(backImg)}" alt="" draggable="false">` : `<span class="c3d-back-default"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M262 74 L238 168 L276 214 L230 300 L268 344 L246 446 L300 330 L262 290 L306 206 L270 160 Z"/></svg><b>RIFT<i>DEX</i></b></span>`}</div>
+      </div>
+    </div>
+    <div class="v3d-bar">
+      ${sealedItem ? '' : `<button class="chip" data-v3d="flip">${I.flip}<span>${L.v3d.flip}</span></button>`}
+      <button class="chip" data-v3d="reset">${L.v3d.reset}</button>
+    </div>
+    <p class="v3d-tip">${L.v3d.tip}</p>
+    <button class="icon-btn v3d-close" data-v3d="close" aria-label="${L.close}">${I.x}</button>`;
+  v3d.hidden = false;
+  Object.assign(v3, { rx: -12, ry: -200, vx: 0, vy: 0, drag: null, idle: performance.now() });
+  v3dSpinTo(0, 0, 900); // entrée : la carte arrive en tournoyant
+  v3dLoop();
+  v3d.querySelector('.v3d-close').focus({ preventScroll: true });
+}
+function zoomClose() { if (v3d) { v3d.hidden = true; cancelAnimationFrame(v3.raf); sheet.querySelector('[data-zoom]')?.focus({ preventScroll: true }); } }
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('[data-zoom]')) return;
+  const c = openId ? cardsById.get(openId) : null;
+  if (c) zoomOpen(c);
+});
 
 // ---------- Navigation ----------
 let currentTab = 'home';
@@ -1873,6 +2175,8 @@ function route() {
   else if (h === 'values') currentRender = renderValues;
   else if (h === 'sealed') { tab = 'sealed'; currentRender = renderSealed; }
   else if (h === 'extra') { tab = 'home'; currentRender = renderExtra; }
+  else if (h === 'lists') { tab = 'home'; currentRender = renderLists; }
+  else if (h.startsWith('list-')) { tab = 'home'; currentRender = () => renderList(h.slice(5)); }
   else if (h === 'friends') { fr.view = null; fr.msg = ''; currentRender = renderFriends; }
   else if (h.startsWith('friend-')) { tab = 'friends'; const uid = h.slice(7); if (fr.view?.uid !== uid) fr.filter = 'all'; renderFriendCurrent = () => renderFriend(uid); currentRender = renderFriendCurrent; }
   else { tab = 'home'; currentRender = renderHome; }

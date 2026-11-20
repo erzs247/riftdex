@@ -13,6 +13,15 @@ sur le modèle de NightDex :
 - **Accueil** : les séries avec la progression (cartes possédées / total, %), en liste ou en grille, avec favoris et recherche.
 - **Série** : trois affichages (Cartes, Liste, Grille), tri (numéro, prix, nom), filtres (possédées, manquantes, rareté), valeur de la série.
 - **Fiche carte** : image, prix tendance Cardmarket en euros, prix minimum, moyennes 7 j et 30 j, **courbe de prix** (7 J, 1 M, 3 M, 1 A, Tout) et bouton **Cardmarket**.
+- **Vue 3D** (toucher l'image de la fiche) : la carte tourne au doigt et se retourne ; reflet holographique seulement sur les cartes imprimées en foil
+  (rares, épiques, showcase, hors-séries, signées ; pas Proving Grounds). Dos bleu (deck), blanc (runes) ou noir (légendes, champs de bataille) :
+  photos des vrais dos à mettre dans `cardBacks` de `data/config.json`, sinon dos RiftDex de la même couleur.
+- **Prix d'achat** : prix payé par exemplaire et plus-value par rapport à la cote, total dans *Collection*. Gardé sur l'appareil seulement (et dans l'export).
+- **Séries illustrées** : chaque série a une bannière avec sa carte phare, sur l'accueil et en tête de sa page.
+- **Listes** (accueil → Listes, façon Pokécardex) : groupes de musique de Riot (K/DA, HEARTSTEEL), illustrations alternatives, hors-séries,
+  signatures, légendes, champs de bataille, runes, jetons, promos, régions (Zaun, Piltover, Bandle…), peuples (Yordles, Poros, Dragons…)
+  et champions, toutes séries confondues, avec progression et favoris. Régions, peuples et champions viennent des étiquettes de la galerie
+  officielle (`tags`) ; les cartes des groupes de musique sont listées dans `MUSIC_CARDS` (`app.js`).
 - **Scellé** : boosters, booster box, cases, decks de champion, coffrets et sets complets, classés par langue, avec leur visuel
   (photo TCGplayer du produit ; version anglaise pour le scellé FR et chinois ; montage de cartes pour les sets de cartes).
 - **Extra** : les versions vendues sur Cardmarket mais absentes de la galerie officielle (Ahri signée V.4, runes et jetons à part,
