@@ -83,7 +83,7 @@ Le workflow `.github/workflows/prix.yml` fait tout seul :
 Chaque lundi, **chaque carte déjà présente garde son identifiant et son produit Cardmarket** : les collections ne bougent pas.
 Une nouvelle série de la galerie officielle est ajoutée et rattachée automatiquement à son extension Cardmarket
 (comparaison des noms des cartes) ; une nouvelle extension Cardmarket de promos devient une série « promo ».
-Seuls le nom français (`fr`) et le nom chinois (`zh`) d'une nouvelle série restent à préciser à la main dans `data/config.json`.
+Une nouvelle série reçoit tout automatiquement, comme les autres : images des cartes (galerie officielle, scans chinois), nom français et chinois (galeries de Riot), bannière et classeur Master Set illustrés par sa carte phare, visuels du scellé (TCGplayer, sinon montage de cartes) et, pour les coffrets et promos absents de la galerie, images TCGplayer du groupe dont le nom correspond à la série (`tcg_auto_groups`, résumé dans l'onglet Actions). Rien n'est à préciser à la main.
 Le résumé de chaque passage est visible dans l'onglet *Actions* de GitHub ; *Run workflow* (case « nouveautés ») lance la recherche à la main.
 
 ## Comptes (collections synchronisées entre appareils)
