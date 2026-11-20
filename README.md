@@ -13,6 +13,9 @@ sur le modèle de NightDex :
 - **Accueil** : les séries avec la progression (cartes possédées / total, %), en liste ou en grille, avec favoris et recherche.
 - **Série** : trois affichages (Cartes, Liste, Grille), tri (numéro, prix, nom), filtres (possédées, manquantes, rareté), valeur de la série.
 - **Fiche carte** : image, prix tendance Cardmarket en euros, prix minimum, moyennes 7 j et 30 j, **courbe de prix** (7 J, 1 M, 3 M, 1 A, Tout) et bouton **Cardmarket**.
+- **Vue 3D** (toucher l'image de la fiche) : la carte tourne au doigt, se retourne (dos RiftDex), avec un reflet holographique sur les cartes brillantes (showcase, épiques, signées, hors-séries, promos).
+- **Prix d'achat** : prix payé par exemplaire et plus-value par rapport à la cote, total dans *Collection*. Gardé sur l'appareil seulement (et dans l'export).
+- **Séries illustrées** : chaque série a une bannière avec sa carte phare, sur l'accueil et en tête de sa page.
 - **Scellé** : boosters, booster box, cases, decks de champion, coffrets et sets complets, classés par langue, avec leur visuel
   (photo TCGplayer du produit ; version anglaise pour le scellé FR et chinois ; montage de cartes pour les sets de cartes).
 - **Extra** : les versions vendues sur Cardmarket mais absentes de la galerie officielle (Ahri signée V.4, runes et jetons à part,
