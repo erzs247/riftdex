@@ -1091,3 +1091,44 @@ body {
 .lb-list li.me { border-color: color-mix(in srgb, var(--cyan) 60%, transparent); background: color-mix(in srgb, var(--cyan) 8%, var(--surface)); }
 .lb-list li.top1 { border-color: #f5c542aa; box-shadow: 0 0 22px -10px #f5c542; } .lb-list li.top2 { border-color: #c9d1dfaa; } .lb-list li.top3 { border-color: #d08a4eaa; }
 .lb-join { display: flex; align-items: center; gap: 10px; font-weight: 600; cursor: pointer; } .lb-join input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* scellé : le visuel tient toujours entier dans son cadre (fiche et vignettes), quel que soit son format */
+.sealed-img img, .detail-top.is-sealed .card-img img, .row .thumb.is-sealed img {
+  position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); object-fit: contain;
+}
+.sealed-img, .detail-top.is-sealed .card-img { position: relative; overflow: hidden; }
+.detail-top.is-sealed .card-img { cursor: zoom-in; }
+
+/* ---------- Icônes en ligne (à la place des emojis, comme NightDex) ---------- */
+.ic { display: inline-grid; place-items: center; flex: none; vertical-align: -3px; margin-right: 6px; }
+.ic svg, .g-add > svg, .b-icon svg, .bp-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.chip .ic, .cta .ic, .btn-ghost .ic { margin-right: 6px; }
+.chip:has(.ic), .cta:has(.ic) { display: inline-flex; align-items: center; justify-content: center; }
+.b-icon { color: var(--accent-2); } .b-icon .ic { margin: 0; } .b-icon svg { width: 30px; height: 30px; stroke-width: 1.6; }
+.badge:not(.got) .b-icon { color: var(--muted); }
+.bp-icon { color: var(--accent-2); } .bp-icon .ic { margin: 0; } .bp-icon svg { width: 34px; height: 34px; }
+.plus-ic { color: var(--accent-2); } .plus-ic .ic { margin: 0; } .plus-ic svg { width: 24px; height: 24px; }
+.plus-btn { display: flex; align-items: center; justify-content: center; gap: 4px; } .plus-btn .ic svg { width: 20px; height: 20px; }
+.alerts-fired h3 { display: flex; align-items: center; }
+.alert-line label { display: inline-flex; align-items: center; }
+.alert-tag .ic svg { width: 13px; height: 13px; } .alert-tag .ic { margin-right: 4px; vertical-align: -2px; }
+.dr-name small .ic { margin-right: 4px; vertical-align: -2px; } .dr-name small .ic svg { width: 13px; height: 13px; stroke-width: 2.4; }
+.deck-row.need .dr-name small { color: #ffb36b; }
+.deck-ok { display: flex; align-items: center; } .deck-ok .ic svg { stroke-width: 2.4; }
+.dr-ctl .icon-btn svg, .dh-card.empty svg { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 1; }
+.dh-card.empty svg { display: block; margin: 6px auto 0; color: var(--accent-2); }
+.g-photo .ic svg { stroke-width: 2.4; color: var(--up); }
+.lb-cta { display: flex; align-items: center; justify-content: center; }
+.official-link { color: var(--fg); text-decoration: none; }
+/* rangs du podium */
+.lb-rank { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; justify-self: center; }
+.lb-list li.top1 .lb-rank { color: #2a1f00; background: linear-gradient(135deg, #ffe58a, #d9a520); }
+.lb-list li.top2 .lb-rank { color: #1c2230; background: linear-gradient(135deg, #f1f4f9, #a9b3c4); }
+.lb-list li.top3 .lb-rank { color: #2a1406; background: linear-gradient(135deg, #f0b07a, #a8602c); }
+/* règles de construction des decks */
+.deck-rules > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.deck-rules > summary::-webkit-details-marker { display: none; }
+.deck-rules > summary h3 { margin: 0; }
+.deck-rules > summary svg { width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 2; transition: transform .2s; }
+.deck-rules[open] > summary svg { transform: rotate(180deg); }
+.deck-rules ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: color-mix(in srgb, var(--fg) 85%, var(--muted)); }

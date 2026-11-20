@@ -63,6 +63,12 @@ def to_webp(b):
     for xy in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1), (w // 2, 0), (w // 2, h - 1), (0, h // 2), (w - 1, h // 2)]:
         if min(im.getpixel(xy)[:3]) > 242:
             ImageDraw.floodfill(im, xy, (255, 255, 255, 0), thresh=14)
+    # liseré blanc laissé par le détourage : sur une bande de 3 px autour du fond retiré, les pixels presque blancs deviennent transparents
+    from PIL import ImageChops, ImageFilter
+    alpha = im.getchannel('A')
+    band = alpha.point(lambda a: 255 if a == 0 else 0).filter(ImageFilter.MaxFilter(7))
+    whiteish = im.convert('L').point(lambda v: 255 if v > 205 else 0)
+    im.putalpha(ImageChops.subtract(alpha, ImageChops.multiply(band, whiteish)))
     im = im.crop(im.getbbox() or (0, 0, w, h))
     im.thumbnail((IMG_MAX, IMG_MAX))
     out = io.BytesIO()
