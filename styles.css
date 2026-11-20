@@ -25,14 +25,14 @@
   --r-signature: #ff6fae;
   --r-promo: #8fb3ff;
 
-  --font-display: "Cinzel", "Times New Roman", serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: "Chakra Petch", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;   /* hextech (Piltover) */
+  --font-body: "Chakra Petch", system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
 
   --gutter-l: max(16px, env(safe-area-inset-left, 0px));
   --gutter-r: max(16px, env(safe-area-inset-right, 0px));
   --tabbar-h: 68px;
 }
-:root:lang(zh) { --font-display: "Noto Serif SC", "Songti SC", "SimSun", "Cinzel", serif; }
+:root:lang(zh) { --font-display: "Chakra Petch", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--fg); }
