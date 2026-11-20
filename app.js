@@ -388,6 +388,21 @@ async function loadData() {
   for (const list of cardsBySet.values()) list.sort((a, b) => extra(a) - extra(b) || String(a.number).localeCompare(String(b.number), 'en', { numeric: true }));
 }
 
+// carte qui a changé d'identifiant (catalog.renamed, ex. variante Cardmarket publiée ensuite par Riot) :
+// exemplaires, souhaits et favoris reportés sur le nouvel identifiant, dans les trois éditions
+function migrateIds() {
+  const ren = catalog.renamed ?? {};
+  let changed = false;
+  for (const l of LANGS) {
+    const col = user.col[l];
+    for (const [from, to] of Object.entries(ren)) {
+      if (col.owned[from]) { col.owned[to] = Math.max(col.owned[to] ?? 0, col.owned[from]); delete col.owned[from]; changed = true; }
+      if (col.wish.includes(from)) { col.wish = [...new Set(col.wish.map((x) => (x === from ? to : x)))]; changed = true; }
+    }
+  }
+  if (changed) { useCollection(); save(); }
+}
+
 // Ce que montre chaque édition : ses séries, ses cartes, son scellé
 // - édition chinoise : seulement les cartes dont Riot publie la version chinoise (image chinoise)
 // - promos et coffrets : imprimés en anglais, donc seulement dans l'édition anglaise (langues de la série dans catalog.json)
@@ -428,14 +443,15 @@ function change(id, days) {
   const before = valueAt(h, from) ?? h[0][1];
   return before ? last[1] / before - 1 : null;
 }
-// Lien Cardmarket : page exacte de la carte, filtrée sur la langue de l'édition ; quand la version n'est pas certaine
-// (rareté écrite par Cardmarket), un second lien ouvre la page de toutes les versions de la carte ; produits scellés : recherche.
+// Lien Cardmarket : page exacte du produit d'après son numéro dans le catalogue Cardmarket (Products?idProduct=…,
+// redirection officielle de Cardmarket : jamais d'adresse devinée), filtrée sur la langue de l'édition pour les cartes ;
+// sans numéro de produit : recherche sur le nom.
 function cmLinks(card) {
   const site = `https://www.cardmarket.com/${ui === 'fr' ? 'fr' : 'en'}/${config.cardmarket?.gameSlug ?? 'Riftbound'}`;
   const langId = config.cardmarket?.languageIds?.[lang];
-  const cm = card.cardmarket ?? {};
-  if (!isSealed(card) && cm.path) return { url: `${site}/${cm.path}${langId ? `?language=${langId}` : ''}`, label: L.cmView, all: cm.guess && cm.versions ? `${site}/${cm.versions}` : null };
-  if (!isSealed(card) && cm.versions) return { url: `${site}/${cm.versions}`, label: L.cmVersions, all: null };
+  const id = card.cardmarket?.idProduct;
+  if (id) return { url: `${site}/Products?idProduct=${id}${!isSealed(card) && langId ? `&language=${langId}` : ''}`, label: L.cmView, all: null };
+  if (card.only) return null; // exclusivité chinoise : pas vendue sur Cardmarket
   const q = isSealed(card) ? String(card.nameEn).replace(/\s*\((Slim|Jumbo)\)$/, '') : card.name;
   return { url: `${site}/Products/Search?searchString=${encodeURIComponent(q)}`, label: L.cmSearch, all: null };
 }
@@ -953,8 +969,8 @@ function openCard(id, keepNav) {
         <div class="chart" id="cardChart"></div>
         ${p.seeded && (p.history?.length ?? 0) > 1 ? `<p class="note">${L.seeded}</p>` : ''}
       </section>
-      <a class="cta" href="${esc(cm.url)}" target="_blank" rel="noopener">${cm.label} ${I.ext}</a>
-      ${cm.all ? `<a class="link-btn cm-all" href="${esc(cm.all)}" target="_blank" rel="noopener">${L.cmAll}</a>` : ''}
+      ${cm ? `<a class="cta" href="${esc(cm.url)}" target="_blank" rel="noopener">${cm.label} ${I.ext}</a>` : ''}
+      ${cm?.all ? `<a class="link-btn cm-all" href="${esc(cm.all)}" target="_blank" rel="noopener">${L.cmAll}</a>` : ''}
       ${q > 0 && p.trend ? `<p class="note num" style="text-align:center">${L.worth(q, eur(q * p.trend))}</p>` : ''}
       ${artNote ? `<p class="note" style="text-align:center">${esc(artNote)}</p>` : ''}
       ${c.artist ? `<p class="note" style="text-align:center">${esc(L.art(c.artist))}</p>` : ''}
@@ -1876,6 +1892,7 @@ pcQuery.addEventListener('change', () => {
 renderChrome();
 try {
   await loadData();
+  migrateIds();
   route();
   initCloud();
 } catch (err) {
