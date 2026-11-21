@@ -5,3 +5,7 @@ dist/
 raw/
 build.py
 app.html
+# clé du compte de service Firebase : ne jamais la publier
+*firebase-adminsdk*.json
+riftdex-7e181-*.json
+_pages/

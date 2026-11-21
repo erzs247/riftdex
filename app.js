@@ -335,6 +335,22 @@ function loadUser() {
     return { ...d, ...u, col, prefs };
   } catch { return defaults(); }
 }
+// ---------- Déménagement depuis l'ancienne adresse (erzs247.github.io/riftdex) ----------
+// l'ancienne adresse renvoie ici avec la collection de l'appareil dans « #migrate=… » (gzip puis base64url) :
+// elle est reprise si cet appareil n'a encore aucune carte ici, puis le paramètre est retiré de l'adresse
+await (async () => {
+  const m = location.hash.match(/^#migrate=([A-Za-z0-9_-]+)(?:&(.*))?$/);
+  if (!m) return;
+  history.replaceState(null, '', location.pathname + location.search + (m[2] ? '#' + m[2] : ''));
+  try {
+    const bin = Uint8Array.from(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')), (ch) => ch.charCodeAt(0));
+    const text = await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    JSON.parse(text);
+    const hasCards = (raw) => { try { return Object.values(JSON.parse(raw)?.col ?? {}).some((c) => Object.keys(c?.owned ?? {}).length || c?.wish?.length); } catch { return false; } };
+    const here = localStorage.getItem(KEY);
+    if (!here || !hasCards(here)) localStorage.setItem(KEY, text);
+  } catch (e) { console.warn('Reprise de la collection', e); }
+})();
 const user = loadUser();
 let lang = LANGS.includes(user.prefs.lang) ? user.prefs.lang : 'fr'; // édition affichée (cartes, collection)
 let ui = LANGS.includes(user.prefs.ui) ? user.prefs.ui : 'fr';       // langue du site (textes)
@@ -1252,7 +1268,6 @@ async function initCloud() {
   try {
     const [appM, authM, fsM] = await Promise.all(['app', 'auth', 'firestore'].map((m) => import(`${FIREBASE}/firebase-${m}.js`)));
     const { googleClientId, ...fbCfg } = cfg;
-    cloud.googleClientId = googleClientId;
     const app = appM.initializeApp(fbCfg);
     const auth = authM.getAuth(app);
     auth.languageCode = ui === 'zh' ? 'zh-CN' : ui;
@@ -1473,7 +1488,6 @@ function openAccount(keep) {
         <button class="btn-ghost btn-danger" data-action="delete-account">${cloud.confirmDelete ? L.deleteConfirm : L.deleteAcc}</button>
       </div>` : `
       <p class="note">${L.accountPitch}</p>
-      <div class="gsi-btn" id="gsiBtn"></div>
       <button class="btn-ghost btn-google" data-action="google" ${cloud.busy ? 'disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.3-4.7 3.3-8.1z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.6l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>${L.google}</button>
       <div class="divider"><span>${L.or}</span></div>
       <form class="stack" id="acctForm" style="gap:10px">
@@ -1491,39 +1505,7 @@ function openAccount(keep) {
   </div>`;
   sheet.hidden = false;
   document.body.style.overflow = 'hidden';
-  if (!u) mountGsi();
 }
-// ---------- Bouton « Se connecter avec Google » (Google Identity Services) ----------
-// Connexion dans la page même (FedCM sur Chrome), sans redirection ni fenêtre à part : c'est ce qui marche dans
-// l'appli installée, où la redirection perd le résultat. Google renvoie un jeton d'identité, que Firebase accepte
-// (signInWithCredential) : même compte que la connexion Google habituelle. Si le bouton ne se charge pas,
-// l'ancien bouton (fenêtre Google) reste affiché.
-const gsi = { loading: null, ready: false };
-function loadGsi() {
-  gsi.loading ??= new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client'; s.async = true; s.onload = resolve; s.onerror = () => { gsi.loading = null; reject(); };
-    document.head.append(s);
-  });
-  return gsi.loading;
-}
-async function mountGsi() {
-  if (!cloud.googleClientId || !document.getElementById('gsiBtn')) return;
-  try { await loadGsi(); } catch { return; }
-  const box = document.getElementById('gsiBtn');
-  if (!box || !window.google?.accounts?.id) return;
-  if (!gsi.ready) {
-    google.accounts.id.initialize({ client_id: cloud.googleClientId, callback: onGsiCredential, ux_mode: 'popup', use_fedcm_for_prompt: true, use_fedcm_for_button: true, auto_select: false });
-    gsi.ready = true;
-  }
-  google.accounts.id.renderButton(box, { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', logo_alignment: 'center', width: Math.min(400, Math.max(220, box.clientWidth || 320)), locale: ui === 'zh' ? 'zh_CN' : ui });
-  box.closest('.account')?.classList.add('has-gsi');
-}
-function onGsiCredential(resp) {
-  const { authM, auth } = cloud.api;
-  cloudAction(() => authM.signInWithCredential(auth, authM.GoogleAuthProvider.credential(resp.credential)), L.welcome);
-}
-
 async function cloudAction(fn, okMsg) {
   cloud.busy = true; cloud.error = ''; refreshAccount();
   try { await fn(); if (okMsg) toast(okMsg); } catch (e) { cloud.error = e.code ?? 'default'; }
@@ -1533,7 +1515,10 @@ function signInGoogle() {
   const { authM, auth } = cloud.api;
   auth.languageCode = ui === 'zh' ? 'zh-CN' : ui;
   const provider = new authM.GoogleAuthProvider();
+  // appli installée : redirection (le site et la page de connexion Firebase sont sur le même domaine, le résultat n'est pas perdu)
+  const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   return cloudAction(async () => {
+    if (installed) { await authM.signInWithRedirect(auth, provider); return; }
     try { await authM.signInWithPopup(auth, provider); }
     catch (e) {
       console.warn('Connexion Google', e);

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#070b14">
+<title>RiftDex a déménagé</title>
+<link rel="icon" href="icons/icon.svg?v=3">
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; box-sizing: border-box;
+         background: #070b14; color: #e8ecf6; font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+  a { color: #20d8ff; }
+</style>
+</head>
+<body>
+<main>
+  <h1>RiftDex a déménagé</h1>
+  <p>Nouvelle adresse : <a id="go" href="https://riftdex-7e181.firebaseapp.com/">riftdex-7e181.firebaseapp.com</a></p>
+  <p>Ta collection de cet appareil suit automatiquement.</p>
+</main>
+<script>
+// Renvoi vers la nouvelle adresse, avec la collection enregistrée sur cet appareil (gzip puis base64url dans « #migrate= »,
+// la partie après # n'est jamais envoyée au serveur). L'ancien service worker et ses caches sont supprimés.
+(async () => {
+  const NEW = 'https://riftdex-7e181.firebaseapp.com/';
+  const hash = location.hash.slice(1);
+  let target = NEW + (hash ? '#' + hash : '');
+  try { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map((r) => r.unregister())); } catch (e) {}
+  try { await Promise.all((await caches.keys()).map((k) => caches.delete(k))); } catch (e) {}
+  try {
+    const raw = localStorage.getItem('riftdex:v1');
+    if (raw && window.CompressionStream) {
+      const buf = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+      target = NEW + '#migrate=' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') + (hash ? '&' + hash : '');
+    }
+  } catch (e) {}
+  document.getElementById('go').href = target;
+  location.replace(target);
+})();
+</script>
+</body>
+</html>

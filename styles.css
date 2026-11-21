@@ -1134,6 +1134,3 @@ body {
 .deck-rules ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: color-mix(in srgb, var(--fg) 85%, var(--muted)); }
 
 /* Bouton « Se connecter avec Google » (Google Identity Services) : remplace l'ancien bouton quand il est chargé */
-.gsi-btn { display: flex; justify-content: center; min-height: 0; }
-.gsi-btn:empty { display: none; }
-.account.has-gsi .btn-google { display: none; }
