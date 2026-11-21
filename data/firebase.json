@@ -1,8 +1,9 @@
 {
   "apiKey": "AIzaSyDQaqUD0t8J_6pdz-wtRdbSX5IOQfdKepI",
-  "authDomain": "erzs247.github.io",
+  "authDomain": "riftdex-7e181.firebaseapp.com",
   "projectId": "riftdex-7e181",
   "storageBucket": "riftdex-7e181.firebasestorage.app",
   "messagingSenderId": "548814633392",
-  "appId": "1:548814633392:web:b57301e5bfba0515dabe75"
+  "appId": "1:548814633392:web:b57301e5bfba0515dabe75",
+  "googleClientId": "548814633392-qoenf36shi92v0acvi18hqkrt930ea9p.apps.googleusercontent.com"
 }
