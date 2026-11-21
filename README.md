@@ -70,7 +70,13 @@ page. Le scellé utilise le même lien. Les exclusivités chinoises, absentes de
 Quand une variante Cardmarket change d'identifiant (publiée ensuite par Riot), `renamed` dans `data/catalog.json` permet à
 l'appli de reporter les exemplaires sur la nouvelle carte.
 
-## Mise en ligne et mises à jour automatiques (GitHub Pages)
+## Mise en ligne et mises à jour automatiques (Firebase Hosting + GitHub Pages)
+
+L'appli est publiée sur **https://riftdex-7e181.firebaseapp.com** (Firebase Hosting, même domaine que la connexion
+Google, ce qui la fait marcher dans l'appli installée). Le workflow la publie avec le secret `FIREBASE_SERVICE_ACCOUNT`
+(clé du compte de service Firebase). GitHub Pages garde les images des cartes (`/images/…` y est renvoyé) et
+l'ancienne adresse `erzs247.github.io/riftdex` renvoie vers la nouvelle en emportant la collection de l'appareil
+(`pages/index.html`, `pages/sw.js`). Sans le secret, tout est publié sur GitHub Pages comme avant.
 
 Le workflow `.github/workflows/prix.yml` fait tout seul :
 
@@ -95,7 +101,7 @@ les collections sont réunies (quantité la plus haute gardée).
 Les comptes utilisent **Firebase** (gratuit à cette échelle). Mise en place, une seule fois :
 1. https://console.firebase.google.com → *Créer un projet* « riftdex » (Google Analytics inutile).
 2. *Authentication* → *Commencer* → *Sign-in method* : activer **Google** et **Adresse e-mail/Mot de passe**.
-3. *Authentication* → *Paramètres* → *Domaines autorisés* : ajouter `erzs247.github.io`.
+3. *Authentication* → *Paramètres* → *Domaines autorisés* : `riftdex-7e181.firebaseapp.com` y est déjà (ajouter `erzs247.github.io` seulement pour l'ancienne adresse).
 4. *Firestore Database* → *Créer une base de données* (mode production, région `eur3` Europe).
    Onglet *Règles* : coller le contenu de `firestore.rules`, puis *Publier*.
 5. *Paramètres du projet* (roue dentée) → *Vos applications* → icône web `</>` → nom « RiftDex » →
