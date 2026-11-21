@@ -1496,6 +1496,9 @@ function signInGoogle() {
   auth.languageCode = ui === 'zh' ? 'zh-CN' : ui;
   const provider = new authM.GoogleAuthProvider();
   return cloudAction(async () => {
+    // appli installée (écran d'accueil) : pas de fenêtre à part, la connexion se fait dans la même fenêtre
+    // (authDomain = erzs247.github.io, sur le même site que l'appli, sinon le téléphone perd le résultat au retour)
+    if (isStandalone()) { await authM.signInWithRedirect(auth, provider); return; }
     try { await authM.signInWithPopup(auth, provider); }
     catch (e) {
       if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'].includes(e.code)) await authM.signInWithRedirect(auth, provider);
