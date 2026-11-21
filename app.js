@@ -1326,8 +1326,8 @@ function cloudChanged() {
 }
 function onCloudUser(u) {
   cloud.unsub?.(); cloud.unsub = null;
-  xOnUser(u);
   cloud.user = u ? { uid: u.uid, email: u.email, name: u.displayName } : null;
+  xOnUser(u); // après cloud.user : la synchro des données perso lit cloud.user.uid
   cloud.confirmDelete = false;
   cloud.supporter = false; cloud.avatar = null;
   if (!u) { cloud.status = 'off'; friendsStop(); renderChromeBadges(); refreshAccount(); if (currentRender === renderFriends || currentRender === renderFriendCurrent) currentRender(); return; }
