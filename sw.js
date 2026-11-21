@@ -1,7 +1,7 @@
 // Cache hors ligne : l'interface et les images sont servies depuis le cache, les données sont rafraîchies dès que possible.
 // Seules les réponses valides sont mises en cache : une erreur passagère (réseau coupé, mise à jour du site)
 // n'est jamais mémorisée, la ressource est simplement redemandée la fois suivante.
-const CACHE = 'riftdex-v25';
+const CACHE = 'riftdex-v26';
 // les images des cartes restent hébergées sur GitHub Pages (gratuit et sans limite de trafic) : l'appli les y demande
 const IMAGES = 'https://erzs247.github.io/riftdex/';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg?v=3', 'data/config.json'];
@@ -15,6 +15,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  // pages de connexion de Firebase (/__/auth/…) : jamais interceptées ni gardées en cache
+  if (url.pathname.startsWith('/__/')) return;
   if (url.pathname.includes('/data/') || /\/(app\.js|styles\.css|index\.html)?$/.test(url.pathname)) {
     // données et code de l'appli : réseau d'abord (mises à jour visibles tout de suite), cache si hors ligne
     // (cache: 'no-cache' : on revalide auprès du serveur, sans resservir une copie gardée par le navigateur)

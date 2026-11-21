@@ -1514,18 +1514,10 @@ async function cloudAction(fn, okMsg) {
 function signInGoogle() {
   const { authM, auth } = cloud.api;
   auth.languageCode = ui === 'zh' ? 'zh-CN' : ui;
-  const provider = new authM.GoogleAuthProvider();
-  // appli installée : redirection (le site et la page de connexion Firebase sont sur le même domaine, le résultat n'est pas perdu)
-  const installed = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-  return cloudAction(async () => {
-    if (installed) { await authM.signInWithRedirect(auth, provider); return; }
-    try { await authM.signInWithPopup(auth, provider); }
-    catch (e) {
-      console.warn('Connexion Google', e);
-      if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'].includes(e.code)) await authM.signInWithRedirect(auth, provider);
-      else if (e.code !== 'auth/popup-closed-by-user') throw e;
-    }
-  }, null);
+  // connexion par redirection, partout : le site et la page de connexion Firebase sont sur le même domaine
+  // (riftdex-7e181.firebaseapp.com), le retour est donc fiable, alors que la fenêtre à part (popup) peut perdre
+  // le lien avec la page Google et finir « fermée » sans connecter
+  return cloudAction(() => authM.signInWithRedirect(auth, new authM.GoogleAuthProvider()), null);
 }
 document.addEventListener('submit', (e) => {
   if (e.target.id !== 'acctForm') return;
