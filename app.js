@@ -1256,7 +1256,9 @@ async function initCloud() {
     auth.languageCode = ui === 'zh' ? 'zh-CN' : ui;
     cloud.api = { app, authM, fsM, auth, db: fsM.getFirestore(app) };
     cloud.enabled = true;
-    authM.getRedirectResult(auth).catch((e) => { cloud.error = e.code; refreshAccount(); });
+    // retour de la connexion Google dans la même fenêtre (appli installée) : succès ou erreur visibles tout de suite
+    authM.getRedirectResult(auth).then((r) => { if (r?.user) toast(L.welcome); })
+      .catch((e) => { cloud.error = e.code || String(e.message || e); toast(authError(cloud.error)); openAccount(); });
     authM.onAuthStateChanged(auth, onCloudUser);
     refreshAccount();
     if (currentRender === renderCollection || currentRender === renderFriends) currentRender();
@@ -1427,7 +1429,8 @@ function refreshAccount() {
   if (cloud.enabled && !topbar.querySelector('.acct-btn') && topbar.querySelector('[data-action="settings"]')) currentRender();
   if (sheetMode === 'account' && !sheet.hidden) openAccount(true);
 }
-function authError(code) { return L.authErr[code] ?? L.authErr.default; }
+// erreur inconnue : on affiche aussi son code Firebase, pour pouvoir la diagnostiquer
+function authError(code) { return L.authErr[code] ?? `${L.authErr.default} (${code || '?'})`; }
 function openAccount(keep) {
   openId = null; sheetMode = 'account';
   const em = keep ? document.getElementById('acctEmail')?.value ?? '' : '';
@@ -1501,6 +1504,7 @@ function signInGoogle() {
     if (isStandalone()) { await authM.signInWithRedirect(auth, provider); return; }
     try { await authM.signInWithPopup(auth, provider); }
     catch (e) {
+      console.warn('Connexion Google', e);
       if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'].includes(e.code)) await authM.signInWithRedirect(auth, provider);
       else if (e.code !== 'auth/popup-closed-by-user') throw e;
     }
