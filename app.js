@@ -377,11 +377,21 @@ const paidDiffHtml = (id) => (paidOf(id) != null ? (price(id) != null ? `${L.pai
 // signature de ce qui est synchronisé avec le compte (les trois éditions ; pas les préférences d'affichage)
 const colCanon = (col) => JSON.stringify(LANGS.map((l) => [Object.entries(col?.[l]?.owned ?? {}).filter(([, q]) => q > 0).sort(), [...(col?.[l]?.wish ?? [])].sort(), [...(col?.[l]?.fav ?? [])].sort()]));
 let lastSig = colCanon(user.col);
+// ---------- DexHub (erzs247.github.io) ----------
+// RiftDex ouvert dans un onglet du hub : la collection lui est envoyée pour la valeur totale et la courbe de prix.
+// Le message ne part que vers erzs247.github.io (le navigateur ne le remet à aucun autre site).
+const HUB = 'https://erzs247.github.io';
+const inHub = window.parent !== window;
+function hubPost() {
+  if (!inHub) return;
+  try { window.parent.postMessage({ type: 'dexhub:collection', app: 'riftdex', col: user.col }, HUB); } catch { /* hub absent */ }
+}
 function save() {
   C.wish = [...wish]; C.fav = [...fav];
   const sig = colCanon(user.col);
   if (sig !== lastSig) { lastSig = sig; cloudChanged(); if (catalog.cards.length) { badgeCheck(); if (user.prefs.lbWorld) lbPush(); } }
   try { localStorage.setItem(KEY, JSON.stringify(user)); } catch { /* stockage indisponible */ }
+  hubPost();
 }
 
 // ---------- Langue & formats ----------
@@ -1302,6 +1312,7 @@ function applyCloudData(d) {
   useCollection();
   lastSig = colCanon(user.col);
   try { localStorage.setItem(KEY, JSON.stringify(user)); } catch { /* stockage indisponible */ }
+  hubPost();
   if (sheet.hidden) currentRender();
   else if (openId) { currentRender(); openCard(openId, true); }
   else { currentRender(); refreshAccount(); }
@@ -1518,6 +1529,9 @@ function signInGoogle() {
   // connexion par redirection, partout : le site et la page de connexion Firebase sont sur le même domaine
   // (riftdex-7e181.firebaseapp.com), le retour est donc fiable, alors que la fenêtre à part (popup) peut perdre
   // le lien avec la page Google et finir « fermée » sans connecter
+  // ouvert dans un onglet de DexHub (erzs247.github.io) : la redirection ne revient jamais dans un cadre, on passe par
+  // la fenêtre de connexion (popup), qui n'a pas besoin de lire les données du site depuis le cadre
+  if (inHub) return cloudAction(() => authM.signInWithPopup(auth, new authM.GoogleAuthProvider()), null);
   return cloudAction(() => authM.signInWithRedirect(auth, new authM.GoogleAuthProvider()), null);
 }
 document.addEventListener('submit', (e) => {
@@ -2317,6 +2331,7 @@ function xOnUser(u) {
     if (remote && (remote.at ?? 0) > (user.xAt ?? 0)) {     // changement fait sur un autre appareil : il fait foi
       user.x = { ...XDEF(), ...remote.x }; user.xAt = remote.at;
       try { localStorage.setItem(KEY, JSON.stringify(user)); } catch { /* */ }
+      hubPost();
       if (sheet.hidden) currentRender();
     } else if (first && (user.xAt ?? 0) > (remote?.at ?? 0)) xCloudChanged(); // l'appareil est plus récent : on envoie
     first = false;
@@ -3561,6 +3576,7 @@ pcQuery.addEventListener('change', () => {
 renderChrome();
 try {
   await loadData();
+  hubPost();
   migrateIds();
   route();
   initCloud();
