@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>RiftDex · DexHub</title>
+<script>
+// Page invisible chargée par DexHub (erzs247.github.io) au démarrage : elle lui envoie la collection RiftDex
+// enregistrée dans ses onglets, sans charger toute l'appli. Le message ne part que vers erzs247.github.io.
+(() => {
+  if (window.parent === window) return;
+  let col = null;
+  try { col = JSON.parse(localStorage.getItem('riftdex:v1') || 'null')?.col ?? null; } catch (e) {}
+  window.parent.postMessage({ type: 'dexhub:collection', app: 'riftdex', col }, 'https://erzs247.github.io');
+})();
+</script>
