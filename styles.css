@@ -1134,3 +1134,17 @@ body {
 .deck-rules ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; color: color-mix(in srgb, var(--fg) 85%, var(--muted)); }
 
 /* Bouton « Se connecter avec Google » (Google Identity Services) : remplace l'ancien bouton quand il est chargé */
+
+/* ---------- Cotes : hausses et baisses de ma collection ---------- */
+.my-movers { gap: 10px; }
+.my-movers h3 { align-items: center; flex-wrap: wrap; }
+.my-movers h3 .seg { flex: none; min-width: 180px; }
+.my-movers .note b.up { color: var(--up); } .my-movers .note b.down { color: var(--down); }
+.mv-sub { margin: 6px 0 0; font: 600 14px var(--font-body); } .mv-sub.up { color: var(--up); } .mv-sub.down { color: var(--down); }
+.mv-item .row { border-bottom: 0; }
+.mv-gain { display: inline-block; margin: -2px 0 8px 12px; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.mv-gain.up { color: var(--up); background: color-mix(in srgb, var(--up) 14%, transparent); }
+.mv-gain.down { color: var(--down); background: color-mix(in srgb, var(--down) 14%, transparent); }
+.mv-controls { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; color: var(--muted); font-size: 13px; }
+.mv-controls .seg button { padding-block: 6px; font-size: 13px; }
+.my-movers > .link-btn { justify-self: center; }
