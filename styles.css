@@ -1145,3 +1145,6 @@ body {
 .mv-gain { display: inline-block; margin: -2px 0 8px 12px; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; }
 .mv-gain.up { color: var(--up); background: color-mix(in srgb, var(--up) 14%, transparent); }
 .mv-gain.down { color: var(--down); background: color-mix(in srgb, var(--down) 14%, transparent); }
+.mv-controls { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; color: var(--muted); font-size: 13px; }
+.mv-controls .seg button { padding-block: 6px; font-size: 13px; }
+.my-movers > .link-btn { justify-self: center; }
