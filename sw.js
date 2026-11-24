@@ -1,7 +1,7 @@
 // Cache hors ligne : l'interface et les images sont servies depuis le cache, les données sont rafraîchies dès que possible.
 // Seules les réponses valides sont mises en cache : une erreur passagère (réseau coupé, mise à jour du site)
 // n'est jamais mémorisée, la ressource est simplement redemandée la fois suivante.
-const CACHE = 'riftdex-v26';
+const CACHE = 'riftdex-v27';
 // les images des cartes restent hébergées sur GitHub Pages (gratuit et sans limite de trafic) : l'appli les y demande
 const IMAGES = 'https://erzs247.github.io/riftdex/';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg?v=3', 'data/config.json'];

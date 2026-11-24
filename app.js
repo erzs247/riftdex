@@ -992,9 +992,10 @@ function renderValues() {
       ${owned.length ? '<div class="ranges" id="pfRanges"></div><div class="chart" id="pfChart"></div>' : `<p class="note">${L.colValueHint}</p>`}
       <p class="note">${hasPrices() ? L.pricesNote(updated) : L.noPricesNote}</p>
     </section>
-    <h2 class="section-title">${L.risers}</h2>
+    ${owned.length ? myMoversHtml(owned) : ''}
+    <h2 class="section-title">${L.risers} <small>${T().mv.market}</small></h2>
     <div class="rows">${ups.map(([c]) => cardRow(c, 7)).join('') || empty}</div>
-    <h2 class="section-title">${L.fallers}</h2>
+    <h2 class="section-title">${L.fallers} <small>${T().mv.market}</small></h2>
     <div class="rows">${downs.map(([c]) => cardRow(c, 7)).join('') || empty}</div>
     <h2 class="section-title">${L.priciest}</h2>
     <div class="rows">${top.map((c) => cardRow(c)).join('') || empty}</div>
@@ -3471,6 +3472,38 @@ document.addEventListener('change', async (e) => {
   else { try { await fsx().deleteDoc(lbRef(cloud.user.uid)); } catch { /* */ } renderRanking(false); }
 });
 
+// ---------- Cotes : plus fortes hausses et baisses de MA collection (en euros sur mes exemplaires) ----------
+Object.assign(TX.fr, { mv: { title: 'Ma collection', up: 'Mes plus fortes hausses', down: 'Mes plus fortes baisses', market: 'tout le marché',
+  total: (v, d, up) => `Sur ${d} jours, ta collection a ${up ? 'gagné' : 'perdu'} <b class="${up ? 'up' : 'down'}">${v}</b>.`, flat: (d) => `Sur ${d} jours, ta collection n'a pas bougé.`,
+  gain: (v, q) => `${v} sur ${q > 1 ? `tes ${q} exemplaires` : 'ton exemplaire'}`, none: 'Pas encore assez d\'historique de prix pour tes cartes sur cette période.' } });
+Object.assign(TX.en, { mv: { title: 'My collection', up: 'My biggest risers', down: 'My biggest fallers', market: 'whole market',
+  total: (v, d, up) => `Over ${d} days, your collection ${up ? 'gained' : 'lost'} <b class="${up ? 'up' : 'down'}">${v}</b>.`, flat: (d) => `Over ${d} days, your collection did not move.`,
+  gain: (v, q) => `${v} on ${q > 1 ? `your ${q} copies` : 'your copy'}`, none: 'Not enough price history for your cards over this period yet.' } });
+Object.assign(TX.zh, { mv: { title: '我的收藏', up: '我的涨幅最大', down: '我的跌幅最大', market: '全市场',
+  total: (v, d, up) => `${d} 天内，你的收藏${up ? '上涨' : '下跌'}了 <b class="${up ? 'up' : 'down'}">${v}</b>。`, flat: (d) => `${d} 天内，你的收藏没有变化。`,
+  gain: (v, q) => `你的 ${q} 张：${v}`, none: '这段时间内你的卡牌还没有足够的价格记录。' } });
+function myMoversHtml(owned) {
+  const d = [7, 30, 90].includes(Number(user.prefs.myMoves)) ? Number(user.prefs.myMoves) : 7;
+  // variation de chaque carte possédée : en % et en euros pour mes exemplaires
+  const rows = owned.map((c) => {
+    const ch = change(c.id, d), p = price(c.id);
+    if (ch == null || p == null || ch === 0) return null;
+    const before = p / (1 + ch);
+    return { c, ch, gain: qty(c.id) * (p - before) };
+  }).filter(Boolean);
+  const ups = rows.filter((r) => r.gain > 0.005).sort((a, b) => b.gain - a.gain).slice(0, 5);
+  const downs = rows.filter((r) => r.gain < -0.005).sort((a, b) => a.gain - b.gain).slice(0, 5);
+  const total = rows.reduce((a, r) => a + r.gain, 0);
+  const signed = (v) => `${v >= 0 ? '+' : '−'}${eur(Math.abs(v))}`;
+  const list = (l) => `<div class="rows">${l.map((r) => `<div class="mv-item">${cardRow(r.c, d)}<span class="mv-gain ${r.gain >= 0 ? 'up' : 'down'} num">${T().mv.gain(signed(r.gain), qty(r.c.id))}</span></div>`).join('')}</div>`;
+  return `<section class="panel my-movers">
+    <h3>${T().mv.title}${seg('myMoves', String(d), [['7', L.ranges[0]], ['30', L.ranges[1]], ['90', L.ranges[2]]])}</h3>
+    ${rows.length ? `<p class="note num" style="margin:0">${Math.abs(total) >= 0.005 ? T().mv.total(eur(Math.abs(total)), d, total >= 0) : T().mv.flat(d)}</p>` : `<p class="note" style="margin:0">${T().mv.none}</p>`}
+    ${ups.length ? `<h4 class="mv-sub up">${T().mv.up}</h4>${list(ups)}` : ''}
+    ${downs.length ? `<h4 class="mv-sub down">${T().mv.down}</h4>${list(downs)}` : ''}
+  </section>`;
+}
+
 // @@NEXT-FEATURES@@
 
 function markTabs() {
