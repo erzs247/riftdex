@@ -3568,6 +3568,19 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 
+// ---------- DexHub (erzs247.github.io) : ouvrir une carte depuis le hub ----------
+// Appli ouverte dans un onglet du hub : quand on touche une carte dans le hub, il demande de l'afficher ici.
+// Seuls les messages de erzs247.github.io sont écoutés.
+const HUB_ORIGIN = 'https://erzs247.github.io';
+addEventListener('message', (e) => {
+  if (e.origin !== HUB_ORIGIN || e.source !== window.parent || e.data?.type !== 'dexhub:open') return;
+  if (cardsById.has(e.data.id)) openCard(e.data.id);
+});
+function hubReady() {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'dexhub:ready' }, HUB_ORIGIN); } catch { /* hub absent */ }
+}
+
 // ---------- Démarrage ----------
 pcQuery.addEventListener('change', () => {
   applyDevice(); markTabs(); currentRender();
@@ -3579,6 +3592,7 @@ try {
   hubPost();
   migrateIds();
   route();
+  hubReady();
   initCloud();
   badgeCheck();
   alertsNotify();
