@@ -1148,3 +1148,6 @@ body {
 .mv-controls { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: center; color: var(--muted); font-size: 13px; }
 .mv-controls .seg button { padding-block: 6px; font-size: 13px; }
 .my-movers > .link-btn { justify-self: center; }
+/* vignette de scellé dans les listes : l'image reste dans sa vignette (cadre de référence) */
+.row .thumb.is-sealed { position: relative; }
+.row .thumb.is-sealed img { inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); }
